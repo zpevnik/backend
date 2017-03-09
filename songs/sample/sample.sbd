@@ -1,0 +1,5 @@
+\beginsong{$title$}[
+  by={$authors$},
+  index={$title$}]
+$song$
+\endsong

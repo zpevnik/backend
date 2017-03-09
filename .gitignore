@@ -1,0 +1,4 @@
+*.pyc
+server_data
+mongo_data
+songs/done
