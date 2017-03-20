@@ -18,43 +18,73 @@ def songbooks():
     ip = request.remote_addr
 
     if request.method == 'GET':
-        #validators.authors_GET(data)
+        data = {
+            'query': request.args['query'] if 'query' in request.args and request.args['query'] is not None else "",
+            'page': int(request.args['page']) if 'page' in request.args and request.args['page'] is not None else 0,
+            'per_page': int(request.args['per_page']) if 'per_page' in request.args and request.args['per_page'] is not None else 30
+        }
+        validators.songbooks_GET(data)
 
-        #print request.headers['Content-Type']
+        result = g.model.songbooks.find_special(data['query'], data['page'], data['per_page'])
+        response = []
+        for res in result:
+            response.append(res.get_serialized_data())
 
-        data = {}
-        data['page'] = 1
-        data['per_page'] = 2
-        data['query'] = "kokos"
+        return jsonify(response), 200
 
-        page = data['page'] if 'page' in data else 0;
-        per_page = data['per_page'] if 'per_page' in data else 30;
-
-        result = g.model.songbooks.find_special(data['query'], page, per_page)
-        print result
-        return 'ok', 200
     else:
         data = request.get_json()
-        validators.songbooks_POST(data)
 
+        validators.songbooks_POST(data)
         songbook = g.model.songbooks.create_songbook(data)
 
         return jsonify(link="songbooks/" + songbook.get_id()), 201
 
-# TODO
+
 @api.route('/songbooks/<songbook_id>', methods=['GET', 'PUT', 'DELETE'])
 def songbook_single(songbook_id):
     ip = request.remote_addr
-    data = request.get_json()
 
-    return 'Ok', 200
+    if request.method == 'GET':
+        songbook = validators.songbook_existence(songbook_id)
+        return jsonify(songbook.get_serialized_data()), 200
 
-# TODO
+    elif request.method == 'PUT':
+        data = request.get_json()
+        songbook = validators.songbook_existence(songbook_id)
+
+        if 'title' in data:
+            songbook.set_title(data['title'])
+
+        g.model.songbooks.save(songbook)
+        return 'Ok', 200
+
+    else:
+        songbook = validators.songbook_existence(songbook_id)
+        g.model.songbooks.delete(songbook)
+        return 'Ok', 200
+
+
 @api.route('/songbooks/<songbook_id>/song/<song_id>/variants/<variant_id>', methods=['POST','DELETE'])
 def songbook_song_variants(songbook_id, song_id, variant_id):
     ip = request.remote_addr
-    data = request.get_json()
 
-    return 'Ok', 200
+    if request.method == 'POST':
+        songbook = validators.songbook_existence(songbook_id)
+        song = validators.song_existence(song_id)
+        song.find_variant(variant_id)
+
+        songbook.add_song(song_id, variant_id)
+        g.model.songbooks.save(songbook)
+        return 'Ok', 200
+
+    else:
+        songbook = validators.songbook_existence(songbook_id)
+        song = validators.song_existence(song_id)
+        song.find_variant(variant_id)
+
+        songbook.remove_song(song_id, variant_id)
+        g.model.songbooks.save(songbook)
+        return 'Ok', 204
 
 app.register_blueprint(api, url_prefix='/api/v1')

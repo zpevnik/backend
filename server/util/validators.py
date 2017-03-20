@@ -79,6 +79,22 @@ def variants_POST(request):
 
 ##### SONGBOOKS #####
 
+def songbook_existence(songbook_id):
+    songbook = g.model.songbooks.find_one(songbook_id=songbook_id)
+    if songbook is None:
+        raise AppException('error', 'songbook_does_not_exist', 'Songbook with id `%s` doesn\'t exist.' % songbook_id)
+
+    return songbook
+
+def songbooks_GET(request):
+    if 'page' in request and request['page'] is not None and request['page'] < 0:
+        raise AppException('error', 'songbooks_page_out_of_range', 'Page number is out of range.', status_code=400)
+    if 'per_page' in request and request['per_page'] is not None \
+                             and (request['per_page'] < 1 or request['per_page'] > 100):
+        raise AppException('error', 'songbooks_per_page_out_of_range', 'Per page number is out of range.', status_code=400)
+
+    return True
+
 def songbooks_POST(request):
     if 'title' not in request or not request['title']:
         raise AppException('error', 'songbook_title_missing', 'Songbook title is missing', status_code=422)

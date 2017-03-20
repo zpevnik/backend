@@ -57,6 +57,38 @@ class Songbooks(object):
             {'$set': songbook.serialize(update=True)}
         )
 
+    def delete(self, songbook):
+        """Delete songbook from the database.
+
+        Args:
+          songbook (Songbook): instance of the songbook.
+        """
+        self._collection.delete_one(
+            {'_id': uuid_from_str(songbook.get_id())}
+        )
+
+    def find_special(self, query, page, per_page):
+        doc = self._collection.find({'$text':{'$search': query}},
+                                    {'score': {'$meta': "textScore"}}) \
+                                    .sort([('score', {'$meta': 'textScore'})])
+
+        songbooks = []
+        for songbook in doc:
+            songbooks.append(Songbook(songbook))
+
+        return songbooks
+
+    def find_one(self, songbook_id=None, title=None):
+        query = {}
+        if songbook_id is not None: query['_id'] = uuid_from_str(songbook_id)
+        if title is not None: query['title'] = title
+            
+        doc = self._collection.find_one(query)
+        if not doc:
+            return None
+
+        return Songbook(doc)
+
     def find(self):
         """Find all the songbooks satisfying given restrictions 
         (currently no restrictions).
@@ -97,22 +129,36 @@ class Songbook(object):
         return songbook
 
     def get_serialized_data(self):
-        songs = []
-        # TODO
-        #songs_doc = g.model.songs.find_by_account_id(self._active_account)
-        #for song in songs_doc:
-        #    songs.append(song.get_serialized_data())
-
         return {
             'id': self._id,
             'created': self._created.isoformat(),
             'title': self._title,
-            'songs': songs
+            'songs': self._songs # TODO
         }
 
     def get_id(self):
         return self._id
 
+    def set_title(self, title):
+        self._title = title
+
+
+    def add_song(self, song_id, variant_id):
+        self._songs.append({
+            'song': song_id,
+            'variant': variant_id    
+        })
+
+    def remove_song(self, song_id, variant_id):
+        self._songs.remove({
+            'song': song_id,
+            'variant': variant_id    
+        })
 
     def __repr__(self):
         return '<%r id=%r title=%r authors=%r>' % (self.__class__.__name__, self._id, self._title, self._authors)
+
+
+#song c7090557e0fd4a83b4e6503f362f78c0
+#variant b91cc26a507c4000afc560708746ef38
+#songbook 1342e92683224213a4a8cb962dc4c5cb
