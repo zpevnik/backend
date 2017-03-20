@@ -57,17 +57,20 @@ class Authors(object):
             {'$set': author.serialize(update=True)}
         )
 
-    def find(self):
-        """Find all the authors satisfying given restrictions 
-        (currently no restrictions).
+    def delete(self, author):
+        """Delete author from the database.
 
-        Returns:
-          list: List of authors instances or None.
+        Args:
+          author (Author): instance of the author.
         """
-        doc = self._collection.find({})
+        self._collection.delete_one(
+            {'_id': uuid_from_str(author.get_id())}
+        )
 
-        if doc.count() == 0:
-            return []
+    def find_special(self, query, page, per_page):
+        doc = self._collection.find({'$text':{'$search': query}},
+                                    {'score': {'$meta': "textScore"}}) \
+                                    .sort([('score', {'$meta': 'textScore'})])
 
         authors = []
         for author in doc:
@@ -75,43 +78,59 @@ class Authors(object):
 
         return authors
 
+    def find_one(self, author_id=None, firstname=None, surname=None):
+        query = {}
+        if author_id is not None: query['_id'] = uuid_from_str(author_id)
+        if firstname is not None: query['firstname'] = firstname
+        if surname is not None: query['surname'] = surname
+            
+        doc = self._collection.find_one(query)
+        if not doc:
+            return None
+
+        return Author(doc)
+
 
 class Author(object):
-    """Class for song abstraction.
 
-    Args:
-      song (dict): Island dictionary.
-
-    Attributes:
-      _id (str): Island UUID.
-      _created (str): Timestamp of the island creation.
-      _authors (str): Authors...
-      _title (str): Title of the song.
-      _text (str): Lyrics and chords of the song.
-    """
-
-    def __init__(self, song):
-        self._id = uuid_to_str(song['_id'])
-        self._created = song['created']
-        self._authors = song['authors']
-        self._title = song['title']
-        self._text = song['text']
+    def __init__(self, author):
+        self._id = uuid_to_str(author['_id'])
+        self._created = author['created']
+        self._surname = author['surname']
+        self._firstname = author['firstname']
 
     def serialize(self, update=False):
-        song = {
-            'authors': self._authors,
-            'title': self._title,
-            'text': self._text
+        author = {
+            'firstname': self._firstname,
+            'surname': self._surname
         }
 
         if not update:
-            song['_id'] = uuid_from_str(self._id)
-            song['created'] = self._created
+            author['_id'] = uuid_from_str(self._id)
+            author['created'] = self._created
 
-        return song
+        return author
+
+    def get_serialized_data(self):
+        return {
+            'id': self._id,
+            'created': self._created.isoformat(),
+            'firstname': self._firstname,
+            'surname': self._surname
+        }
 
     def get_id(self):
         return self._id
 
+    def get_fullname(self):
+        return self._firstname + " " + self._surname
+
+
+    def set_firstname(self, firstname):
+        self._firstname = firstname
+
+    def set_surname(self, surname):
+        self._surname = surname
+
     def __repr__(self):
-        return '<%r id=%r title=%r authors=%r>' % (self.__class__.__name__, self._id, self._title, self._authors)
+        return '<%r id=%r name=%r %r>' % (self.__class__.__name__, self._id, self._firstname, self._surname)

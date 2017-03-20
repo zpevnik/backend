@@ -8,6 +8,8 @@ class Model (object):
 
     Attributes:
       songs (server.model.Songs): Submodel for managing songs
+      authors (server.model.Authors): Submodel for managing authors
+      songbooks (server.model.Songbooks): Submodel for managing songbooks
     """
 
     def __init__(self, db):
@@ -16,6 +18,6 @@ class Model (object):
         from server.model.songbooks import Songbooks
 
         self.songs = Songs(model=self, db=db)
-        self.songs = Authors(model=self, db=db)
-        self.songs = Songbooks(model=self, db=db)
+        self.authors = Authors(model=self, db=db)
+        self.songbooks = Songbooks(model=self, db=db)
         

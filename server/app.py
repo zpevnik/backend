@@ -48,7 +48,7 @@ Compress(app)
 
 setup_logging()
 
-skautis = Skautis(app.config['SKAUTIS']['SECRET'])
+#skautis = Skautis(app.config['SKAUTIS']['SECRET'])
 
 mongoClient = MongoClient(app.config['MONGODB']['URL'])
 db = mongoClient[app.config['MONGODB']['DB']]

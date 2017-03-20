@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 @app.errorhandler(AppException)
 def handle_AppException(error):
-    response = jsonify(error.message)
+    response = jsonify(message=error.message)
     response.status_code = error.status_code
     return response
 
