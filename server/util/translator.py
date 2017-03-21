@@ -2,7 +2,7 @@
 def translate_to_tex(song):
 
     state_chorus = False
-    state_verse = False   
+    state_verse = False
     output = ""
 
     def finish_part(state_chorus, state_verse):

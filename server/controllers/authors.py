@@ -1,32 +1,26 @@
-from flask import g, request, jsonify, Blueprint
+import logging
+
+from flask import g
+from flask import request
+from flask import jsonify
+from flask import Blueprint
 
 from server.app import app
-from server.util import generate_random_filename, generate_tex_file, export_to_pdf
 from server.util import validators
 
-from server.util.exceptions import AppException
-
-import os
-import subprocess
-import logging
 logger = logging.getLogger(__name__)
-
-
 api = Blueprint('authors', __name__,)
 
-# db.authors.createIndex({"firstname":"text","surname":"text"})
 
 @api.route('/authors', methods=['GET', 'POST'])
 def authors():
-    ip = request.remote_addr
-
     if request.method == 'GET':
         data = {
             'query': request.args['query'] if 'query' in request.args and request.args['query'] is not None else "",
             'page': int(request.args['page']) if 'page' in request.args and request.args['page'] is not None else 0,
             'per_page': int(request.args['per_page']) if 'per_page' in request.args and request.args['per_page'] is not None else 30
         }
-        validators.authors_GET(data)
+        validators.request_GET(data)
 
         result = g.model.authors.find_special(data['query'], data['page'], data['per_page'])
         response = []
@@ -48,8 +42,6 @@ def authors():
 
 @api.route('/authors/<author_id>', methods=['GET', 'PUT', 'DELETE'])
 def author_single(author_id):
-    ip = request.remote_addr
-
     if request.method == 'GET':
         author = validators.author_existence(author_id)
         return jsonify(author.get_serialized_data()), 200

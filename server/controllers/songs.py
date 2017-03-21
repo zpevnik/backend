@@ -1,30 +1,26 @@
-from flask import g, jsonify, request, Blueprint
+from flask import g
+from flask import jsonify
+from flask import request
+from flask import Blueprint
 
 from server.app import app
-from server.util import generate_random_filename, generate_tex_file, export_to_pdf
+from server.util import generate_random_filename
+from server.util import generate_tex_file
+from server.util import export_to_pdf
 from server.util import validators
-
-import os
-import subprocess
-import logging
-logger = logging.getLogger(__name__)
-
 
 api = Blueprint('songs', __name__,)
 
-# db.authors.createIndex({"firstname":"text","surname":"text"})
 
 @api.route('/songs', methods=['GET', 'POST'])
 def songs():
-    ip = request.remote_addr
-
     if request.method == 'GET':
         data = {
             'query': request.args['query'] if 'query' in request.args and request.args['query'] is not None else "",
             'page': int(request.args['page']) if 'page' in request.args and request.args['page'] is not None else 0,
             'per_page': int(request.args['per_page']) if 'per_page' in request.args and request.args['per_page'] is not None else 30
         }
-        validators.songs_GET(data)
+        validators.request_GET(data)
 
         result = g.model.songs.find_special(data['query'], data['page'], data['per_page'])
         response = []
@@ -39,13 +35,11 @@ def songs():
         validators.songs_POST(data)
         song = g.model.songs.create_song(data)
 
-        return jsonify(link="songs/" + song.get_id()), 201
+        return jsonify(link="songs/{}".format(song.get_id())), 201
 
 
 @api.route('/songs/<song_id>', methods=['GET', 'PUT', 'DELETE'])
 def song_single(song_id):
-    ip = request.remote_addr
-
     if request.method == 'GET':
         song = validators.song_existence(song_id)
         return jsonify(song.get_serialized_data()), 200
@@ -68,8 +62,6 @@ def song_single(song_id):
 
 @api.route('/songs/<song_id>/variants', methods=['GET', 'POST'])
 def song_variants(song_id):
-    ip = request.remote_addr
-
     if request.method == 'GET':
         song = validators.song_existence(song_id)
         variants = song.get_variants()
@@ -94,13 +86,12 @@ def song_variants(song_id):
         variant = song.create_variant(data)
         g.model.songs.save(song)
 
-        return jsonify(link="songs/" + song.get_id() + "/" + variant.get_id()), 201
+        return jsonify(link="songs/{}/{}" \
+            .format(song.get_id(), variant.get_id())), 201
 
 
 @api.route('/songs/<song_id>/variants/<variant_id>', methods=['GET', 'PUT', 'DELETE'])
 def song_variant_single(song_id, variant_id):
-    ip = request.remote_addr
-
     if request.method == 'GET':
         song = validators.song_existence(song_id)
 
@@ -156,13 +147,11 @@ def song_authors(song_id):
 
     return jsonify(authors), 200
 
-@api.route('/songs/<song_id>/authors/<author_id>', methods=['POST','DELETE'])
+@api.route('/songs/<song_id>/authors/<author_id>', methods=['POST', 'DELETE'])
 def song_author_singe(song_id, author_id):
-    ip = request.remote_addr
-
     if request.method == 'POST':
         song = validators.song_existence(song_id)
-        
+
         validators.author_existence(author_id)
         song.add_author(author_id)
 

@@ -1,16 +1,16 @@
-from flask import Flask, g
-from flask_compress import Compress
-
-from pymongo import MongoClient
-from server.skautis import Skautis
-from server.model import Model
-
 import time
-from logging import StreamHandler, Formatter
+import logging
+
+from flask import Flask
+from flask import g
+from flask_compress import Compress
+from pymongo import MongoClient
 from colorlog import ColoredFormatter
 
-import logging
+from server.model import Model
+
 logger = logging.getLogger(__name__)
+
 
 def setup_handler(handler, level, fmt, use_colors=False):
     handler.setLevel(level)
@@ -27,7 +27,7 @@ def setup_handler(handler, level, fmt, use_colors=False):
                 'CRITICAL': 'red',
             }))
     else:
-        handler.setFormatter(Formatter(fmt))
+        handler.setFormatter(logging.Formatter(fmt))
     return handler
 
 def setup_logging():
@@ -37,7 +37,8 @@ def setup_logging():
     rootLogger.setLevel(logging.DEBUG)
 
     consoleFormat = ('[%(asctime)s] %(levelname)s %(name)s: %(message)s')
-    consoleHandler = setup_handler(StreamHandler(), logging.DEBUG, consoleFormat, use_colors=True)
+    consoleHandler = setup_handler(logging.StreamHandler(), logging.DEBUG,
+                                   consoleFormat, use_colors=True)
     rootLogger.addHandler(consoleHandler)
 
 

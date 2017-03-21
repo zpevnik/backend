@@ -1,12 +1,14 @@
-from flask import abort, request, jsonify
+import os
+import time
+import logging
+
+from flask import abort
+from flask import request
+from flask import jsonify
 
 from server.app import app
 from server.util import AppException
 
-import os
-import time
-
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -24,18 +26,17 @@ def handle_IOError(error):
 
 @app.route("/cleanup")
 def cleanup():
-
-    ip = request.remote_addr 
+    ip = request.remote_addr
     if ip != app.config['SERVER_IP']:
-       abort(404)
+        abort(404)
 
-    logger.info('Cleaning up the temp folder from %s ...' % ip)
+    logger.info('Cleaning up the temp folder from %s ...', ip)
 
     current_time = time.time()
 
-    for f in os.listdir("songs/done"):
-        creation_time = os.path.getctime("songs/done/" + f)
+    for temp_file in os.listdir("songs/done"):
+        creation_time = os.path.getctime("songs/done/" + temp_file)
         if (current_time - creation_time) > 1800:
-            os.unlink("songs/done/" + f)
+            os.unlink("songs/done/" + temp_file)
 
     return 'Ok'

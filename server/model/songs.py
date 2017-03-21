@@ -1,23 +1,24 @@
-from flask import g
 from datetime import datetime
+from flask import g
 
-from server.util import generate_random_uuid, uuid_from_str, uuid_to_str, translate_to_tex
+from server.util import generate_random_uuid
+from server.util import uuid_from_str
+from server.util import uuid_to_str
+from server.util import translate_to_tex
 from server.util.exceptions import AppException
 
-import logging
-logger = logging.getLogger(__name__)
 
 class Songs(object):
-    """Collection for managing CRUD operation in database for songs
+    """Collection for managing CRUD operation in database for songs.
 
     Args:
-      model (server.model.Model): Reference to model
-      db (pymongo.MongoClient): Reference to database
+      model (server.model.Model): Reference to model.
+      db (pymongo.MongoClient): Reference to database.
 
     Attributes:
-      _model (server.model.Model): Reference to model
-      _db: Reference to database
-      _collection: Reference to collection in database for this class
+      _model (server.model.Model): Reference to model.
+      _db: Reference to database.
+      _collection: Reference to collection in database for this class.
     """
 
     COLLECTION_NAME = 'songs'
@@ -28,10 +29,10 @@ class Songs(object):
         self._collection = db[self.COLLECTION_NAME]
 
     def create_song(self, data):
-        """Create new song instance and insert it into database.
+        """Create new song and insert it into database.
 
         Args:
-          data (dict): Data about the song (title, authors and text).
+          data (dict): Song data containing 'title' dictionary key.
 
         Returns:
           Song: Instance of the new song.
@@ -48,10 +49,10 @@ class Songs(object):
         return song
 
     def save(self, song):
-        """Save instance of song into database.
+        """Save song into the database.
 
         Args:
-          song (Song): instance of the song.
+          song (Song): Instance of the song.
         """
         self._collection.update(
             {'_id': uuid_from_str(song.get_id())},
@@ -62,16 +63,32 @@ class Songs(object):
         """Delete song from the database.
 
         Args:
-          song (Song): instance of the song.
+          song (Song): Instance of the song.
         """
         self._collection.delete_one(
             {'_id': uuid_from_str(song.get_id())}
         )
 
     def find_special(self, query, page, per_page):
-        doc = self._collection.find({'$text':{'$search': query}},
-                                    {'score': {'$meta': "textScore"}}) \
-                                    .sort([('score', {'$meta': 'textScore'})])
+        """Find songs from the database based on query and page the result.
+
+        Args:
+          query (str): Query string.
+          page (int): Result page number.
+          per_page (int): Number of songs per search result.
+
+        If the query string is empty, whole database is returned (and paged).
+
+        Returns:
+          list: List of Songs instances satisfying the query.
+        """
+        if query is None or query == "":
+            doc = self._collection.find({}).skip(page*per_page).limit(per_page)
+        else:
+            doc = self._collection.find({'$text':{'$search': query}},
+                                        {'score': {'$meta': "textScore"}}) \
+                                  .sort([('score', {'$meta': 'textScore'})]) \
+                                  .skip(page * per_page).limit(per_page)
 
         songs = []
         for song in doc:
@@ -80,47 +97,40 @@ class Songs(object):
         return songs
 
     def find_one(self, song_id=None, title=None):
+        """Find one song based on given arguments.
+
+        Args:
+          song_id (str, optional): Song UUID.
+          title (str, optional): Title of the song.
+
+        Returns:
+          Author: One Song or None if it does not exist.
+        """
         query = {}
-        if song_id is not None: query['_id'] = uuid_from_str(song_id)
-        if title is not None: query['title'] = title
-            
+        if song_id is not None:
+            query['_id'] = uuid_from_str(song_id)
+        if title is not None:
+            query['title'] = title
+
         doc = self._collection.find_one(query)
         if not doc:
             return None
 
         return Song(doc)
 
-    def find(self):
-        """Find all the songs satisfying given restrictions 
-        (currently no restrictions).
-
-        Returns:
-          list: List of song instances or None.
-        """
-        doc = self._collection.find({})
-
-        if doc.count() == 0:
-            return []
-
-        songs = []
-        for song in doc:
-            songs.append(Song(song))
-
-        return songs
-
 
 class Song(object):
     """Class for song abstraction.
 
     Args:
-      song (dict): Island dictionary.
+      song (dict): Song dictionary.
 
     Attributes:
-      _id (str): Island UUID.
-      _created (str): Timestamp of the island creation.
-      _authors (str): Authors...
-      _title (str): Title of the song.
-      _text (str): Lyrics and chords of the song.
+      _id (str): Song UUID.
+      _created (str): Timestamp of the song creation.
+      _title (str): Song title.
+      _authors (dict): Dict of Author UUIDs.
+      _variants (dict): Dics of Variants.
     """
 
     def __init__(self, song):
@@ -128,12 +138,18 @@ class Song(object):
         self._created = song['created']
         self._authors = song['authors']
         self._title = song['title']
-        
+
         self._variants = []
         for variant in song['variants']:
             self._variants.append(Variant(variant))
 
     def serialize(self, update=False):
+        """Serialize song data for database operations.
+
+        Args:
+          update (bool, optional): Determines whether method returns only
+            update attributes or data for new database entry.
+        """
         variants = []
         for variant in self._variants:
             variants.append(variant.serialize())
@@ -177,13 +193,17 @@ class Song(object):
 
     def add_author(self, author_id):
         if author_id in self._authors:
-            raise AppException('error', 'author_already_set', 'Tento autor je jiz k pisni prirazen', status_code=404)
+            raise AppException('error', 'author_already_set',
+                               'Tento autor je jiz k pisni prirazen',
+                               status_code=404)
 
         self._authors.append(author_id)
 
     def remove_author(self, author_id):
         if author_id not in self._authors:
-            raise AppException('error', 'author_not_set', 'Tento autor neni u pisne prirazen', status_code=404)
+            raise AppException('error', 'author_not_set',
+                               'Tento autor neni u pisne prirazen',
+                               status_code=404)
 
         self._authors.remove(author_id)
 
@@ -204,15 +224,26 @@ class Song(object):
             if variant.get_id() == variant_id:
                 return variant
 
-        raise AppException('error', 'variant_does_not_exist', 'Varianta pisne nebyla nalezena', status_code=404)
+        raise AppException('error', 'variant_does_not_exist',
+                           'Varianta pisne nebyla nalezena',
+                           status_code=404)
 
     def delete_variant(self, variant_id):
         variant = self.find_variant(variant_id)
         self._variants.remove(variant)
 
     def generate_tex(self, filename, variant_id):
-        with open('songs/sample/sample.sbd', 'r') as file:
-            filedata = file.read()
+        """Generate tex output and append it to given filename.
+
+        Since this method is appending the code and not overwriting given file,
+        it can be called on multiple songs in the row with the same file name.
+
+        Args:
+          filename (str): Output file name.
+          variant_id (str): Variant UUID.
+        """
+        with open('songs/sample/sample.sbd', 'r') as sample_file:
+            filedata = sample_file.read()
 
         variant = self.find_variant(variant_id)
         text = translate_to_tex(variant.get_text())
@@ -226,16 +257,29 @@ class Song(object):
         filedata = filedata.replace('$authors$', ", ".join(authors))
         filedata = filedata.replace('$song$', text)
 
-        with open('songs/temp/' + filename + '.sbd', 'a') as file:
-            file.write(filedata)
+        with open('songs/temp/' + filename + '.sbd', 'a') as song_file:
+            song_file.write(filedata)
 
 
     def __repr__(self):
-        return '<%r id=%r title=%r authors=%r variants=%r>' % (self.__class__.__name__, self._id, self._title, self._authors, self._variants)
+        return '<{!r} id={!r} title={!r} authors={!r} variants={!r}>' \
+            .format(self.__class__.__name__, self._id, self._title,
+                    self._authors, self._variants)
 
 
 
 class Variant(object):
+    """Class for variant abstraction.
+
+    Args:
+      variant (dict): Variant dictionary.
+
+    Attributes:
+      _id (str): Variant UUID.
+      _created (str): Timestamp of the variant creation.
+      _title (str): Variant title.
+      _text (str): Variant song text itself.
+    """
 
     def __init__(self, variant):
         self._id = uuid_to_str(variant['_id'])
@@ -244,6 +288,12 @@ class Variant(object):
         self._text = variant['text']
 
     def serialize(self):
+        """Serialize variant data for database operations.
+
+        Args:
+          update (bool, optional): Determines whether method returns only
+            update attributes or data for new database entry.
+        """
         variant = {
             'title': self._title,
             'text': self._text
@@ -277,4 +327,4 @@ class Variant(object):
         self._text = text
 
     def __repr__(self):
-        return '<%r id=%r>' % (self.__class__.__name__, self._id)
+        return '<{!r} id={!r}>'.format(self.__class__.__name__, self._id)

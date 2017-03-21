@@ -1,34 +1,29 @@
-from flask import g, request, jsonify, Blueprint
+from flask import g
+from flask import request
+from flask import jsonify
+from flask import Blueprint
 
 from server.app import app
-from server.util import generate_random_filename, generate_tex_file, export_to_pdf
 from server.util import validators
-
-import os
-import subprocess
-import logging
-logger = logging.getLogger(__name__)
-
 
 api = Blueprint('songbooks', __name__,)
 
 
 @api.route('/songbooks', methods=['GET', 'POST'])
 def songbooks():
-    ip = request.remote_addr
-
     if request.method == 'GET':
         data = {
             'query': request.args['query'] if 'query' in request.args and request.args['query'] is not None else "",
             'page': int(request.args['page']) if 'page' in request.args and request.args['page'] is not None else 0,
             'per_page': int(request.args['per_page']) if 'per_page' in request.args and request.args['per_page'] is not None else 30
         }
-        validators.songbooks_GET(data)
+        validators.request_GET(data)
 
         result = g.model.songbooks.find_special(data['query'], data['page'], data['per_page'])
         response = []
         for res in result:
             response.append(res.get_serialized_data())
+            print res
 
         return jsonify(response), 200
 
@@ -43,8 +38,6 @@ def songbooks():
 
 @api.route('/songbooks/<songbook_id>', methods=['GET', 'PUT', 'DELETE'])
 def songbook_single(songbook_id):
-    ip = request.remote_addr
-
     if request.method == 'GET':
         songbook = validators.songbook_existence(songbook_id)
         return jsonify(songbook.get_serialized_data()), 200
@@ -65,10 +58,8 @@ def songbook_single(songbook_id):
         return 'Ok', 200
 
 
-@api.route('/songbooks/<songbook_id>/song/<song_id>/variants/<variant_id>', methods=['POST','DELETE'])
+@api.route('/songbooks/<songbook_id>/song/<song_id>/variants/<variant_id>', methods=['POST', 'DELETE'])
 def songbook_song_variants(songbook_id, song_id, variant_id):
-    ip = request.remote_addr
-
     if request.method == 'POST':
         songbook = validators.songbook_existence(songbook_id)
         song = validators.song_existence(song_id)

@@ -12,7 +12,6 @@ class Skautis(object):
 
     def test(self):
         print self._test
-        
 
 
 class SkautisApi(object):

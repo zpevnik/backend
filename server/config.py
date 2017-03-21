@@ -1,3 +1,5 @@
+"""Configuration file for Zpevnik application"""
+
 VERSION = '1.0'
 DEVELOPMENT = True
 SERVER_PORT = 5010
@@ -10,5 +12,5 @@ MONGODB = {
 }
 
 SKAUTIS = {
-	'SECRET': 'TODO',
+    'SECRET': 'TODO',
 }
