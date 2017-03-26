@@ -1,0 +1,483 @@
+#%RAML 1.0
+title: Skautský zpěvník
+version: v1
+baseUri: http://zpevnik.skauting.cz/api/
+mediaType:
+  - application/json
+protocols:
+  - HTTPS
+description: |
+  Popis REST API webové aplikace https://zpevnik.skauting.cz/
+/songs/:
+  get:
+    description: Slouží k získávání seznamu písní.
+    queryParameters:
+      query:
+        type: string
+        description: Text použitý k vyhledávání mezi písněmi.
+        required: false
+      page:
+        type: integer
+        description: Stránka výpisu.
+        required: false
+        default: 0
+        minimum: 0
+      per_page:
+        type: integer
+        default: 30
+        description: Upravuje počet písní na stránce.
+        required: false
+        minimum: 1
+        maximum: 100
+    responses:
+      200:
+        description: Odpověď použitá v případě nalezení 0+ písní.
+        headers:
+          Link:
+            type: string
+            example: </songs/?page=0&per_page=30>; rel="first", </songs/?page=0&per_page=30>; rel="prev", </songs/?page=2&per_page=30>; rel="next", </songs/?page=5&per_page=30>; rel="last"
+        body:
+          application/json:
+            type: Song[]
+            description: V případě, že žádná píseň nevyhovuje, je vráceno prázdné pole.
+            minItems: 0
+      400:
+        description: Odpověď použitá v případě, že některý z parametrů obsahuje neplatná data.
+        body:
+          application/json:
+            type: ClientError
+  post:
+    description: Slouží k vytváření nových písní.
+    body:
+      type: object
+      properties:
+        title: string
+    responses:
+      201:
+        description: Odpověď použitá v případě úspěšného vytvoření písně.
+        headers:
+          Location:
+            example: /songs/1/
+        body:
+          application/json:
+            type: Redirect
+            example:
+              link: /songs/1/
+      422:
+        description: Odpověď použitá v případě, že při vytváření došlo k chybě.
+        body:
+          application/json:
+            type: ValidationError
+/songs/{song_id}/:
+  uriParameters:
+    song_id:
+      type: integer
+  get:
+    description: Slouží k získání detailu písně.
+    responses:
+      200:
+        description: Odpověď vrácená v případě nalezení písně.
+        body:
+          application/json:
+            type: object
+            properties:
+              id: integer
+              title: string
+      404:
+        description: Odpověď použitá v případě, že píseň nebyla nalezena.
+        body:
+          application/json:
+            type: object
+            properties:
+              message: string
+  put:
+    description: Slouží k úpravě detailů písně.
+    body:
+      type: object
+      properties:
+        title: string
+    responses:
+      200:
+        body:
+          application/json:
+            type: Song
+  delete:
+    description: |
+      Slouží ke smazání jedné konkrétní písně
+      včetně akordů.
+    responses:
+      204:
+      404:
+        body:
+          application/json:
+            type: ClientError
+            example:
+              message: Píseň nebyla nalezena.
+/songs/{song_id}/variants/:
+  get:
+    description: |
+      Slouží k získání seznamu všech variant akordů jedné
+      konkrétní písně.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Chords[]
+      404:
+        body:
+          application/json:
+            type: ClientError
+  post:
+    description: |
+      Slouží k vytvoření nové varianty akordů písně.
+    body:
+      type: object
+      properties:
+        title: string
+    responses:
+      201:
+        headers:
+          Location:
+            example: /songs/1/1/
+        body:
+          application/json:
+            type: Redirect
+            example:
+              link: /songs/1/1/
+/songs/{song_id}/variants/{variant_id}/:
+  uriParameters:
+    song_id:
+      type: integer
+    variant_id:
+      type: integer
+  get:
+    description: Slouží k získání detailů varianty písně.
+    queryParameters:
+      transpose:
+        type: number
+        required: false
+        format: float
+    headers:
+      Accept:
+        type: string
+        description: |
+            Je-li hlavička Accept explicitně nastavena na `application/pdf`,
+            vrátí endpoint vygenerovaný soubor. V opačném případě
+            je vrácen detail písně standardně v `json`u.
+        default: application/json
+        enum:
+          - application/json
+          - application/pdf
+    body:
+      application/json:
+        type: Chords
+      application/pdf:
+        description: |
+          Vygenerované PDFko.
+  put:
+    description: Slouží k úpravě varianty písně.
+    body:
+      type: object
+      properties:
+        chords:
+          type: string
+          description: Text písně s akordy v našem vnitřním formátu.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Chords
+  delete:
+    description: Slouží ke smazání varianty písně.
+    responses:
+      204:
+      404:
+        body:
+          application/json:
+            type: ClientError
+            examples:
+              song:
+                message: Píseň nebyla nalezena.
+              variant:
+                message: Varianta nebyla nalezena.
+/authors/:
+  get:
+    description: |
+      Slouží k získání seznamu autorů.
+    queryParameters:
+      query:
+        type: string
+        description: Text použitý k vyhledávání mezi autory.
+        required: false
+      page:
+        type: integer
+        description: Stránka výpisu.
+        required: false
+        default: 0
+        minimum: 0
+      per_page:
+        type: integer
+        default: 30
+        description: Upravuje počet autorů na stránce.
+        required: false
+        minimum: 1
+        maximum: 100
+    responses:
+      200:
+        headers:
+          Link:
+            type: string
+            example: </songs/?page=0&per_page=30>; rel="first", </songs/?page=0&per_page=30>; rel="prev", </songs/?page=2&per_page=30>; rel="next", </songs/?page=5&per_page=30>; rel="last"
+        body:
+          application/json:
+            type: Author[]
+  post:
+    description: |
+      Slouží k vytváření autorů.
+    responses:
+      201:
+        body:
+          application/json:
+            type: Redirect
+            example:
+              link: /authors/1/
+/authors/{author_id}/:
+  get:
+    description: |
+      Slouží k získání detailu autora.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Author
+      404:
+        body:
+          application/json:
+            type: ClientError
+            example:
+              message: Autor nebyl nalezen.
+  put:
+    description: Slouží k úpravě informací o autorovi.
+  delete:
+    description: Slouží ke smazání autora.
+/songs/{song_id}/authors/:
+  get:
+    description: |
+      Slouží k získání seznamu autorů písně.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Author[]
+            example:
+              !include examples/authors.json
+      404:
+        body:
+          application/json:
+            type: ClientError
+            example:
+              message: Píseň nebyla nalezena.
+/songs/{song_id}/authors/{author_id}/:
+  post:
+    description: |
+      Slouží k přiřazení autora k písni.
+    responses:
+      200:
+        body:
+          application/json:
+            type: object
+            properties:
+              message: string
+            example:
+              message: Přiřazení autora proběhlo úspěšně.
+      404:
+        body:
+          application/json:
+            type: ClientError
+            examples:
+              song:
+                message: Píseň neexistuje.
+              author:
+                message: Autor neexistuje.
+  delete:
+    description: |
+      Slouží k odstranění autora písně.
+    responses:
+      204:
+      404:
+        body:
+          application/json:
+            type: ClientError
+/songbooks/:
+  get:
+    description: |
+      Slouží k získání seznamu zpěvníků. Součástí seznamu by měli
+       být jak zpěvníky veřejné, tak ty, ke kterým má uživatel
+       přidělený přístup.
+    queryParameters:
+       query:
+         type: string
+         description: Text použitý k vyhledávání mezi zpěvníky.
+         required: false
+       page:
+         type: integer
+         description: Stránka výpisu.
+         required: false
+         default: 0
+         minimum: 0
+       per_page:
+         type: integer
+         default: 30
+         description: Upravuje počet zpěvníků na stránce.
+         required: false
+         minimum: 1
+         maximum: 100
+    responses:
+      200:
+        headers:
+          Link:
+            type: string
+            example: </songs/?page=0&per_page=30>; rel="first", </songs/?page=0&per_page=30>; rel="prev", </songs/?page=2&per_page=30>; rel="next", </songs/?page=5&per_page=30>; rel="last"
+        body:
+          type: Songbook[]
+  post:
+    description: Slouží k založení nového zpěvníku.
+/songbooks/{songbook_id}/:
+  uriParameters:
+    songbook_id:
+      type: integer
+  get:
+    description: Slouží k získání detailů zpěvníků.
+    headers:
+      Accept:
+        type: string
+        description: |
+          |
+            Je-li hlavička Accept explicitně nastavena na `application/pdf`,
+            vrátí endpoint vygenerovaný soubor. V opačném případě
+            je vrácen detail písně standardně v `json`u.
+        default: application/json
+        enum:
+          - application/json
+          - application/pdf
+    responses:
+      200:
+        body:
+          application/json:
+            type: Songbook
+          application/pdf:
+            description: Vygenerované PDF se zpěvníkem.
+      404:
+        body:
+          application/json:
+            type: ClientError
+  put:
+    description: Slouží k úpravě zpěvníku.
+  delete:
+    description: |
+      Slouží ke smazání zpěvníku.
+    responses:
+      204:
+      404:
+/songbooks/{songbook_id}/song/{song_id}/variants/{variant_id}/:
+  uriParameters:
+    songbook_id:
+      type: integer
+    song_id:
+      type: integer
+    variant_id:
+      type: integer
+  post:
+    description: Slouží k přidání písně do zpěvníku.
+    responses:
+      200:
+        body:
+          application/json:
+            type: object
+            properties:
+              message: string
+            example:
+              message: Píseň byla úspěšně přidána do zpěvníku.
+      404:
+        body:
+          application/json:
+            type: ClientError
+            examples:
+              songbook:
+                message: Zpěvník nebyl nalezen.
+              song:
+                message: Píseň neexistuje.
+              variant:
+                message: Varianta písně neexistuje.
+  delete:
+    description: Slouží k odstranění písně ze zpěvníku.
+    responses:
+      204:
+      404:
+        body:
+          application/json:
+            type: ClientError
+types:
+  ClientError:
+    type: object
+    properties:
+      message: string
+  ValidationError:
+    type: object
+    properties:
+      message: string
+      errors:
+        type: array
+        items:
+          type: object
+          properties:
+            field: string
+            code:
+              type: string
+              enum:
+                - missing_field
+                - already_exists
+                - invalid
+            message: string
+  Redirect:
+    type: object
+    properties:
+      link: string
+  Author:
+    type: object
+    properties:
+      id: integer
+      firstname: string
+      surname: string
+    example:
+      id: 1
+      firstname: Karel
+      surname: Kryl
+  Song:
+    type: object
+    properties:
+      id: integer
+      title: string
+      authors:
+        type: array
+        items: string
+        description: Pole odkazů na detaily autorů.
+      variants:
+        type: array
+        items: string
+        description: Pole odkazů na detaily variant akordů.
+  Songbook:
+    type: object
+    properties:
+      id: integer
+      title: string
+  Chords:
+    type: object
+    properties:
+      id: integer
+      song:
+        type: string
+        description: Odkaz na píseň, ke které akordy patří.
+      chords:
+        type: string
+        description: Text písně s akordy ve vnitřním formátu.
