@@ -1,6 +1,6 @@
 #%RAML 1.0
 title: Skautský zpěvník
-version: v1
+version: v0.1
 baseUri: http://zpevnik.skauting.cz/api/
 mediaType:
   - application/json
@@ -71,7 +71,7 @@ description: |
 /songs/{song_id}/:
   uriParameters:
     song_id:
-      type: integer
+      type: string
   get:
     description: Slouží k získání detailu písně.
     responses:
@@ -104,9 +104,10 @@ description: |
   delete:
     description: |
       Slouží ke smazání jedné konkrétní písně
-      včetně akordů.
+      včetně všech variant akordů.
     responses:
       204:
+        description: Použije se v případě, že došlo ke smazání.
       404:
         body:
           application/json:
@@ -114,6 +115,9 @@ description: |
             example:
               message: Píseň nebyla nalezena.
 /songs/{song_id}/variants/:
+  uriParameters:
+    song_id:
+      type: string
   get:
     description: |
       Slouží k získání seznamu všech variant akordů jedné
@@ -122,7 +126,7 @@ description: |
       200:
         body:
           application/json:
-            type: Chords[]
+            type: Variant[]
       404:
         body:
           application/json:
@@ -133,7 +137,7 @@ description: |
     body:
       type: object
       properties:
-        title: string
+        variant: string
     responses:
       201:
         headers:
@@ -147,9 +151,9 @@ description: |
 /songs/{song_id}/variants/{variant_id}/:
   uriParameters:
     song_id:
-      type: integer
+      type: string
     variant_id:
-      type: integer
+      type: string
   get:
     description: Slouží k získání detailů varianty písně.
     queryParameters:
@@ -170,7 +174,7 @@ description: |
           - application/pdf
     body:
       application/json:
-        type: Chords
+        type: Variant
       application/pdf:
         description: |
           Vygenerované PDFko.
@@ -179,18 +183,19 @@ description: |
     body:
       type: object
       properties:
-        chords:
+        variant:
           type: string
           description: Text písně s akordy v našem vnitřním formátu.
     responses:
       200:
         body:
           application/json:
-            type: Chords
+            type: Variant
   delete:
     description: Slouží ke smazání varianty písně.
     responses:
       204:
+        description: Použije se v případě, že došlo ke smazání.
       404:
         body:
           application/json:
@@ -234,6 +239,11 @@ description: |
   post:
     description: |
       Slouží k vytváření autorů.
+    body:
+      type: object
+      properties:
+        firstname: string
+        surname: string
     responses:
       201:
         body:
@@ -242,6 +252,9 @@ description: |
             example:
               link: /authors/1/
 /authors/{author_id}/:
+  uriParameters:
+    author_id:
+      type: string
   get:
     description: |
       Slouží k získání detailu autora.
@@ -258,9 +271,38 @@ description: |
               message: Autor nebyl nalezen.
   put:
     description: Slouží k úpravě informací o autorovi.
+    body:
+      type: object
+      properties:
+        firstname: string
+        surname: string
+    responses:
+      200:
+        body:
+          application/json:
+            description: Upravené informace o autorovi.
+            type: Author
+      404:
+        body:
+          application/json:
+            type: ClientError
+            example:
+              message: Autor nebyl nalezen.
   delete:
     description: Slouží ke smazání autora.
+    responses:
+      204:
+        description: Použije se v případě, že došlo ke smazání.
+      404:
+        body:
+          application/json:
+            type: ClientError
+            example:
+              message: Autor nebyl nalezen.
 /songs/{song_id}/authors/:
+  uriParameters:
+    song_id:
+      type: string
   get:
     description: |
       Slouží k získání seznamu autorů písně.
@@ -269,15 +311,19 @@ description: |
         body:
           application/json:
             type: Author[]
-            example:
-              !include examples/authors.json
+            example: [{ id : "1", firstname : "Karel", surname : "Kryl" }, { id : "2", firstname : "Jaromír", surname : "Nohavica" } ]
       404:
         body:
           application/json:
             type: ClientError
             example:
               message: Píseň nebyla nalezena.
-/songs/{song_id}/authors/{author_id}/:
+/songs/{song_id}/authors/{author_id}:
+  uriParameters:
+    song_id:
+      type: string
+    author_id:
+      type: string
   post:
     description: |
       Slouží k přiřazení autora k písni.
@@ -301,13 +347,19 @@ description: |
                 message: Autor neexistuje.
   delete:
     description: |
-      Slouží k odstranění autora písně.
+      Slouží k odstranění autora ze seznamu autorů konkrétní písně.
     responses:
       204:
+        description: Použije se v případě, že došlo ke smazání.
       404:
         body:
           application/json:
             type: ClientError
+            examples:
+              song:
+                message: Píseň neexistuje.
+              author:
+                message: Autor neexistuje.
 /songbooks/:
   get:
     description: |
@@ -342,10 +394,21 @@ description: |
           type: Songbook[]
   post:
     description: Slouží k založení nového zpěvníku.
+    body:
+      type: object
+      properties:
+        title: string
+    responses:
+      201:
+        body:
+          application/json:
+            type: Redirect
+            example:
+              link: /songbooks/1/
 /songbooks/{songbook_id}/:
   uriParameters:
     songbook_id:
-      type: integer
+      type: string
   get:
     description: Slouží k získání detailů zpěvníků.
     headers:
@@ -373,20 +436,43 @@ description: |
             type: ClientError
   put:
     description: Slouží k úpravě zpěvníku.
+    body:
+      type: object
+      properties:
+        title: string
+    responses:
+      200:
+        body:
+          application/json:
+            type: Songbook
+            description: Detail upraveného zpěvníku.
+      404:
+        body:
+          application/json:
+            type: ClientError
+            example:
+              message: Zpěvník nebyl nalezen
   delete:
     description: |
       Slouží ke smazání zpěvníku.
     responses:
       204:
+        description: Použije se v případě, že došlo ke smazání.
       404:
+        body:
+          application/json:
+            type: ClientError
+            example:
+              message: Zpěvník nebyl nalezen
+
 /songbooks/{songbook_id}/song/{song_id}/variants/{variant_id}/:
   uriParameters:
     songbook_id:
-      type: integer
+      type: string
     song_id:
-      type: integer
+      type: string
     variant_id:
-      type: integer
+      type: string
   post:
     description: Slouží k přidání písně do zpěvníku.
     responses:
@@ -413,6 +499,7 @@ description: |
     description: Slouží k odstranění písně ze zpěvníku.
     responses:
       204:
+        description: Použije se v případě, že došlo ke smazání.
       404:
         body:
           application/json:
@@ -446,17 +533,17 @@ types:
   Author:
     type: object
     properties:
-      id: integer
+      id: string
       firstname: string
       surname: string
     example:
-      id: 1
+      id: 507f191e810c19729de860ea
       firstname: Karel
       surname: Kryl
   Song:
     type: object
     properties:
-      id: integer
+      id: string
       title: string
       authors:
         type: array
@@ -469,12 +556,12 @@ types:
   Songbook:
     type: object
     properties:
-      id: integer
+      id: string
       title: string
-  Chords:
+  Variant:
     type: object
     properties:
-      id: integer
+      id: string
       song:
         type: string
         description: Odkaz na píseň, ke které akordy patří.
