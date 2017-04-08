@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from flask import g
 from flask import request
 from flask import jsonify
@@ -23,41 +25,57 @@ def songbooks():
         response = []
         for res in result:
             response.append(res.get_serialized_data())
-            print res
 
         return jsonify(response), 200
 
     else:
         data = request.get_json()
 
-        validators.songbooks_POST(data)
+        validators.json_request(data)
+        validators.songbooks_request(data)
         songbook = g.model.songbooks.create_songbook(data)
 
-        return jsonify(link="songbooks/" + songbook.get_id()), 201
+        return jsonify(link='songbooks/{}'.format(songbook.get_id())), 201, \
+              {'location': '/songbooks/{}'.format(songbook.get_id())}
 
 
 @api.route('/songbooks/<songbook_id>', methods=['GET', 'PUT', 'DELETE'])
 def songbook_single(songbook_id):
     if request.method == 'GET':
         songbook = validators.songbook_existence(songbook_id)
+
+        if request.headers['Content-Type'] == 'application/pdf':
+            filename = generate_random_filename()
+
+            for song_x in songbook.get_songs():
+                song = validators.song_existence(song_x['song'])
+                song.generate_tex(filename, variant_id)
+
+            generate_tex_file(filename)
+            exported = export_to_pdf(filename)
+            return exported, 200
+
         return jsonify(songbook.get_serialized_data()), 200
 
     elif request.method == 'PUT':
         data = request.get_json()
         songbook = validators.songbook_existence(songbook_id)
 
+        validators.json_request(data)
+        validators.songbooks_request(data)
+
         if 'title' in data:
             songbook.set_title(data['title'])
 
         g.model.songbooks.save(songbook)
-        return 'Ok', 200
+        return jsonify(songbook.get_serialized_data()), 200
 
     else:
         songbook = validators.songbook_existence(songbook_id)
         g.model.songbooks.delete(songbook)
-        return 'Ok', 200
+        return jsonify(), 204
 
-
+# FIXME
 @api.route('/songbooks/<songbook_id>/song/<song_id>/variants/<variant_id>', methods=['POST', 'DELETE'])
 def songbook_song_variants(songbook_id, song_id, variant_id):
     if request.method == 'POST':
@@ -67,7 +85,7 @@ def songbook_song_variants(songbook_id, song_id, variant_id):
 
         songbook.add_song(song_id, variant_id)
         g.model.songbooks.save(songbook)
-        return 'Ok', 200
+        return jsonify({'message': 'Píseň byla úspěšně přidána do zpěvníku.'}), 200
 
     else:
         songbook = validators.songbook_existence(songbook_id)
@@ -76,6 +94,6 @@ def songbook_song_variants(songbook_id, song_id, variant_id):
 
         songbook.remove_song(song_id, variant_id)
         g.model.songbooks.save(songbook)
-        return 'Ok', 204
+        return jsonify(), 204
 
 app.register_blueprint(api, url_prefix='/api/v1')

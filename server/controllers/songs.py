@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from flask import g
 from flask import jsonify
 from flask import request
@@ -32,10 +34,12 @@ def songs():
     else:
         data = request.get_json()
 
-        validators.songs_POST(data)
+        validators.json_request(data)
+        validators.songs_request(data)
         song = g.model.songs.create_song(data)
 
-        return jsonify(link="songs/{}".format(song.get_id())), 201
+        return jsonify(link='songs/{}'.format(song.get_id())), 201, \
+              {'location': '/songs/{}'.format(song.get_id())}
 
 
 @api.route('/songs/<song_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -48,16 +52,19 @@ def song_single(song_id):
         data = request.get_json()
         song = validators.song_existence(song_id)
 
+        validators.json_request(data)
+        validators.songs_request(data)
+
         if 'title' in data:
             song.set_title(data['title'])
 
         g.model.songs.save(song)
-        return 'Ok', 200
+        return jsonify(song.get_serialized_data()), 200
 
     else:
         song = validators.song_existence(song_id)
         g.model.songs.delete(song)
-        return 'Ok', 200
+        return jsonify(), 204
 
 
 @api.route('/songs/<song_id>/variants', methods=['GET', 'POST'])
@@ -71,8 +78,8 @@ def song_variants(song_id):
             response.append({
                 'id': variant.get_id(),
                 'song': song.get_id(),
-                'chords': variant.get_text(),
-                'title': variant.get_title()
+                'title': variant.get_title(),
+                'chords': variant.get_text()
             })
 
         return jsonify(response), 200
@@ -81,13 +88,14 @@ def song_variants(song_id):
         data = request.get_json()
         song = validators.song_existence(song_id)
 
-        validators.variants_POST(data)
+        validators.json_request(data)
+        validators.variants_request(data)
 
         variant = song.create_variant(data)
         g.model.songs.save(song)
 
-        return jsonify(link="songs/{}/{}" \
-            .format(song.get_id(), variant.get_id())), 201
+        return jsonify(link='songs/{}/variants/{}'.format(song.get_id(), variant.get_id())), 201, \
+              {'location': '/songs/{}/variants/{}'.format(song.get_id(), variant.get_id())}
 
 
 @api.route('/songs/<song_id>/variants/<variant_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -108,31 +116,34 @@ def song_variant_single(song_id, variant_id):
         response = {
             'id': variant.get_id(),
             'song': song.get_id(),
+            'title': variant.get_title(),
             'chords': variant.get_text()
         }
         return jsonify(response), 200
 
     elif request.method == 'PUT':
         data = request.get_json()
-
         song = validators.song_existence(song_id)
         variant = song.find_variant(variant_id)
 
+        validators.json_request(data)
+        validators.variants_request(data)
+
         if 'title' in data:
             variant.set_title(data['title'])
-        if 'text' in data:
+        if 'chords' in data:
             variant.set_text(data['text'])
 
         g.model.songs.save(song)
 
-        return 'Ok', 200
+        return jsonify(variant.get_serialized_data()), 200
 
     else:
         song = validators.song_existence(song_id)
         song.delete_variant(variant_id)
 
         g.model.songs.save(song)
-        return 'Ok', 200
+        return jsonify(), 204
 
 
 @api.route('/songs/<song_id>/authors', methods=['GET'])
@@ -147,6 +158,7 @@ def song_authors(song_id):
 
     return jsonify(authors), 200
 
+
 @api.route('/songs/<song_id>/authors/<author_id>', methods=['POST', 'DELETE'])
 def song_author_singe(song_id, author_id):
     if request.method == 'POST':
@@ -156,14 +168,14 @@ def song_author_singe(song_id, author_id):
         song.add_author(author_id)
 
         g.model.songs.save(song)
-        return 'Ok', 200
+        return jsonify({'message': 'Přiřazení autora proběhlo úspěšně.'}), 200
 
     else:
         song = validators.song_existence(song_id)
 
         song.remove_author(author_id)
         g.model.songs.save(song)
-        return 'Ok', 204
+        return jsonify(), 204
 
 
 app.register_blueprint(api, url_prefix='/api/v1')

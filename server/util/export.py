@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 import os
 import subprocess
 
-from server.util.exceptions import AppException
+from server.util.exceptions import CompilationException
 
 
 def generate_tex_file(filename):
@@ -20,7 +22,7 @@ def export_to_pdf(filename):
             if line.startswith("!"):
                 error += line + "\n"
 
-        raise AppException('error', 'compilation_error', error, status_code=422)
+        raise CompilationException(error, 500)
 
     process = subprocess.Popen(["pdflatex", "-halt-on-error", filename + ".tex"],
                                stdout=subprocess.PIPE, cwd='songs/temp')
@@ -53,7 +55,6 @@ def export_to_pdf(filename):
             os.remove(os.path.join('songs/temp', fname))
 
     if not os.path.isfile("songs/done/" + filename + ".pdf"):
-        raise AppException('error', 'file_existence_error',
-                           'Final pdf file does not exist.', status_code=422)
+        raise CompilationException('Final pdf file does not exist.', 500)
 
-    return "songs/done/" + filename + ".pdf"
+    return "songs/done/{}.pdf".format(filename)

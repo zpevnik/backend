@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
 from flask import g
 
@@ -5,7 +7,7 @@ from server.util import generate_random_uuid
 from server.util import uuid_from_str
 from server.util import uuid_to_str
 from server.util import translate_to_tex
-from server.util.exceptions import AppException
+from server.util.exceptions import ClientException
 
 
 class Songs(object):
@@ -169,13 +171,13 @@ class Song(object):
     def get_serialized_data(self):
         variants = []
         for variant in self._variants:
-            variants.append(variant.get_serialized_data())
+            variants.append(variant.get_id())
 
         return {
             'id': self._id,
             'created': self._created.isoformat(),
-            #'variants': self._variants,
-            #'authors': self._authors,
+            'variants': variants,
+            'authors': self._authors,
             'title': self._title
         }
 
@@ -193,17 +195,13 @@ class Song(object):
 
     def add_author(self, author_id):
         if author_id in self._authors:
-            raise AppException('error', 'author_already_set',
-                               'Tento autor je jiz k pisni prirazen',
-                               status_code=404)
+            raise ClientException('Tento autor je jiz k pisni prirazen', 404)
 
         self._authors.append(author_id)
 
     def remove_author(self, author_id):
         if author_id not in self._authors:
-            raise AppException('error', 'author_not_set',
-                               'Tento autor neni u pisne prirazen',
-                               status_code=404)
+            raise ClientException('Tento autor neni u pisne prirazen', 404)
 
         self._authors.remove(author_id)
 
@@ -224,9 +222,7 @@ class Song(object):
             if variant.get_id() == variant_id:
                 return variant
 
-        raise AppException('error', 'variant_does_not_exist',
-                           'Varianta pisne nebyla nalezena',
-                           status_code=404)
+        raise ClientException('Varianta nebyla nalezena.', 404)
 
     def delete_variant(self, variant_id):
         variant = self.find_variant(variant_id)

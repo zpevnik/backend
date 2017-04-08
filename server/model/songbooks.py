@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
 
 from server.util import generate_random_uuid
@@ -164,9 +166,11 @@ class Songbook(object):
     def get_id(self):
         return self._id
 
+    def get_songs(self):
+        return self._songs
+
     def set_title(self, title):
         self._title = title
-
 
     def add_song(self, song_id, variant_id):
         self._songs.append({
