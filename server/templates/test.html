@@ -1,0 +1,94 @@
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Zpevnik test</title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+	<div id="content">
+		<div class="row-fluid">
+	    <div class="col-md-4">
+
+	      <h3>Testovací formulář</h3>
+	      <form action="#" id="main-form">
+				  <div class="form-group">
+				    <label for="address">Address:</label>
+				    <input name="address" type="text" class="form-control" id="address" value="/authors">
+				  </div>
+
+	      	<div class="form-group">
+      			<label for="email">Method:</label>
+          	<select name="method" class="form-control">
+          		<option value="0">GET</option>
+          		<option value="1" selected="selected">POST</option>
+          		<option value="2">PUT</option>
+          		<option value="3">DELETE</option>
+          	</select>
+				  </div>
+
+				  <div class="form-group">
+						<label for="argc">POST/PUT Arguments:</label>
+						<textarea name="args" class="form-control" rows="5" id="args" disabled>{"firstname": "Jimmy", "surname": "Page"}</textarea>
+					</div>
+
+					<button type="submit" class="btn btn-default">Submit</button>
+	      </form>
+	    </div>
+	    <div class="col-md-8">
+	        <h3>Odpověd serveru</h3>
+	        <div class="well well-small">
+	            <pre id="received-dump">NULL</pre>
+	        </div>
+	    </div>
+		</div>
+	</div><!-- /content -->
+</div> <!-- /container -->
+
+<script type="text/javascript">
+	$("select[name=method]").change(function () {
+		var method = $("select[name=method]").val();
+		switch(method) {
+			case '1':
+			case '2':
+				$('#args').removeAttr('disabled');
+				break;
+			default:
+				$('#args').attr('disabled', 'disabled');
+		}
+  }).change();
+
+	$("#main-form").submit(function( event ) {
+	  event.preventDefault();
+
+	  //var method = $("select[name=method]").val();
+	  var method = $("select[name=method] option:selected").text();
+	  var address = $("input[name=address]").val();
+	  var args = $("textarea[name=args]").val();
+
+	  var url = "http://127.0.0.1:5010/api/v1" + address;
+
+		$.ajax({
+      url: url,
+      data: args,
+      type: method,
+      dataType: "json",
+      contentType: "application/json; charset=utf-8",
+    }).always(function (result) {
+    	console.log(result);
+    	if (result)
+    		$("#received-dump").text(JSON.stringify(result, null, 2));
+    	else 
+    		$("#received-dump").text("NULL");
+    });
+
+	});
+</script>
+
+</body>
+</html>

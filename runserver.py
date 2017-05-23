@@ -1,4 +1,4 @@
-#!./server_data/bin/python
+#!./venv/bin/python
 
 import logging
 import gevent.monkey

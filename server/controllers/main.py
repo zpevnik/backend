@@ -5,6 +5,7 @@ import logging
 from flask import abort
 from flask import request
 from flask import jsonify
+from flask import render_template
 
 from server.app import app
 
@@ -47,6 +48,10 @@ def handle_IOError(error):
     response = jsonify(error.filename + ": " + error.strerror)
     response.status_code = 500
     return response
+
+@app.route("/test")
+def app_test():
+    return render_template('test.html')
 
 @app.route("/cleanup")
 def cleanup():

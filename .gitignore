@@ -1,5 +1,5 @@
 *.pyc
-server_data
+venv
 mongo_data
 songs/done
 
