@@ -2,10 +2,6 @@
 
 from datetime import datetime
 
-from server.util import generate_random_uuid
-from server.util import uuid_from_str
-from server.util import uuid_to_str
-
 
 class Users(object):
     """Collection for managing CRUD operation in database for user
@@ -51,12 +47,12 @@ class Users(object):
 
     def save(self, user):
         self._collection.update(
-            {'_id': uuid_from_str(user.get_id())},
+            {'_id': user.get_id()},
             {'$set': user.serialize(update=True)}
         )
 
     def find(self, userid):
-        doc = self._collection.find_one(uuid_from_str(userid))
+        doc = self._collection.find_one(userid)
         if not doc:
             return None
 
@@ -80,7 +76,7 @@ class User(object):
     """
 
     def __init__(self, user):
-        self._id = uuid_to_str(user['_id'])
+        self._id = user['_id']
         self._created = user['created']
         self._lastLogin = user['lastLogin']
         self._name = user['name']
@@ -98,7 +94,7 @@ class User(object):
         }
 
         if not update:
-            user['_id'] = uuid_from_str(self._id)
+            user['_id'] = self._id
             user['created'] = self._created
 
         return user
