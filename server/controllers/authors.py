@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from flask import g
-from flask import request
 from flask import jsonify
+from flask import request
 from flask import Blueprint
+from flask_login import login_required
 
 from server.app import app
 from server.util import validators
