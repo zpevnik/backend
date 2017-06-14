@@ -6,8 +6,11 @@ from flask import abort
 from flask import request
 from flask import jsonify
 from flask import render_template
+from flask_login import login_required
+from flask_login import current_user
 
 from server.app import app
+from server.app import skautis
 
 from server.util import ClientException
 from server.util import ValidationException
@@ -15,9 +18,7 @@ from server.util import CompilationException
 from server.util import RequestException
 
 
-
 logger = logging.getLogger(__name__)
-
 
 @app.errorhandler(ClientException)
 def handle_ClientException(error):
@@ -50,8 +51,11 @@ def handle_IOError(error):
     return response
 
 @app.route("/test")
-def app_test():
-    return render_template('test.html')
+@login_required
+def application():
+    user = current_user
+    return render_template('test.html', logout_link=skautis.get_logout_url(),
+                                        username=user.get_name())
 
 @app.route("/cleanup")
 def cleanup():

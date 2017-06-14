@@ -1,0 +1,100 @@
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <title>Skautský zpěvník</title>
+
+    <link href="../static/favicon.ico" rel="shortcut icon">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<style type="text/css">
+    @font-face {
+        font-family: 'themix';
+        src: url('https://cdn.skauting.cz/fonts/TheMix_LT_400.eot');
+        src: url('https://cdn.skauting.cz/fonts/TheMix_LT_400.eot? #iefix') format('embedded-opentype');
+        src: url('https://cdn.skauting.cz/fonts/TheMix_LT_400.woff') format('woff'),
+             url('https://cdn.skauting.cz/fonts/TheMix_LT_400.otf') format('opentype'),
+             url('https://cdn.skauting.cz/fonts/TheMix_LT_400.svg#themix') format('svg');
+        font-weight: 400;
+        font-style: normal;
+    }
+
+    .icon-skautis {
+        margin: 4px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAABlBMVEX///////9VfPVsAAAAAXRSTlMAQObYZgAAAKZJREFUeAHt18EOAyEIhGH+93/p9tiwMrid1DSuc/IAX7wYIX4cALffEcATwBPAE8AUXICU5QCX7AEcwBTmOzRQenymAsSVimppin4YAeQogCuAABgkAyAEWiFQAF/nL4ADmEL1DTcdCmhuVJS/o19HX+4DMfPA9eh0H+gGOlL64e8e8IABAyyBIkazQA6ghGBwjImov9FfOHYGtODvjT5gCQuWbycvkYgGpQ1xK5oAAAAASUVORK5CYII=);
+    }
+
+    .btn-skautis {
+        border-radius: 0;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+        border-width: 1px;
+        color: #fff;
+        background-color: #fcaf17;
+        border-color: rgba(0,0,0,0.2);
+        position: relative;
+        padding-left: 44px;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border: 1px solid transparent;
+    }
+
+    .btn-skautis:hover {
+        color: #fff;
+        background-color: #f99d1c;
+        border-color: rgba(0,0,0,0.2);
+    }
+
+    .btn-social>:first-child {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 32px;
+        line-height: 34px;
+        font-size: 1.6em;
+        text-align: center;
+        border-right: 1px solid rgba(0,0,0,0.2);
+    }
+    .login-box {
+        width: 320px;
+        margin: 0 auto;
+    }
+    .title {
+        display: block;
+        color: #294885;
+        margin-top: -55px;
+        margin-bottom: 40px;
+        font-family: themix;
+        font-weight: bold;
+        font-size: 45px;
+    }
+</style>
+<body>
+
+<div class="container">
+    <div id="content">
+        <div class="row">
+            <div class="col-lg-12" style="text-align: center;">
+                <img style="max-width:400px;" src="../static/logo.svg" />
+                <span class="title">Zpěvník</span>
+            </div>
+            <div class="col-lg-12" style="text-align: center;">
+                <div class="text-center login-box">
+                    <a href="{{ login_link }}" class="btn btn-block btn-social btn-skautis btn-flat" style=""><i class="icon-skautis"></i> přihlášení přes skautIS</a>
+                </div>
+            </div>
+        </div>
+    </div><!-- /content -->
+</div> <!-- /container -->
+
+</body>
+</html>

@@ -1,0 +1,636 @@
+#%RAML 1.0
+title: "Skautský zpěvník"
+version: "v0.1"
+protocols:
+- "HTTPS"
+baseUri: "https://zpevnik.skauting.cz/api/"
+types:
+  ClientError:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+  ValidationError:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+      errors:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            field:
+              type: "string"
+              required: false
+            code:
+              type: "string"
+              required: false
+            message:
+              type: "string"
+              required: false
+  Redirect:
+    type: "object"
+    properties:
+      link:
+        type: "string"
+  Author:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      firstname:
+        type: "string"
+      surname:
+        type: "string"
+  Song:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      title:
+        type: "string"
+      authors:
+        type: "array"
+        items:
+          type: "string"
+      variants:
+        type: "array"
+        items:
+          type: "string"
+  Songbook:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      title:
+        type: "string"
+  Variant:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      title:
+        type: "string"
+        required: false
+      song:
+        type: "string"
+      chords:
+        type: "string"
+  anonymousRepresentation:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+  anonymousRepresentation2:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+  anonymousRepresentation3:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+        required: false
+      chords:
+        type: "string"
+  anonymousRepresentation4:
+    type: "object"
+    properties:
+      variant:
+        type: "string"
+  anonymousRepresentation5:
+    type: "object"
+    properties:
+      firstname:
+        type: "string"
+      surname:
+        type: "string"
+  anonymousRepresentation6:
+    type: "object"
+    properties:
+      firstname:
+        type: "string"
+      surname:
+        type: "string"
+  anonymousRepresentation7:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+  anonymousRepresentation8:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+  anonymousRepresentation9:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+  anonymousRepresentation10:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+/songs:
+  get:
+    description: "Slouží k získávání seznamu písní."
+    queryParameters:
+      query:
+        type: "string"
+        description: "Text použitý k vyhledávání mezi písněmi."
+        required: false
+      page:
+        type: "integer"
+        format: "int64"
+        description: "Stránka výpisu."
+        default: 0
+        required: false
+      per_page:
+        type: "integer"
+        format: "int64"
+        description: "Upravuje počet písní na stránce."
+        default: 30
+        required: false
+    responses:
+      200:
+        description: "Odpověď použitá v případě nalezení 0+ písní."
+        headers:
+          Link:
+            type: "string"
+            example: "</songs/?page=0&per_page=30>; rel=\"first\""
+        body:
+          application/json:
+            type: "Song"
+      400:
+        description: "Odpověď použitá v případě, že některý z parametrů obsahuje neplatná\
+          \ data."
+        body:
+          application/json:
+            type: "ClientError"
+  post:
+    description: "Slouží k vytváření nových písní."
+    body:
+      application/json:
+        type: "anonymousRepresentation"
+    responses:
+      201:
+        description: "Odpověď použitá v případě úspěšného vytvoření písně."
+        headers:
+          Location:
+            type: "string"
+            example: "/songs/1/"
+        body:
+          application/json:
+            type: "Redirect"
+      422:
+        description: "Odpověď použitá v případě, že při vytváření došlo k chybě."
+        body:
+          application/json:
+            type: "ValidationError"
+/songs/{song_id}:
+  uriParameters:
+    song_id:
+      type: "string"
+  get:
+    description: "Slouží k získání detailu písně."
+    responses:
+      200:
+        description: "Odpověď vrácená v případě nalezení písně."
+        body:
+          application/json:
+            type: "Song"
+      404:
+        description: "Odpověď použitá v případě, že píseň nebyla nalezena."
+        body:
+          application/json:
+            type: "ClientError"
+  put:
+    description: "Slouží k úpravě detailů písně."
+    body:
+      application/json:
+        type: "anonymousRepresentation2"
+    responses:
+      200:
+        description: "Odpověď vrácená v případě úspěšného uložení písně"
+        body:
+          application/json:
+            type: "Song"
+      404:
+        description: "Odpověď použitá v případě, že píseň nebyla nalezena."
+        body:
+          application/json:
+            type: "ClientError"
+      422:
+        description: "Odpověď použitá v případě, že při vytváření došlo k chybě."
+        body:
+          application/json:
+            type: "ValidationError"
+  delete:
+    description: "Slouží ke smazání jedné konkrétní písně\nvčetně všech variant akordů\
+      ."
+    responses:
+      204:
+        description: "Použije se v případě, že došlo ke smazání."
+      404:
+        body:
+          application/json:
+            type: "ClientError"
+/songs/{song_id}/variants:
+  uriParameters:
+    song_id:
+      type: "string"
+  get:
+    description: "Slouží k získání seznamu všech variant akordů jedné\nkonkrétní pí\
+      sně."
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Variant"
+      404:
+        description: "Odpověď použitá v případě, že píseň nebyla nalezena."
+        body:
+          application/json:
+            type: "ClientError"
+  post:
+    description: "Slouží k vytvoření nové varianty akordů písně."
+    body:
+      application/json:
+        type: "anonymousRepresentation3"
+    responses:
+      201:
+        headers:
+          Location:
+            type: "string"
+            example: "/songs/1/variants/1/"
+        body:
+          application/json:
+            type: "Redirect"
+      404:
+        description: "Odpověď použitá v případě, že píseň nebyla nalezena."
+        body:
+          application/json:
+            type: "ClientError"
+      422:
+        description: "Odpověď použitá v případě, že při vytváření došlo k chybě."
+        body:
+          application/json:
+            type: "ValidationError"
+/songs/{song_id}/variants/{variant_id}:
+  uriParameters:
+    song_id:
+      type: "string"
+    variant_id:
+      type: "string"
+  get:
+    description: "Slouží k získání detailů varianty písně."
+    headers:
+      Accept:
+        type: "string"
+        description: "Je-li hlavička Accept explicitně nastavena na `application/pdf`,\n\
+          vrátí endpoint vygenerovaný soubor. V opačném případě\nje vrácen detail\
+          \ písně standardně v `json`u."
+        default: "application/json"
+        enum:
+        - "application/json"
+        - "application/pdf"
+    responses:
+      200:
+        description: "Odpověď vrácená v případě nalezení varianty písně."
+        body:
+          application/json:
+            type: "Variant"
+          application/pdf:
+            type: "Variant"
+      404:
+        description: "Odpověď použitá v případě, že píseň nebo její varianta nebyla\
+          \ nalezena."
+        body:
+          application/json:
+            type: "ClientError"
+          application/pdf:
+            type: "ClientError"
+      500:
+        description: "Odpověď v případě chyby kompilace zpěvníku na pdf."
+        body:
+          application/json:
+            type: "ClientError"
+          application/pdf:
+            type: "ClientError"
+  put:
+    description: "Slouží k úpravě varianty písně."
+    body:
+      application/json:
+        type: "anonymousRepresentation4"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Variant"
+      404:
+        description: "Odpověď použitá v případě, že varianta nebo píseň nebyla nalezena."
+        body:
+          application/json:
+            type: "ClientError"
+      422:
+        description: "Odpověď použitá v případě, že při vytváření došlo k chybě."
+        body:
+          application/json:
+            type: "ValidationError"
+  delete:
+    description: "Slouží ke smazání varianty písně."
+    responses:
+      204:
+        description: "Použije se v případě, že došlo ke smazání."
+      404:
+        body:
+          application/json:
+            type: "ClientError"
+/authors:
+  get:
+    description: "Slouží k získání seznamu autorů."
+    queryParameters:
+      query:
+        type: "string"
+        description: "Text použitý k vyhledávání mezi autory."
+        required: false
+      page:
+        type: "integer"
+        format: "int64"
+        description: "Stránka výpisu."
+        default: 0
+        required: false
+      per_page:
+        type: "integer"
+        format: "int64"
+        description: "Upravuje počet autorů na stránce."
+        default: 30
+        required: false
+    responses:
+      200:
+        description: "Odpověď použitá v případě nalezení 0+ autorů."
+        headers:
+          Link:
+            type: "string"
+            example: "</authors/?page=0&per_page=30>; rel=\"first\""
+        body:
+          application/json:
+            type: "Author"
+      400:
+        description: "Odpověď použitá v případě, že některý z parametrů obsahuje neplatná\
+          \ data."
+        body:
+          application/json:
+            type: "ClientError"
+  post:
+    description: "Slouží k vytváření autorů."
+    body:
+      application/json:
+        type: "anonymousRepresentation5"
+    responses:
+      201:
+        description: "Odpověď použitá v případě úspěšného vytvoření písně."
+        headers:
+          Location:
+            type: "string"
+            example: "/authors/1/"
+        body:
+          application/json:
+            type: "Redirect"
+      422:
+        description: "Odpověď použitá v případě, že při vytváření došlo k chybě."
+        body:
+          application/json:
+            type: "ValidationError"
+/authors/{author_id}:
+  uriParameters:
+    author_id:
+      type: "string"
+  get:
+    description: "Slouží k získání detailu autora."
+    responses:
+      200:
+        description: "Odpověď vrácená v případě nalezení autora."
+        body:
+          application/json:
+            type: "Author"
+      404:
+        description: "Odpověď použitá v případě, že autor nebyl nalezen."
+        body:
+          application/json:
+            type: "ClientError"
+  put:
+    description: "Slouží k úpravě informací o autorovi."
+    body:
+      application/json:
+        type: "anonymousRepresentation6"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Author"
+      404:
+        description: "V případě nenalezeného autora."
+        body:
+          application/json:
+            type: "ClientError"
+      422:
+        description: "Odpověď použitá v případě, že při vytváření došlo k chybě."
+        body:
+          application/json:
+            type: "ValidationError"
+  delete:
+    description: "Slouží ke smazání autora."
+    responses:
+      204:
+        description: "Použije se v případě, že došlo ke smazání."
+      404:
+        body:
+          application/json:
+            type: "ClientError"
+/songs/{song_id}/authors:
+  uriParameters:
+    song_id:
+      type: "string"
+  get:
+    description: "Slouží k získání seznamu autorů písně."
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Author"
+      404:
+        body:
+          application/json:
+            type: "ClientError"
+/songs/{song_id}/authors/{author_id}:
+  uriParameters:
+    song_id:
+      type: "string"
+    author_id:
+      type: "string"
+  post:
+    description: "Slouží k přiřazení autora k písni."
+    responses:
+      200:
+        body:
+          application/json:
+            type: "anonymousRepresentation7"
+      404:
+        body:
+          application/json:
+            type: "ClientError"
+  delete:
+    description: "Slouží k odstranění autora ze seznamu autorů konkrétní písně."
+    responses:
+      204:
+        description: "Použije se v případě, že došlo ke smazání."
+      404:
+        body:
+          application/json:
+            type: "ClientError"
+/songbooks:
+  get:
+    description: "Slouží k získání seznamu zpěvníků. Součástí seznamu by měli\n bý\
+      t jak zpěvníky veřejné, tak ty, ke kterým má uživatel\n přidělený přístup."
+    queryParameters:
+      query:
+        type: "string"
+        description: "Text použitý k vyhledávání mezi zpěvníky."
+        required: false
+      page:
+        type: "integer"
+        format: "int64"
+        description: "Stránka výpisu."
+        default: 0
+        required: false
+      per_page:
+        type: "integer"
+        format: "int64"
+        description: "Upravuje počet zpěvníků na stránce."
+        default: 30
+        required: false
+    responses:
+      200:
+        description: "Odpověď použitá v případě nalezení 0+ zpěvníků."
+        headers:
+          Link:
+            type: "string"
+            example: "</songbooks/?page=0&per_page=30>; rel=\"first\""
+        body:
+          application/json:
+            type: "Songbook"
+      400:
+        description: "Odpověď použitá v případě, že některý z parametrů obsahuje neplatná\
+          \ data."
+        body:
+          application/json:
+            type: "ClientError"
+  post:
+    description: "Slouží k založení nového zpěvníku."
+    body:
+      application/json:
+        type: "anonymousRepresentation8"
+    responses:
+      201:
+        body:
+          application/json:
+            type: "Redirect"
+/songbooks/{songbook_id}:
+  uriParameters:
+    songbook_id:
+      type: "string"
+  get:
+    description: "Slouží k získání detailů zpěvníků."
+    headers:
+      Accept:
+        type: "string"
+        description: "|\n  Je-li hlavička Accept explicitně nastavena na `application/pdf`,\n\
+          \  vrátí endpoint vygenerovaný soubor. V opačném případě\n  je vrácen detail\
+          \ písně standardně v `json`u."
+        default: "application/json"
+        enum:
+        - "application/json"
+        - "application/pdf"
+    responses:
+      200:
+        description: "Odpověď vrácená v případě nalezení zpěvníku."
+        body:
+          application/json:
+            type: "Songbook"
+          application/pdf:
+            type: "Songbook"
+      404:
+        description: "Odpověď použitá v případě, že zpěvník nebyl nalezen."
+        body:
+          application/json:
+            type: "ClientError"
+          application/pdf:
+            type: "ClientError"
+      500:
+        description: "Odpověď v případě chyby kompilace zpěvníku na pdf."
+        body:
+          application/json:
+            type: "ClientError"
+          application/pdf:
+            type: "ClientError"
+  put:
+    description: "Slouží k úpravě zpěvníku."
+    body:
+      application/json:
+        type: "anonymousRepresentation9"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Songbook"
+      404:
+        description: "V případě nenalezeného zpěvníku"
+        body:
+          application/json:
+            type: "ClientError"
+      422:
+        description: "Odpověď použitá v případě, že při vytváření došlo k chybě."
+        body:
+          application/json:
+            type: "ValidationError"
+  delete:
+    description: "Slouží ke smazání zpěvníku."
+    responses:
+      204:
+        description: "Použije se v případě, že došlo ke smazání."
+      404:
+        body:
+          application/json:
+            type: "ClientError"
+/songbooks/{songbook_id}/song/{song_id}/variants/{variant_id}:
+  uriParameters:
+    songbook_id:
+      type: "string"
+    song_id:
+      type: "string"
+    variant_id:
+      type: "string"
+  post:
+    description: "Slouží k přidání písně do zpěvníku."
+    responses:
+      200:
+        body:
+          application/json:
+            type: "anonymousRepresentation10"
+      404:
+        body:
+          application/json:
+            type: "ClientError"
+  delete:
+    description: "Slouží k odstranění písně ze zpěvníku."
+    responses:
+      204:
+        description: "Použije se v případě, že došlo ke smazání."
+      404:
+        body:
+          application/json:
+            type: "ClientError"

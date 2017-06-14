@@ -1,16 +1,16 @@
 """Configuration file for Zpevnik application"""
 
-VERSION = '1.0'
-DEVELOPMENT = True
-SERVER_PORT = 5010
-SERVER_IP = '127.0.0.1'
-SERVER_NAME = '%s:%d' % (SERVER_IP, SERVER_PORT)
+from os import getenv
 
-MONGODB = {
-    'DB': 'zpevnik',
-    'URL': 'mongodb://localhost:27017'
-}
+VERSION = '0.1'
+APP_NAME = 'Skautský zpěvník'
+
+DEVELOPMENT = True
+SERVER_PORT = int(getenv('PORT', 5010))
+
+MONGODB_URI = getenv('MONGODB_URI', 'mongodb://localhost:27017/zpevnik')
 
 SKAUTIS = {
-    'SECRET': 'TODO',
+	'TEST': True,
+	'APPID': getenv('SKAUTIS_APPID', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx')
 }

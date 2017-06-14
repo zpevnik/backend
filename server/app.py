@@ -4,8 +4,10 @@ import logging
 from flask import Flask
 from flask import g
 from flask_compress import Compress
+from urlparse import urlsplit
 from pymongo import MongoClient
 from colorlog import ColoredFormatter
+from skautis import SkautisApi
 
 from server.model import Model
 
@@ -46,12 +48,18 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 Compress(app)
-
 setup_logging()
 
+parsed = urlsplit(app.config['MONGODB_URI'])
 
-mongoClient = MongoClient(app.config['MONGODB']['URL'])
-db = mongoClient[app.config['MONGODB']['DB']]
+skautis = SkautisApi(app.config['SKAUTIS']['APPID'],test=app.config['SKAUTIS']['TEST'])
+mongoClient = MongoClient(app.config['MONGODB_URI'])
+db = mongoClient[parsed.path[1:]]
+
+# Authenticate
+if '@' in app.config['MONGODB_URI']:
+    user, password = parsed.netloc.split('@')[0].split(':')
+    db.authenticate(user, password)
 
 model = Model(db=db)
 

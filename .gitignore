@@ -1,7 +1,4 @@
 *.pyc
 venv
-mongo_data
 songs/done
-
-
-
+.env
