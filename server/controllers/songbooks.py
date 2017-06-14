@@ -12,6 +12,7 @@ api = Blueprint('songbooks', __name__,)
 
 
 @api.route('/songbooks', methods=['GET', 'POST'])
+@login_required
 def songbooks():
     if request.method == 'GET':
         data = {
@@ -40,6 +41,7 @@ def songbooks():
 
 
 @api.route('/songbooks/<songbook_id>', methods=['GET', 'PUT', 'DELETE'])
+@login_required
 def songbook_single(songbook_id):
     if request.method == 'GET':
         songbook = validators.songbook_existence(songbook_id)
@@ -77,6 +79,7 @@ def songbook_single(songbook_id):
 
 # FIXME
 @api.route('/songbooks/<songbook_id>/song/<song_id>/variants/<variant_id>', methods=['POST', 'DELETE'])
+@login_required
 def songbook_song_variants(songbook_id, song_id, variant_id):
     if request.method == 'POST':
         songbook = validators.songbook_existence(songbook_id)

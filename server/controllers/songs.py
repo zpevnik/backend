@@ -15,6 +15,7 @@ api = Blueprint('songs', __name__,)
 
 
 @api.route('/songs', methods=['GET', 'POST'])
+@login_required
 def songs():
     if request.method == 'GET':
         data = {
@@ -43,6 +44,7 @@ def songs():
 
 
 @api.route('/songs/<song_id>', methods=['GET', 'PUT', 'DELETE'])
+@login_required
 def song_single(song_id):
     if request.method == 'GET':
         song = validators.song_existence(song_id)
@@ -68,6 +70,7 @@ def song_single(song_id):
 
 
 @api.route('/songs/<song_id>/variants', methods=['GET', 'POST'])
+@login_required
 def song_variants(song_id):
     if request.method == 'GET':
         song = validators.song_existence(song_id)
@@ -99,6 +102,7 @@ def song_variants(song_id):
 
 
 @api.route('/songs/<song_id>/variants/<variant_id>', methods=['GET', 'PUT', 'DELETE'])
+@login_required
 def song_variant_single(song_id, variant_id):
     if request.method == 'GET':
         song = validators.song_existence(song_id)
@@ -147,6 +151,7 @@ def song_variant_single(song_id, variant_id):
 
 
 @api.route('/songs/<song_id>/authors', methods=['GET'])
+@login_required
 def song_authors(song_id):
     song = validators.song_existence(song_id)
     author_ids = song.get_authors()
@@ -160,6 +165,7 @@ def song_authors(song_id):
 
 
 @api.route('/songs/<song_id>/authors/<author_id>', methods=['POST', 'DELETE'])
+@login_required
 def song_author_singe(song_id, author_id):
     if request.method == 'POST':
         song = validators.song_existence(song_id)

@@ -59,9 +59,9 @@ def application():
 
 @app.route("/cleanup")
 def cleanup():
-    ip = request.remote_addr
-    if ip != app.config['SERVER_IP']:
-        abort(404)
+    #ip = request.remote_addr
+    #if ip != app.config['SERVER_IP']:
+    #    abort(404)
 
     logger.info('Cleaning up the temp folder from %s ...', ip)
 
