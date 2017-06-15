@@ -54,9 +54,7 @@ def login():
     login_user(user)
 
     arg_next = request.args.get('next')
-    if not is_safe_url(arg_next):
-        return flask.abort(400)
-
+    
     return redirect(arg_next or url_for('application'))
 
 @app.route('/logout', methods=['POST'])

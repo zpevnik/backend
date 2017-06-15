@@ -54,7 +54,7 @@ def handle_IOError(error):
 @login_required
 def application():
     user = current_user
-    return render_template('test.html', logout_link=skautis.get_logout_url(),
+    return render_template('test.html', logout_link=skautis.get_logout_url(user.get_token()),
                                         username=user.get_name())
 
 @app.route("/cleanup")

@@ -4,8 +4,8 @@ from os import getenv
 
 VERSION = '0.1'
 APP_NAME = 'Skautský zpěvník'
+SECRET_KEY = 'q@yqlen+yr03d$z8mcbyx005a&'
 
-DEVELOPMENT = True
 SERVER_PORT = int(getenv('PORT', 5010))
 
 MONGODB_URI = getenv('MONGODB_URI', 'mongodb://localhost:27017/zpevnik')
