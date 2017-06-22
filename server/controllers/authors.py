@@ -69,12 +69,21 @@ def author_single(author_id):
         if 'surname' in data:
             author.set_surname(data['surname'])
 
+        data['author_id'] = author_id
+
         g.model.authors.save(author)
+        g.model.logs.create_log({'event': EVENTS.AUTHOR_EDIT,
+                                 'user': current_user.get_id(),
+                                 'data': data})
+
         return jsonify(author.get_serialized_data()), 200
 
     else:
         author = validators.author_existence(author_id)
         g.model.authors.delete(author)
+        g.model.logs.create_log({'event': EVENTS.AUTHOR_DELETE,
+                                 'user': current_user.get_id(),
+                                 'data': author_id})
 
         return jsonify(), 204
 

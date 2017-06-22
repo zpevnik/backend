@@ -40,6 +40,10 @@ def songs():
         validators.songs_request(data)
         song = g.model.songs.create_song(data)
 
+        g.model.logs.create_log({'event': EVENTS.SONG_NEW,
+                                 'user': current_user.get_id(),
+                                 'data': data})
+
         return jsonify(link='songs/{}'.format(song.get_id())), 201, \
               {'location': '/songs/{}'.format(song.get_id())}
 
@@ -61,12 +65,22 @@ def song_single(song_id):
         if 'title' in data:
             song.set_title(data['title'])
 
+        data['song_id'] = song_id
+
         g.model.songs.save(song)
+        g.model.logs.create_log({'event': EVENTS.SONG_EDIT,
+                                 'user': current_user.get_id(),
+                                 'data': data})
+
         return jsonify(song.get_serialized_data()), 200
 
     else:
         song = validators.song_existence(song_id)
         g.model.songs.delete(song)
+        g.model.logs.create_log({'event': EVENTS.SONG_DELETE,
+                                 'user': current_user.get_id(),
+                                 'data': song_id})
+
         return jsonify(), 204
 
 
@@ -97,6 +111,9 @@ def song_variants(song_id):
 
         variant = song.create_variant(data)
         g.model.songs.save(song)
+        g.model.logs.create_log({'event': EVENTS.VARIANT_NEW,
+                                 'user': current_user.get_id(),
+                                 'data': data})
 
         return jsonify(link='songs/{}/variants/{}'.format(song.get_id(), variant.get_id())), 201, \
               {'location': '/songs/{}/variants/{}'.format(song.get_id(), variant.get_id())}
@@ -139,7 +156,13 @@ def song_variant_single(song_id, variant_id):
         if 'chords' in data:
             variant.set_text(data['text'])
 
+        data['song_id'] = song_id
+        data['variant_id'] = variant_id
+
         g.model.songs.save(song)
+        g.model.logs.create_log({'event': EVENTS.VARIANT_EDIT,
+                                 'user': current_user.get_id(),
+                                 'data': data})
 
         return jsonify(variant.get_serialized_data()), 200
 
@@ -148,6 +171,10 @@ def song_variant_single(song_id, variant_id):
         song.delete_variant(variant_id)
 
         g.model.songs.save(song)
+        g.model.logs.create_log({'event': EVENTS.VARIANT_DELETE,
+                                 'user': current_user.get_id(),
+                                 'data': {'song_id': song_id, 'author_id': author_id}})
+
         return jsonify(), 204
 
 
@@ -175,6 +202,10 @@ def song_author_singe(song_id, author_id):
         song.add_author(author_id)
 
         g.model.songs.save(song)
+        g.model.logs.create_log({'event': EVENTS.VARIANT_EDIT,
+                                 'user': current_user.get_id(),
+                                 'data': {'song_id': song_id, 'author_id': author_id}})
+
         return jsonify({'message': 'Přiřazení autora proběhlo úspěšně.'}), 200
 
     else:
@@ -182,6 +213,10 @@ def song_author_singe(song_id, author_id):
 
         song.remove_author(author_id)
         g.model.songs.save(song)
+        g.model.logs.create_log({'event': EVENTS.VARIANT_DELETE,
+                                 'user': current_user.get_id(),
+                                 'data': {'song_id': song_id, 'author_id': author_id}})
+
         return jsonify(), 204
 
 
