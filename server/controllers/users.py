@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 from flask import g
 from flask import render_template
 from flask import redirect

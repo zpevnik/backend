@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from datetime import datetime
 from flask import g
 
@@ -131,7 +129,8 @@ class Song(object):
       _id (str): Song UUID.
       _created (str): Timestamp of the song creation.
       _title (str): Song title.
-      _authors (dict): Dict of Author UUIDs.
+      _authors (dict): Dict of lists of Author UUIDs. 
+        Dict contains lyrics and music authors.
       _variants (dict): Dics of Variants.
     """
 

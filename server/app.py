@@ -6,7 +6,7 @@ from flask import g
 from flask_compress import Compress
 from flask_cors import CORS
 
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 from pymongo import MongoClient
 from colorlog import ColoredFormatter
 from skautis import SkautisApi

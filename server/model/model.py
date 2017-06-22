@@ -13,7 +13,7 @@ class Model(object):
     """
 
     def __init__(self, db):
-    	from server.model.users import Users
+        from server.model.users import Users
         from server.model.songs import Songs
         from server.model.authors import Authors
         from server.model.songbooks import Songbooks

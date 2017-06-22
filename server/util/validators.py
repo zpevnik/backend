@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from flask import g
 from server.util.exceptions import ClientException
 from server.util.exceptions import ValidationException

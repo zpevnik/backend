@@ -1,6 +1,5 @@
 import uuid
 
-
 def generate_random_filename():
     temp = uuid.uuid4().urn
     return temp[9:]

@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 from server.util.export import export_to_pdf, generate_tex_file
 
 from server.util.docid import generate_random_filename

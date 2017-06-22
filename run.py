@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import logging
 
 from server.app import app

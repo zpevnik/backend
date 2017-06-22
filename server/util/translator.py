@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 def translate_to_tex(song):
 
     state_chorus = False
