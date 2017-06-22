@@ -17,7 +17,7 @@ from server.app import skautis
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-login_manager.login_view = "users.login"
+login_manager.login_view = "index"
 login_manager.login_message = u"Přihlaste se pro přístup na tuto stránku"
 login_manager.login_message_category = "info"
 
