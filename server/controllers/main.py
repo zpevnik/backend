@@ -2,6 +2,7 @@ import os
 import time
 import logging
 
+from flask import g
 from flask import abort
 from flask import request
 from flask import jsonify
@@ -60,8 +61,8 @@ def application():
 @app.route("/logs")
 def log_test():
     logs = g.model.logs.find()
-    print(logs)
-
+    ready = [x.get_serialized_data() for x in logs]
+    return jsonify(ready), 200
 
 @app.route("/cleanup")
 def cleanup():

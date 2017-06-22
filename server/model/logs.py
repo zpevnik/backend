@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from server.util import generate_random_uuid
+from server.util import uuid_from_str
 from server.util import uuid_to_str
 
 
@@ -57,6 +58,7 @@ class Logs(object):
           list: List of Log instances satisfying the query.
         """
         loc = locals()
+        loc.pop('self', None)
         criteria = {k:loc[k] for k in loc if loc[k] != None}
         doc = self._collection.find(criteria)
 
@@ -88,10 +90,10 @@ class Log(object):
     def serialize(self):
         return {
             '_id': uuid_from_str(self._id),
-            'created': self._created,
             'user': self._user,
             'data': self._data,
-            'event': self._event
+            'event': self._event,
+            'created': self._created
         }
 
     def get_serialized_data(self):
