@@ -4,6 +4,7 @@ Flask-Compress==1.4.0
 Flask-Cors==3.0.2
 Flask-Login==0.4.0
 Flask-Mail==0.9.1
+Flask-SSLify==0.1.5
 Flask-WTF==0.14.2
 gevent==1.2.1
 gevent-socketio==0.3.6

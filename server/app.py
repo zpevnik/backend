@@ -1,3 +1,4 @@
+import os
 import time
 import logging
 
@@ -5,6 +6,7 @@ from flask import Flask
 from flask import g
 from flask_compress import Compress
 from flask_cors import CORS
+from flask_sslify import SSLify
 
 from urllib.parse import urlsplit
 from pymongo import MongoClient
@@ -51,6 +53,9 @@ app.config.from_pyfile('config.py')
 
 Compress(app)
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+
+if 'DYNO' in os.environ: # only trigger SSLify if the app is running on Heroku
+    SSLify(app)
 
 setup_logging()
 
