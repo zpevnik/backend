@@ -4,16 +4,18 @@ from flask import g
 from flask import jsonify
 from flask import request
 from flask import Blueprint
+from flask_cors import cross_origin
 from flask_login import login_required
 
 from server.app import app
 from server.util import validators
 
+
 api = Blueprint('authors', __name__,)
 
 
 @api.route('/authors', methods=['GET', 'POST'])
-@login_required
+@cross_origin()
 def authors():
     if request.method == 'GET':
         data = {
@@ -44,7 +46,7 @@ def authors():
 
 
 @api.route('/authors/<author_id>', methods=['GET', 'PUT', 'DELETE'])
-@login_required
+@cross_origin()
 def author_single(author_id):
     if request.method == 'GET':
         author = validators.author_existence(author_id)

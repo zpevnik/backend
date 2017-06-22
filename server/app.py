@@ -4,6 +4,8 @@ import logging
 from flask import Flask
 from flask import g
 from flask_compress import Compress
+from flask_cors import CORS
+
 from urlparse import urlsplit
 from pymongo import MongoClient
 from colorlog import ColoredFormatter
@@ -48,6 +50,8 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 Compress(app)
+CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+
 setup_logging()
 
 parsed = urlsplit(app.config['MONGODB_URI'])
