@@ -1,4 +1,4 @@
-*.pyc
-venv
 songs/done
+venv
+*.pyc
 .env

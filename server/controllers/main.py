@@ -6,6 +6,7 @@ from flask import g
 from flask import abort
 from flask import request
 from flask import jsonify
+from flask import make_response
 from flask import render_template
 from flask_login import login_required
 from flask_login import current_user
@@ -53,7 +54,7 @@ def handle_IOError(error):
 
 @app.route("/test")
 @login_required
-def application():
+def test_page():
     user = current_user
     return render_template('test.html', logout_link=skautis.get_logout_url(user.get_token()),
                                         username=user.get_name())
@@ -63,6 +64,18 @@ def log_test():
     logs = g.model.logs.find()
     ready = [x.get_serialized_data() for x in logs]
     return jsonify(ready), 200
+
+@app.route("/application")
+@login_required
+def application():
+    data = current_user.get_serialized_data()
+    data['logout_link'] = skautis.get_logout_url(current_user.get_token())
+
+    response = make_response(render_template('app.html', data=data))
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 @app.route("/cleanup")
 def cleanup():
