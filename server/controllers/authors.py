@@ -3,6 +3,7 @@ from flask import jsonify
 from flask import request
 from flask import Blueprint
 from flask_cors import cross_origin
+from flask_login import current_user
 from flask_login import login_required
 
 from server.app import app

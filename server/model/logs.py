@@ -36,8 +36,8 @@ class Logs(object):
         log = Log({
             '_id': generate_random_uuid(),
             'created': datetime.utcnow(),
-            'event': data['event'],
             'data': data['data'],
+            'event': data['event'],
             'user': data['user']
         })
         self._collection.insert(log.serialize())
@@ -80,10 +80,19 @@ class Log(object):
 
     def __init__(self, log):
         self._id = uuid_to_str(log['_id'])
-        self._user = uuid_to_str(log['user'])
         self._created = log['created']
         self._event = log['event']
+        self._user = log['user']
         self._data = log['data']
+
+    def serialize(self):
+        return {
+            '_id': uuid_from_str(self._id),
+            'created': self._created,
+            'user': self._user,
+            'data': self._data,
+            'event': self._event
+        }
 
     def get_serialized_data(self):
         return {
