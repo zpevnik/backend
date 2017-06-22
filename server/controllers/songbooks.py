@@ -7,6 +7,9 @@ from flask_login import login_required
 from server.app import app
 from server.util import validators
 
+from server.constants.logs import EVENTS
+
+
 api = Blueprint('songbooks', __name__,)
 
 

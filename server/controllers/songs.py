@@ -11,6 +11,8 @@ from server.util import generate_tex_file
 from server.util import export_to_pdf
 from server.util import validators
 
+from server.constants.logs import EVENTS
+
 
 api = Blueprint('songs', __name__,)
 
