@@ -8,6 +8,8 @@ from flask_login import login_required
 from server.app import app
 from server.util import validators
 
+from server.constants.logs import EVENTS
+
 
 api = Blueprint('authors', __name__,)
 
@@ -38,6 +40,10 @@ def authors():
         validators.author_nonexistence(data['firstname'], data['surname'])
 
         author = g.model.authors.create_author(data)
+
+        g.model.logs.create_log({'event': EVENTS.AUTHOR_NEW,
+                                 'user': current_user.get_id(),
+                                 'data': data})
 
         return jsonify(link='authors/{}'.format(author.get_id())), 201, \
               {'location': '/authors/{}'.format(author.get_id())}

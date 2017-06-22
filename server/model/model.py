@@ -6,6 +6,7 @@ class Model(object):
       db: Reference to database.
 
     Attributes:
+      logs (server.model.Logs): Submodel for managing logs.
       users (server.model.Users): Submodel for managing users.
       songs (server.model.Songs): Submodel for managing songs.
       authors (server.model.Authors): Submodel for managing authors.
@@ -13,11 +14,13 @@ class Model(object):
     """
 
     def __init__(self, db):
+        from server.model.logs import Logs
         from server.model.users import Users
         from server.model.songs import Songs
         from server.model.authors import Authors
         from server.model.songbooks import Songbooks
 
+        self.logs = Logs(model=self, db=db)
         self.users = Users(model=self, db=db)
         self.songs = Songs(model=self, db=db)
         self.authors = Authors(model=self, db=db)

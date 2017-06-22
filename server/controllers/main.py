@@ -57,6 +57,12 @@ def application():
     return render_template('test.html', logout_link=skautis.get_logout_url(user.get_token()),
                                         username=user.get_name())
 
+@app.route("/logs")
+def log_test():
+    logs = g.model.logs.find()
+    print(logs)
+
+
 @app.route("/cleanup")
 def cleanup():
     #ip = request.remote_addr
