@@ -45,7 +45,7 @@ def login():
 
     user = g.model.users.find(user_id)
     if (user is None):
-        user = g.model.users.create_user(user_id, user_info['UserName'], user_info['IsActive'], skautis_idunit) #FIXME
+        user = g.model.users.create_user(user_id, user_info['UserName'], user_info['IsActive'], skautis_idunit)
 
     user.set_token(skautis_token)
     g.model.users.save(user)
@@ -54,6 +54,16 @@ def login():
     arg_next = request.args.get('next')
     
     return redirect(arg_next or url_for('application'))
+
+
+@app.route('/user', methods=['GET'])
+@login_required
+def get_user_info():
+    user = current_user.get_serialized_data()
+    user['logout_link'] = skautis.get_logout_url(user.get_token())
+
+    return jsonify(user), 200
+
 
 @app.route('/logout', methods=['POST'])
 @login_required

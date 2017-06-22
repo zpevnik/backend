@@ -7,6 +7,10 @@ class Events(object):
     SONG_EDIT = 'song_edit'
     SONG_DELETE = 'song_delete'
 
+    VARIANT_NEW = 'variant_new'
+    VARIANT_EDIT = 'variant_edit'
+    VARIANT_DELETE = 'variant_delete'
+
     SONGBOOK_NEW = 'songbook_new'
     SONGBOOK_EDIT = 'songbook_edit'
     SONGBOOK_DELETE = 'songbook_delete'
