@@ -1,9 +1,10 @@
 from flask import g
 from flask import render_template
+from flask import jsonify
 from flask import redirect
 from flask import url_for
 from flask import request
-from flask import abort
+from flask import Blueprint
 
 from flask_login import LoginManager
 from flask_login import login_user
@@ -56,15 +57,6 @@ def login():
     return redirect(arg_next or url_for('application'))
 
 
-@app.route('/user', methods=['GET'])
-@login_required
-def get_user_info():
-    user = current_user.get_serialized_data()
-    user['logout_link'] = skautis.get_logout_url(user.get_token())
-
-    return jsonify(user), 200
-
-
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
@@ -74,3 +66,18 @@ def logout():
 
     logout_user()
     return redirect(url_for('index'))
+
+
+api = Blueprint('users', __name__,)
+
+
+@api.route('/user', methods=['GET'])
+@login_required
+def get_user_info():
+    user = current_user.get_serialized_data()
+    user['logout_link'] = skautis.get_logout_url(current_user.get_token())
+
+    return jsonify(user), 200
+
+
+app.register_blueprint(api, url_prefix='/api/v1')
