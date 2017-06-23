@@ -11,6 +11,6 @@ SERVER_PORT = int(getenv('PORT', 5010))
 MONGODB_URI = getenv('MONGODB_URI', 'mongodb://localhost:27017/zpevnik')
 
 SKAUTIS = {
-	'TEST': True,
+	'TEST': False,
 	'APPID': getenv('SKAUTIS_APPID', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx')
 }
