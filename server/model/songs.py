@@ -32,7 +32,8 @@ class Songs(object):
         """Create new song and insert it into database.
 
         Args:
-          data (dict): Song data containing 'title' dictionary key.
+          data (dict): Song data dictionary containing 'title', 'text', 'text',
+            'authors', 'variants' and 'interpreters' dictionary key.
 
         Returns:
           Song: Instance of the new song.
@@ -41,8 +42,9 @@ class Songs(object):
             '_id': generate_random_uuid(),
             'created': datetime.utcnow(),
             'title': data['title'],
-            'variants': [],
-            'authors': []
+            'text': data['text'] if 'text' in data else [],
+            'authors': data['authors'] if 'authors' in data else {'lyrics': [], 'music': []},
+            'interpreters': data['interpreters'] if 'interpreters' in data else []
         })
         self._collection.insert(song.serialize())
 
@@ -70,7 +72,7 @@ class Songs(object):
         )
 
     def find_special(self, query, page, per_page):
-        """Find songs from the database based on query and page the result.
+        """Find songs in the database based on query and page the result.
 
         Args:
           query (str): Query string.
@@ -129,20 +131,18 @@ class Song(object):
       _id (str): Song UUID.
       _created (str): Timestamp of the song creation.
       _title (str): Song title.
-      _authors (dict): Dict of lists of Author UUIDs. 
-        Dict contains lyrics and music authors.
-      _variants (dict): Dics of Variants.
+      _text (str): Song data itself (lyrics and chords).
+      _authors (list): Dict of lists of Author UUIDs.
+      _interpreters (list): List of Interpreter UUIDs.
     """
 
     def __init__(self, song):
         self._id = uuid_to_str(song['_id'])
         self._created = song['created']
-        self._authors = song['authors']
         self._title = song['title']
-
-        self._variants = []
-        for variant in song['variants']:
-            self._variants.append(Variant(variant))
+        self._text = song['text']
+        self._authors = song['authors']
+        self._interpreters = song['interpreters']
 
     def serialize(self, update=False):
         """Serialize song data for database operations.
@@ -151,14 +151,12 @@ class Song(object):
           update (bool, optional): Determines whether method returns only
             update attributes or data for new database entry.
         """
-        variants = []
-        for variant in self._variants:
-            variants.append(variant.serialize())
 
         song = {
-            'variants': variants,
+            'title': self._title,
+            'text': self._text,
             'authors': self._authors,
-            'title': self._title
+            'interpreters': self._interpreters
         }
 
         if not update:
@@ -168,29 +166,38 @@ class Song(object):
         return song
 
     def get_serialized_data(self):
-        variants = []
-        for variant in self._variants:
-            variants.append(variant.get_id())
-
         return {
             'id': self._id,
             'created': self._created.isoformat(),
-            'variants': variants,
+            'title': self._title,
+            'text': self._text,
             'authors': self._authors,
-            'title': self._title
+            'interpreters': self._interpreters
         }
 
     def get_id(self):
         return self._id
 
-    def get_variants(self):
-        return self._variants
+    def get_text(self):
+        return self._text
 
     def get_authors(self):
         return self._authors
 
+    def get_interpreters(self):
+        return self._interpreters
+
     def set_title(self, title):
         self._title = title
+
+    def set_text(self, text):
+        self._text = text
+
+    def set_authors(self, authors):
+        self._authors = authors
+
+    def set_interpreters(self, interpreters):
+        self._interpreters = interpreters
 
     def add_author(self, author_id):
         if author_id in self._authors:
@@ -204,30 +211,20 @@ class Song(object):
 
         self._authors.remove(author_id)
 
+    def add_interpreter(self, interpreter_id):
+        if interpreter_id in self._interpreters:
+            raise ClientException('Tento interpret je jiz k pisni prirazen', 404)
 
-    def create_variant(self, data):
-        variant = Variant({
-            '_id': generate_random_uuid(),
-            'created': datetime.utcnow(),
-            'title': data['title'],
-            'text': data['text']
-        })
-        self._variants.append(variant)
+        self._interpreters.append(interpreter_id)
 
-        return variant
+    def remove_interpreter(self, interpreter_id):
+        if interpreter_id not in self._interpreters:
+            raise ClientException('Tento interpret neni u pisne prirazen', 404)
 
-    def find_variant(self, variant_id):
-        for variant in self._variants:
-            if variant.get_id() == variant_id:
-                return variant
+        self._interpreters.remove(interpreter_id)
 
-        raise ClientException('Varianta nebyla nalezena.', 404)
 
-    def delete_variant(self, variant_id):
-        variant = self.find_variant(variant_id)
-        self._variants.remove(variant)
-
-    def generate_tex(self, filename, variant_id):
+    def generate_tex(self, filename):
         """Generate tex output and append it to given filename.
 
         Since this method is appending the code and not overwriting given file,
@@ -235,13 +232,11 @@ class Song(object):
 
         Args:
           filename (str): Output file name.
-          variant_id (str): Variant UUID.
         """
         with open('songs/sample/sample.sbd', 'r') as sample_file:
             filedata = sample_file.read()
 
-        variant = self.find_variant(variant_id)
-        text = translate_to_tex(variant.get_text())
+        text = translate_to_tex(self.get_text())
 
         authors = []
         for author_id in self._authors:
@@ -257,69 +252,6 @@ class Song(object):
 
 
     def __repr__(self):
-        return '<{!r} id={!r} title={!r} authors={!r} variants={!r}>' \
+        return '<{!r} id={!r} title={!r} authors={!r} interpreters={!r}' \
             .format(self.__class__.__name__, self._id, self._title,
-                    self._authors, self._variants)
-
-
-
-class Variant(object):
-    """Class for variant abstraction.
-
-    Args:
-      variant (dict): Variant dictionary.
-
-    Attributes:
-      _id (str): Variant UUID.
-      _created (str): Timestamp of the variant creation.
-      _title (str): Variant title.
-      _text (str): Variant song text itself.
-    """
-
-    def __init__(self, variant):
-        self._id = uuid_to_str(variant['_id'])
-        self._created = variant['created']
-        self._title = variant['title']
-        self._text = variant['text']
-
-    def serialize(self):
-        """Serialize variant data for database operations.
-
-        Args:
-          update (bool, optional): Determines whether method returns only
-            update attributes or data for new database entry.
-        """
-        variant = {
-            'title': self._title,
-            'text': self._text
-        }
-        variant['_id'] = uuid_from_str(self._id)
-        variant['created'] = self._created
-
-        return variant
-
-    def get_serialized_data(self):
-        return {
-            'id': self._id,
-            'created': self._created,
-            'title': self._title,
-            'text': self._text
-        }
-
-    def get_id(self):
-        return self._id
-
-    def get_title(self):
-        return self._title
-
-    def get_text(self):
-        return self._text
-
-    def set_title(self, title):
-        self._title = title
-
-    def set_text(self, text):
-        self._text = text
-
-    def __repr__(self):
-        return '<{!r} id={!r}>'.format(self.__class__.__name__, self._id)
+                    self._authors, self._interpreters)

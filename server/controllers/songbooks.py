@@ -101,4 +101,5 @@ def songbook_song_variants(songbook_id, song_id, variant_id):
         g.model.songbooks.save(songbook)
         return jsonify(), 204
 
-app.register_blueprint(api, url_prefix='/api/v1')
+# Songbooks are disabled!
+#app.register_blueprint(api, url_prefix='/api/v1')
