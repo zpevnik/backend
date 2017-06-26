@@ -9,7 +9,7 @@ def request_GET(request):
             raise ClientException('Page number is out of range.', 400)
 
     if 'per_page' in request and request['per_page'] is not None:
-        if request['per_page'] < 1 or request['per_page'] > 100:
+        if request['per_page'] < 1 or request['per_page'] > 10000:
             raise ClientException('Per page number is out of range.', 400)
     return True
 

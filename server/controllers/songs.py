@@ -25,7 +25,7 @@ def songs():
         data = {
             'query': request.args['query'] if 'query' in request.args and request.args['query'] is not None else "",
             'page': int(request.args['page']) if 'page' in request.args and request.args['page'] is not None else 0,
-            'per_page': int(request.args['per_page']) if 'per_page' in request.args and request.args['per_page'] is not None else 30
+            'per_page': int(request.args['per_page']) if 'per_page' in request.args and request.args['per_page'] is not None else 10000
         }
         validators.request_GET(data)
 
