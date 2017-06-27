@@ -60,10 +60,10 @@ def authors_request(request):
         err.append({'field': 'firstname',
                     'code': 'missing_field',
                     'message': 'Author first name is missing'})
-    if 'surname' not in request or not request['surname']:
-        err.append({'field': 'surname',
-                    'code': 'missing_field',
-                    'message': 'Author surname name is missing'})
+    #if 'surname' not in request or not request['surname']:
+    #    err.append({'field': 'surname',
+    #                'code': 'missing_field',
+    #                'message': 'Author surname name is missing'})
     if err:
         raise ValidationException('Cannot process variants POST request.', 422, errors=err)
     return True
