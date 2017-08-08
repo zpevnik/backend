@@ -31,9 +31,9 @@ class ValidationException(Exception):
             self._errors = []
 
         self._errors.append({'field': field,
-                            'code': code,
-                            'message': message
-                           })
+                             'code': code,
+                             'message': message
+                            })
 
     def get_json(self):
         json = {'message': self._message}

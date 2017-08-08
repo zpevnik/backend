@@ -80,4 +80,18 @@ def get_user_info():
     return jsonify(user), 200
 
 
+@api.route('/user/songbook/<songbook_id>', methods=['PUT'])
+@login_required
+def user_songbook(songbook_id):
+    songbook = validators.songbook_existence(songbook_id)
+    if songbook.get_owner() != current_user and 
+       songbook.get_owner_unit() != current_user.get_unit():
+        raise ClientException('Tento zpěvník není vlastněn ani tebou ani tvoji jednotkou.', 404)
+
+    current_user.set_active_songbook(songbook_id)
+    g.model.users.save(current_user)
+
+    return jsonify({'message': 'Aktivní zpěvník byl změněn.'}), 200
+
+
 app.register_blueprint(api, url_prefix='/api/v1')

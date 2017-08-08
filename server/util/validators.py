@@ -9,7 +9,7 @@ def request_GET(request):
             raise ClientException('Page number is out of range.', 400)
 
     if 'per_page' in request and request['per_page'] is not None:
-        if request['per_page'] < 1 or request['per_page'] > 10000:
+        if request['per_page'] < 1 or request['per_page'] > 200:
             raise ClientException('Per page number is out of range.', 400)
     return True
 
@@ -60,10 +60,6 @@ def authors_request(request):
         err.append({'field': 'firstname',
                     'code': 'missing_field',
                     'message': 'Author first name is missing'})
-    #if 'surname' not in request or not request['surname']:
-    #    err.append({'field': 'surname',
-    #                'code': 'missing_field',
-    #                'message': 'Author surname name is missing'})
     if err:
         raise ValidationException('Cannot process variants POST request.', 422, errors=err)
     return True
@@ -74,20 +70,6 @@ def songs_request(request):
                 'code': 'missing_field',
                 'message': 'Song title is missing'}]
         raise ValidationException('Cannot process songs POST request.', 422, errors=err)
-    return True
-
-def variants_request(request):
-    err = []
-    if 'title' not in request or not request['title']:
-        err.append({'field': 'title',
-                    'code': 'missing_field',
-                    'message': 'Song title is missing'})
-    if 'text' not in request or not request['text']:
-        err.append({'field': 'text',
-                    'code': 'missing_field',
-                    'message': 'Song text is missing'})
-    if err:
-        raise ValidationException('Cannot process variants POST request.', 422, errors=err)
     return True
 
 def songbooks_request(request):

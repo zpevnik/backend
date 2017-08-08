@@ -7,11 +7,12 @@ from flask_login import login_required
 from server.app import app
 from server.util import validators
 
-from server.constants.logs import EVENTS
+from server.constants import EVENTS
 
 
 api = Blueprint('songbooks', __name__,)
 
+#TODO add logging
 
 @api.route('/songbooks', methods=['GET', 'POST'])
 @login_required
@@ -53,7 +54,7 @@ def songbook_single(songbook_id):
 
             for song_x in songbook.get_songs():
                 song = validators.song_existence(song_x['song'])
-                song.generate_tex(filename, variant_id)
+                song.generate_tex(filename)
 
             generate_tex_file(filename)
             exported = export_to_pdf(filename)
@@ -79,27 +80,24 @@ def songbook_single(songbook_id):
         g.model.songbooks.delete(songbook)
         return jsonify(), 204
 
-# FIXME
-@api.route('/songbooks/<songbook_id>/song/<song_id>/variants/<variant_id>', methods=['POST', 'DELETE'])
+
+@api.route('/songbooks/<songbook_id>/song/<song_id>/', methods=['POST', 'DELETE'])
 @login_required
-def songbook_song_variants(songbook_id, song_id, variant_id):
+def songbook_song_variants(songbook_id, song_id):
     if request.method == 'POST':
         songbook = validators.songbook_existence(songbook_id)
-        song = validators.song_existence(song_id)
-        song.find_variant(variant_id)
+        validators.song_existence(song_id)
 
-        songbook.add_song(song_id, variant_id)
+        songbook.add_song(song_id)
         g.model.songbooks.save(songbook)
         return jsonify({'message': 'Píseň byla úspěšně přidána do zpěvníku.'}), 200
 
     else:
         songbook = validators.songbook_existence(songbook_id)
-        song = validators.song_existence(song_id)
-        song.find_variant(variant_id)
 
-        songbook.remove_song(song_id, variant_id)
+        songbook.remove_song(song_id)
         g.model.songbooks.save(songbook)
         return jsonify(), 204
 
-# Songbooks are disabled!
-#app.register_blueprint(api, url_prefix='/api/v1')
+
+app.register_blueprint(api, url_prefix='/api/v1')

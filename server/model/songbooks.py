@@ -3,6 +3,9 @@ from datetime import datetime
 from server.util import generate_random_uuid
 from server.util import uuid_from_str
 from server.util import uuid_to_str
+from server.util.exceptions import ClientException
+
+from server.constants import SONGBOOK_VISIBILITY
 
 
 class Songbooks(object):
@@ -29,7 +32,8 @@ class Songbooks(object):
         """Create new songbook and insert it into database.
 
         Args:
-          data (dict): Songbook data containing 'title' dictionary key.
+          data (dict): Songbook data containing 'title', 'owner',
+            'owner_unit' and 'visibility' dictionary key.
 
         Returns:
           Songbook: Instance of the new songbook.
@@ -38,7 +42,10 @@ class Songbooks(object):
             '_id': generate_random_uuid(),
             'created': datetime.utcnow(),
             'title': data['title'],
-            'songs': []
+            'owner': data['owner'],
+            'owner_unit': data['owner_unit'],
+            'visibility': data['visibility'],
+            'songs': [],
         })
         self._collection.insert(songbook.serialize())
 
@@ -127,6 +134,9 @@ class Songbook(object):
       _created (str): Timestamp of the songbook creation.
       _title (str): Songbook title.
       _songs (dict): Songs contained in this songbook.
+      _owner (str): user UUID
+      _owner_unit (str): Unit UUID
+      _visibility (str): Songbook visibility status
     """
 
     def __init__(self, songbook):
@@ -134,6 +144,9 @@ class Songbook(object):
         self._created = songbook['created']
         self._title = songbook['title']
         self._songs = songbook['songs']
+        self._owner = songbook['owner']
+        self._owner_unit = songbook['owner_unit']
+        self._visibility = songbook['visibility']
 
     def serialize(self, update=False):
         """Serialize songbook data for database operations.
@@ -144,7 +157,10 @@ class Songbook(object):
         """
         songbook = {
             'title': self._title,
-            'songs': self._songs
+            'songs': self._songs,
+            'owner': self._owner,
+            'owner_unit': self._owner_unit,
+            'visibility': self._visibility
         }
 
         if not update:
@@ -158,7 +174,10 @@ class Songbook(object):
             'id': self._id,
             'created': self._created.isoformat(),
             'title': self._title,
-            'songs': self._songs
+            'songs': self._songs,
+            'owner': self._owner,
+            'owner_unit': self._owner_unit,
+            'visibility': self._visibility
         }
 
     def get_id(self):
@@ -170,17 +189,27 @@ class Songbook(object):
     def set_title(self, title):
         self._title = title
 
-    def add_song(self, song_id, variant_id):
-        self._songs.append({
-            'song': song_id,
-            'variant': variant_id
-        })
+    def get_owner(self):
+        return self._owner
 
-    def remove_song(self, song_id, variant_id):
-        self._songs.remove({
-            'song': song_id,
-            'variant': variant_id
-        })
+    def get_owner_unit(self):
+        return self._owner_unit
+
+    def get_visibility(self):
+        return self._visibility
+
+    def set_visibility(self, visibility):
+        if visibility not in SONGBOOK_VISIBILITY:
+            raise ClientException('Nemohu změnit viditelnost zpěvníku', 404)
+        self._visibility = visibility
+
+    # FIXME
+    def add_song(self, song_id):
+        self._songs.append({'song': song_id})
+
+    # FIXME
+    def remove_song(self, song_id):
+        self._songs.remove({'song': song_id})
 
     def __repr__(self):
         return '<{!r} id={!r} title={!r}>' \

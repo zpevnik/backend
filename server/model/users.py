@@ -36,7 +36,8 @@ class Users(object):
             'active': active,
             'unit': unit,
             'created': datetime.utcnow(),
-            'lastLogin': datetime.utcnow(),
+            'last_login': datetime.utcnow(),
+            'active_songbook': None,
             'token': None
         })
         self._collection.insert(user.serialize())
@@ -66,7 +67,7 @@ class User(object):
     Attributes:
       _id (str) UUID
       _created (int) UTC timestamp
-      _lastLogin (int) UTC timestamp
+      _last_login (int) UTC timestamp
       _name (str) Name in the skautis
       _active (bool) True, if is user's account active
       _token (str): Unique token for current skautis communication
@@ -76,7 +77,8 @@ class User(object):
     def __init__(self, user):
         self._id = user['_id']
         self._created = user['created']
-        self._lastLogin = user['lastLogin']
+        self._last_login = user['last_login']
+        self._active_songbook = user['active_songbook']
         self._name = user['name']
         self._active = user['active']
         self._token = user['token']
@@ -86,7 +88,8 @@ class User(object):
         user = {
             'name': self._name,
             'active': self._active,
-            'lastLogin': self._lastLogin,
+            'last_login': self._last_login,
+            'active_songbook': self._active_songbook,
             'token': self._token,
             'unit': self._unit
         }
@@ -102,7 +105,8 @@ class User(object):
             'id': self._id,
             'name': self._name,
             'created': self._created.isoformat(),
-            'lastLogin': self._lastLogin.isoformat(),
+            'last_login': self._last_login.isoformat(),
+            'active_songbook': self._active_songbook,
             'active': self._active,
             'unit': self._unit
         }
@@ -125,14 +129,20 @@ class User(object):
     def get_created(self):
         return self._created
 
-    def get_lastLogin(self):
-        return self._lastLogin
+    def get_last_login(self):
+        return self._last_login
 
     def get_token(self):
         return self._token
 
     def get_unit(self):
         return self._unit
+
+    def get_active_songbook(self):
+        return self._active_songbook
+
+    def set_active_songbook(self, songbook):
+        self._active_songbook = songbook
 
     def set_token(self, token):
         self._token = token

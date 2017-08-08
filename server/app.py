@@ -61,7 +61,7 @@ setup_logging()
 
 parsed = urlsplit(app.config['MONGODB_URI'])
 
-skautis = SkautisApi(app.config['SKAUTIS']['APPID'],test=app.config['SKAUTIS']['TEST'])
+skautis = SkautisApi(app.config['SKAUTIS']['APPID'], test=app.config['SKAUTIS']['TEST'])
 mongoClient = MongoClient(app.config['MONGODB_URI'])
 db = mongoClient[parsed.path[1:]]
 

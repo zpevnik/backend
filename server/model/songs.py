@@ -7,6 +7,8 @@ from server.util import uuid_to_str
 from server.util import translate_to_tex
 from server.util.exceptions import ClientException
 
+from server.constants import SONG_VISIBILITY
+
 
 class Songs(object):
     """Collection for managing CRUD operation in database for songs.
@@ -32,8 +34,8 @@ class Songs(object):
         """Create new song and insert it into database.
 
         Args:
-          data (dict): Song data dictionary containing 'title', 'text', 'text',
-            'authors', 'variants' and 'interpreters' dictionary key.
+          data (dict): Song data dictionary containing 'owner',  'title', 'text', 'text',
+            'authors', 'variants', 'interpreters' 'visibility' and 'owner_unit', dictionary key.
 
         Returns:
           Song: Instance of the new song.
@@ -41,10 +43,13 @@ class Songs(object):
         song = Song({
             '_id': generate_random_uuid(),
             'created': datetime.utcnow(),
+            'owner': data['owner'],
             'title': data['title'],
-            'text': data['text'] if 'text' in data else [],
+            'text': data['text'] if 'text' in data else '',
             'authors': data['authors'] if 'authors' in data else {'lyrics': [], 'music': []},
-            'interpreters': data['interpreters'] if 'interpreters' in data else []
+            'interpreters': data['interpreters'] if 'interpreters' in data else [],
+            'owner_unit': data['owner_unit'],
+            'visibility': data['visibility']
         })
         self._collection.insert(song.serialize())
 
@@ -131,18 +136,24 @@ class Song(object):
       _id (str): Song UUID.
       _created (str): Timestamp of the song creation.
       _title (str): Song title.
+      _owner (str): user UUID
       _text (str): Song data itself (lyrics and chords).
       _authors (list): Dict of lists of Author UUIDs.
       _interpreters (list): List of Interpreter UUIDs.
+      _owner_unit (str): Unit UUID
+      _visibility (str): Song visibility status
     """
 
     def __init__(self, song):
         self._id = uuid_to_str(song['_id'])
         self._created = song['created']
         self._title = song['title']
+        self._owner = song['owner']
         self._text = song['text']
         self._authors = song['authors']
         self._interpreters = song['interpreters']
+        self._owner_unit = song['owner_unit']
+        self._visibility = song['visibility']
 
     def serialize(self, update=False):
         """Serialize song data for database operations.
@@ -154,9 +165,12 @@ class Song(object):
 
         song = {
             'title': self._title,
+            'owner': self._owner,
             'text': self._text,
             'authors': self._authors,
-            'interpreters': self._interpreters
+            'interpreters': self._interpreters,
+            'owner_unit': self._owner_unit,
+            'visibility': self._visibility
         }
 
         if not update:
@@ -170,9 +184,12 @@ class Song(object):
             'id': self._id,
             'created': self._created.isoformat(),
             'title': self._title,
+            'owner': self._owner,
             'text': self._text,
             'authors': self._authors,
-            'interpreters': self._interpreters
+            'interpreters': self._interpreters,
+            'owner_unit': self._owner_unit,
+            'visibility': self._visibility
         }
 
     def get_id(self):
@@ -187,6 +204,15 @@ class Song(object):
     def get_interpreters(self):
         return self._interpreters
 
+    def get_owner(self):
+        return self._owner
+
+    def get_owner_unit(self):
+        return self._owner_unit
+
+    def get_visibility(self):
+        return self._visibility
+
     def set_title(self, title):
         self._title = title
 
@@ -198,6 +224,12 @@ class Song(object):
 
     def set_interpreters(self, interpreters):
         self._interpreters = interpreters
+
+    def set_visibility(self, visibility):
+        #if visibility not in SONG_VISIBILITY:
+        #    raise ClientException('Nemohu změnit viditelnost písně', 404)
+        self._visibility = visibility
+
 
     def add_author(self, author_id):
         if author_id in self._authors:
@@ -238,13 +270,13 @@ class Song(object):
 
         text = translate_to_tex(self.get_text())
 
-        authors = []
-        for author_id in self._authors:
-            author = g.model.authors.find_one(author_id=author_id)
-            authors.append(author.get_fullname())
+        #authors = []
+        #for author_id in self._authors:
+        #    author = g.model.authors.find_one(author_id=author_id)
+        #    authors.append(author.get_fullname())
 
         filedata = filedata.replace('$title$', self._title)
-        filedata = filedata.replace('$authors$', ", ".join(authors))
+        #filedata = filedata.replace('$authors$', ", ".join(authors))
         filedata = filedata.replace('$song$', text)
 
         with open('songs/temp/' + filename + '.sbd', 'a') as song_file:

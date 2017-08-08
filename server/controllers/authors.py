@@ -9,7 +9,7 @@ from flask_login import login_required
 from server.app import app
 from server.util import validators
 
-from server.constants.logs import EVENTS
+from server.constants import EVENTS
 
 
 api = Blueprint('authors', __name__,)
