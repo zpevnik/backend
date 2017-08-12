@@ -1,13 +1,11 @@
 from datetime import datetime
-from flask import g
 
 from server.util import generate_random_uuid
 from server.util import uuid_from_str
 from server.util import uuid_to_str
-from server.util import translate_to_tex
 from server.util.exceptions import ClientException
 
-from server.constants import SONG_VISIBILITY
+from server.constants import permission_dict
 
 
 class Songs(object):
@@ -34,8 +32,9 @@ class Songs(object):
         """Create new song and insert it into database.
 
         Args:
-          data (dict): Song data dictionary containing 'owner',  'title', 'text', 'text',
-            'authors', 'variants', 'interpreters' 'visibility' and 'owner_unit', dictionary key.
+          data (dict): Song data dictionary containing 'owner', 'title', 'text',
+            'description', 'authors', 'variants', 'interpreters', 'owner_unit', 
+            'visibility' and 'edit_perm' dictionary key.
 
         Returns:
           Song: Instance of the new song.
@@ -46,10 +45,12 @@ class Songs(object):
             'owner': data['owner'],
             'title': data['title'],
             'text': data['text'] if 'text' in data else '',
+            'description': data['description'] if 'description' in data else '',
             'authors': data['authors'] if 'authors' in data else {'lyrics': [], 'music': []},
             'interpreters': data['interpreters'] if 'interpreters' in data else [],
             'owner_unit': data['owner_unit'],
-            'visibility': data['visibility']
+            'visibility': data['visibility'],
+            'edit_perm': data['edit_perm']
         })
         self._collection.insert(song.serialize())
 
@@ -76,13 +77,15 @@ class Songs(object):
             {'_id': uuid_from_str(song.get_id())}
         )
 
-    def find_special(self, query, page, per_page):
+    def find_special(self, data): #FIXME
         """Find songs in the database based on query and page the result.
 
-        Args:
+        Args in dict:
           query (str): Query string.
           page (int): Result page number.
-          per_page (int): Number of songs per search result.
+          per_page (int): Number of songbooks per search result.
+          user (str): user UUID
+          unit (str): Unit UUID
 
         If the query string is empty, whole database is returned (and paged).
 
@@ -90,12 +93,13 @@ class Songs(object):
           list: List of Songs instances satisfying the query.
         """
         if query is None or query == "":
-            doc = self._collection.find({}).skip(page*per_page).limit(per_page)
+            doc = self._collection.find({}).skip(data['page'] * data['per_page']) \
+                                  .limit(data['per_page'])
         else:
-            doc = self._collection.find({'$text':{'$search': query}},
+            doc = self._collection.find({'$text':{'$search': data['query']}},
                                         {'score': {'$meta': "textScore"}}) \
                                   .sort([('score', {'$meta': 'textScore'})]) \
-                                  .skip(page * per_page).limit(per_page)
+                                  .skip(data['page'] * data['per_page']).limit(data['per_page'])
 
         songs = []
         for song in doc:
@@ -138,10 +142,12 @@ class Song(object):
       _title (str): Song title.
       _owner (str): user UUID
       _text (str): Song data itself (lyrics and chords).
+      _description (str): Song description.
       _authors (list): Dict of lists of Author UUIDs.
       _interpreters (list): List of Interpreter UUIDs.
       _owner_unit (str): Unit UUID
       _visibility (str): Song visibility status
+      _edit_perm (str): Editing permission status
     """
 
     def __init__(self, song):
@@ -151,9 +157,11 @@ class Song(object):
         self._owner = song['owner']
         self._text = song['text']
         self._authors = song['authors']
+        self._description = song['description']
         self._interpreters = song['interpreters']
         self._owner_unit = song['owner_unit']
         self._visibility = song['visibility']
+        self._edit_perm = song['edit_perm']
 
     def serialize(self, update=False):
         """Serialize song data for database operations.
@@ -168,9 +176,11 @@ class Song(object):
             'owner': self._owner,
             'text': self._text,
             'authors': self._authors,
+            'description': self._description,
             'interpreters': self._interpreters,
             'owner_unit': self._owner_unit,
-            'visibility': self._visibility
+            'visibility': self._visibility,
+            'edit_perm': self._edit_perm
         }
 
         if not update:
@@ -186,10 +196,12 @@ class Song(object):
             'title': self._title,
             'owner': self._owner,
             'text': self._text,
+            'description': self._description,
             'authors': self._authors,
             'interpreters': self._interpreters,
             'owner_unit': self._owner_unit,
-            'visibility': self._visibility
+            'visibility': self._visibility,
+            'edit_perm': self._edit_perm
         }
 
     def get_id(self):
@@ -204,6 +216,9 @@ class Song(object):
     def get_interpreters(self):
         return self._interpreters
 
+    def get_description(self):
+        return self._description
+
     def get_owner(self):
         return self._owner
 
@@ -213,62 +228,28 @@ class Song(object):
     def get_visibility(self):
         return self._visibility
 
-    def set_title(self, title):
-        self._title = title
+    def get_edit_perm(self):
+        return self._edit_perm
 
-    def set_text(self, text):
-        self._text = text
+    def set_data(self, data):
+        self._title = data['title'] if 'title' in data else self._title
+        self._text = data['text'] if 'text' in data else self._text
+        self._description = data['title'] if 'title' in data else self._description
+        self._authors = data['authors'] if 'authors' in data else self._authors
+        self._interpreters = data['interpreters'] if 'interpreters' in data else self._interpreters
+        if 'visibility' in data:
+            if data['visibility'] in permission_dict:
+                self._visibility = data['visibility']
+        if 'edit_perm' in data:
+            if data['edit_perm'] in permission_dict:
+                self._edit_perm = data['edit_perm']
 
-    def set_authors(self, authors):
-        self._authors = authors
-
-    def set_interpreters(self, interpreters):
-        self._interpreters = interpreters
-
-    def set_visibility(self, visibility):
-        #if visibility not in SONG_VISIBILITY:
-        #    raise ClientException('Nemohu změnit viditelnost písně', 404)
-        self._visibility = visibility
-
-
-    def add_author(self, author_id):
-        if author_id in self._authors:
-            raise ClientException('Tento autor je jiz k pisni prirazen', 404)
-
-        self._authors.append(author_id)
-
-    def remove_author(self, author_id):
-        if author_id not in self._authors:
-            raise ClientException('Tento autor neni u pisne prirazen', 404)
-
-        self._authors.remove(author_id)
-
-    def add_interpreter(self, interpreter_id):
-        if interpreter_id in self._interpreters:
-            raise ClientException('Tento interpret je jiz k pisni prirazen', 404)
-
-        self._interpreters.append(interpreter_id)
-
-    def remove_interpreter(self, interpreter_id):
-        if interpreter_id not in self._interpreters:
-            raise ClientException('Tento interpret neni u pisne prirazen', 404)
-
-        self._interpreters.remove(interpreter_id)
-
-
-    def generate_tex(self, filename):
-        """Generate tex output and append it to given filename.
-
-        Since this method is appending the code and not overwriting given file,
-        it can be called on multiple songs in the row with the same file name.
-
-        Args:
-          filename (str): Output file name.
-        """
+    def generate_sbd_output(self): #FIXME
+        """Generate tex output and return it."""
         with open('songs/sample/sample.sbd', 'r') as sample_file:
             filedata = sample_file.read()
 
-        text = translate_to_tex(self.get_text())
+        text = translate_to_tex(self._text)
 
         #authors = []
         #for author_id in self._authors:
@@ -279,8 +260,12 @@ class Song(object):
         #filedata = filedata.replace('$authors$', ", ".join(authors))
         filedata = filedata.replace('$song$', text)
 
-        with open('songs/temp/' + filename + '.sbd', 'a') as song_file:
-            song_file.write(filedata)
+        return filedata
+
+        #sbd_file.write(filedata)
+
+        #with open('songs/temp/' + filename + '.sbd', 'a') as song_file:
+        #    song_file.write(filedata)
 
 
     def __repr__(self):

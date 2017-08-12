@@ -5,7 +5,7 @@ from server.util import uuid_from_str
 from server.util import uuid_to_str
 from server.util.exceptions import ClientException
 
-from server.constants import SONGBOOK_VISIBILITY
+from server.constants import permission_dict
 
 
 class Songbooks(object):
@@ -33,7 +33,7 @@ class Songbooks(object):
 
         Args:
           data (dict): Songbook data containing 'title', 'owner',
-            'owner_unit' and 'visibility' dictionary key.
+            'owner_unit', 'visibility' and 'edit_perm' dictionary key.
 
         Returns:
           Songbook: Instance of the new songbook.
@@ -45,6 +45,7 @@ class Songbooks(object):
             'owner': data['owner'],
             'owner_unit': data['owner_unit'],
             'visibility': data['visibility'],
+            'edit_perm': data['edit_perm'],
             'songs': [],
         })
         self._collection.insert(songbook.serialize())
@@ -72,13 +73,15 @@ class Songbooks(object):
             {'_id': uuid_from_str(songbook.get_id())}
         )
 
-    def find_special(self, query, page, per_page):
+    def find_special(self, data): # FIXME
         """Find songbooks from the database based on query and page the result.
 
-        Args:
+        Args in dict:
           query (str): Query string.
           page (int): Result page number.
           per_page (int): Number of songbooks per search result.
+          user (str): user UUID
+          unit (str): Unit UUID
 
         If the query string is empty, whole database is returned (and paged).
 
@@ -86,18 +89,16 @@ class Songbooks(object):
           list: List of Songbook instances satisfying the query.
         """
         if query is None or query == "":
-            doc = self._collection.find({}).skip(page * per_page) \
-                                  .limit(per_page)
+            doc = self._collection.find({}).skip(data['page'] * data['per_page']) \
+                                  .limit(data['per_page'])
         else:
-            doc = self._collection.find({'$text':{'$search': query}},
+            doc = self._collection.find({'$text':{'$search': data['query']}},
                                         {'score': {'$meta': "textScore"}}) \
                                   .sort([('score', {'$meta': 'textScore'})]) \
-                                  .skip(page * per_page).limit(per_page)
-
+                                  .skip(data['page'] * data['per_page']).limit(data['per_page'])
         songbooks = []
         for songbook in doc:
             songbooks.append(Songbook(songbook))
-
         return songbooks
 
     def find_one(self, songbook_id=None, title=None):
@@ -137,6 +138,7 @@ class Songbook(object):
       _owner (str): user UUID
       _owner_unit (str): Unit UUID
       _visibility (str): Songbook visibility status
+      _edit_perm (str): Editing permission status
     """
 
     def __init__(self, songbook):
@@ -147,6 +149,7 @@ class Songbook(object):
         self._owner = songbook['owner']
         self._owner_unit = songbook['owner_unit']
         self._visibility = songbook['visibility']
+        self._edit_perm = songbook['edit_perm']
 
     def serialize(self, update=False):
         """Serialize songbook data for database operations.
@@ -160,7 +163,8 @@ class Songbook(object):
             'songs': self._songs,
             'owner': self._owner,
             'owner_unit': self._owner_unit,
-            'visibility': self._visibility
+            'visibility': self._visibility,
+            'edit_perm': self._edit_perm
         }
 
         if not update:
@@ -177,7 +181,8 @@ class Songbook(object):
             'songs': self._songs,
             'owner': self._owner,
             'owner_unit': self._owner_unit,
-            'visibility': self._visibility
+            'visibility': self._visibility,
+            'edit_perm': self._edit_perm
         }
 
     def get_id(self):
@@ -185,9 +190,6 @@ class Songbook(object):
 
     def get_songs(self):
         return self._songs
-
-    def set_title(self, title):
-        self._title = title
 
     def get_owner(self):
         return self._owner
@@ -198,18 +200,23 @@ class Songbook(object):
     def get_visibility(self):
         return self._visibility
 
-    def set_visibility(self, visibility):
-        if visibility not in SONGBOOK_VISIBILITY:
-            raise ClientException('Nemohu změnit viditelnost zpěvníku', 404)
-        self._visibility = visibility
+    def get_edit_perm(self):
+        return self._edit_perm
 
-    # FIXME
-    def add_song(self, song_id):
-        self._songs.append({'song': song_id})
+    def set_data(self, data):
+        self._title = data['title'] if 'title' in data else self._title
+        if 'visibility' in data:
+            if data['visibility'] in permission_dict:
+                self._visibility = data['visibility']
+        if 'edit_perm' in data:
+            if data['edit_perm'] in permission_dict:
+                self._edit_perm = data['edit_perm']
 
-    # FIXME
+    def add_song(self, song_id, data):
+        self._songs[song_id] = data
+
     def remove_song(self, song_id):
-        self._songs.remove({'song': song_id})
+        self._songs.pop(song_id, None)
 
     def __repr__(self):
         return '<{!r} id={!r} title={!r}>' \

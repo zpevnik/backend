@@ -3,6 +3,25 @@ import subprocess
 
 from server.util.exceptions import CompilationException
 
+def export_song(song):
+    filename = generate_random_filename()
+
+    with open('songs/temp/' + filename + '.sbd', 'w') as file:
+        file.write(song.generate_sbd_output())
+
+    generate_tex_file(filename)
+    return export_to_pdf(filename)
+
+def export_songbook(songbook):
+    filename = generate_random_filename()
+
+    with open('songs/temp/' + filename + '.sbd', 'a') as file:
+        for song_id in songbook.get_songs().iterkeys():
+            song = validators.song_existence(song_id)
+            file.write(song.generate_sbd_output())
+
+    generate_tex_file(filename)
+    return export_to_pdf(filename)
 
 def generate_tex_file(filename):
     with open('songs/sample/sample.tex', 'r') as sample_file:

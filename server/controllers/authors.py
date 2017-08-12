@@ -19,13 +19,7 @@ api = Blueprint('authors', __name__,)
 @login_required
 def authors():
     if request.method == 'GET':
-        data = {
-            'query': request.args['query'] if 'query' in request.args and request.args['query'] is not None else "",
-            'page': int(request.args['page']) if 'page' in request.args and request.args['page'] is not None else 0,
-            'per_page': int(request.args['per_page']) if 'per_page' in request.args and request.args['per_page'] is not None else 10000
-        }
-        validators.request_GET(data)
-
+        data = validators.handle_GET_request(request.args)
         result = g.model.authors.find_special(data['query'], data['page'], data['per_page'])
         response = []
         for res in result:
@@ -35,10 +29,10 @@ def authors():
 
     else:
         data = request.get_json()
-
         validators.json_request(data)
-        validators.authors_request(data)
-        validators.author_nonexistence(data['firstname'], data['surname'])
+
+        data = validators.authors_request(data)
+        validators.author_nonexistence(data['name'])
 
         author = g.model.authors.create_author(data)
 
@@ -53,24 +47,21 @@ def authors():
 @api.route('/authors/<author_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def author_single(author_id):
-    if request.method == 'GET':
-        author = validators.author_existence(author_id)
+    author = validators.author_existence(author_id)
+
+    if request.method == 'GET':    
         return jsonify(author.get_serialized_data()), 200
 
     elif request.method == 'PUT':
-        data = request.get_json()
         author = validators.author_existence(author_id)
 
+        data = request.get_json()
         validators.json_request(data)
-        validators.authors_request(data)
+        data = validators.authors_request(data)
 
-        if 'firstname' in data:
-            author.set_firstname(data['firstname'])
-        if 'surname' in data:
-            author.set_surname(data['surname'])
+        author.set_data(data)
 
         data['author_id'] = author_id
-
         g.model.authors.save(author)
         g.model.logs.create_log({'event': EVENTS.AUTHOR_EDIT,
                                  'user': current_user.get_id(),
@@ -79,7 +70,6 @@ def author_single(author_id):
         return jsonify(author.get_serialized_data()), 200
 
     else:
-        author = validators.author_existence(author_id)
         g.model.authors.delete(author)
         g.model.logs.create_log({'event': EVENTS.AUTHOR_DELETE,
                                  'user': current_user.get_id(),

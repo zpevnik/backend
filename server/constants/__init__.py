@@ -1,36 +1,5 @@
+from server.constants.constants import EVENTS
+from server.constants.constants import PERMISSION
+from server.constants.constants import permission_dict
 
-class Events(object):
-    AUTHOR_NEW = 'author_new'
-    AUTHOR_EDIT = 'author_edit'
-    AUTHOR_DELETE = 'author_delete'
-
-    SONG_NEW = 'song_new'
-    SONG_EDIT = 'song_edit'
-    SONG_DELETE = 'song_delete'
-
-    VARIANT_NEW = 'variant_new'
-    VARIANT_EDIT = 'variant_edit'
-    VARIANT_DELETE = 'variant_delete'
-
-    SONGBOOK_NEW = 'songbook_new'
-    SONGBOOK_EDIT = 'songbook_edit'
-    SONGBOOK_DELETE = 'songbook_delete'
-
-EVENTS = Events()
-
-
-class SongVisibility(object):
-    SONG_PRIVATE = 'song_private'
-    SONG_UNIT = 'song_unit'
-    SONG_PENDING = 'song_pending'
-    SONG_PUBLIC = 'song_public'
-
-SONG_VISIBILITY = SongVisibility()
-
-
-class SongbookVisibility(object):
-    SONGBOOK_PRIVATE = 'songbook_private'
-    SONGBOOK_UNIT = 'songbook_unit'
-    SONGBOOK_PUBLIC = 'songbook_public'
-
-SONGBOOK_VISIBILITY = SongbookVisibility()
+from server.constants.strings import STRINGS

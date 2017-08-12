@@ -35,7 +35,7 @@ def index():
                            app_name=app.config['APP_NAME'])
 
 # Not safe enough
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['POST']) #FIXME
 def login():
     skautis_token = request.form['skautIS_Token']
     skautis_idunit = request.form['skautIS_IDUnit']
@@ -80,11 +80,11 @@ def get_user_info():
     return jsonify(user), 200
 
 
-@api.route('/user/songbook/<songbook_id>', methods=['PUT'])
+@api.route('/user/songbook/<songbook_id>', methods=['PUT']) #FIXME
 @login_required
 def user_songbook(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
-    if songbook.get_owner() != current_user and 
+    if songbook.get_owner() != current_user and \
        songbook.get_owner_unit() != current_user.get_unit():
         raise ClientException('Tento zpěvník není vlastněn ani tebou ani tvoji jednotkou.', 404)
 

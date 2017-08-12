@@ -7,12 +7,12 @@ from flask_login import current_user
 from flask_login import login_required
 
 from server.app import app
-from server.util import generate_random_filename
-from server.util import generate_tex_file
-from server.util import export_to_pdf
+from server.util import export_song
+from server.util import permissions
 from server.util import validators
 
 from server.constants import EVENTS
+from server.constants import STRINGS
 
 
 api = Blueprint('songs', __name__,)
@@ -22,14 +22,11 @@ api = Blueprint('songs', __name__,)
 @login_required
 def songs():
     if request.method == 'GET':
-        data = {
-            'query': request.args['query'] if 'query' in request.args and request.args['query'] is not None else "",
-            'page': int(request.args['page']) if 'page' in request.args and request.args['page'] is not None else 0,
-            'per_page': int(request.args['per_page']) if 'per_page' in request.args and request.args['per_page'] is not None else 30
-        }
-        validators.request_GET(data)
+        data = validators.handle_GET_request(request.args)
+        data['user'] = current_user.get_id()
+        data['unit'] = current_user.get_unit()
 
-        result = g.model.songs.find_special(data['query'], data['page'], data['per_page'])
+        result = g.model.songs.find_special(data)
         response = []
         for res in result:
             response.append(res.get_serialized_data())
@@ -38,10 +35,15 @@ def songs():
 
     else:
         data = request.get_json()
-
         validators.json_request(data)
-        validators.songs_request(data)
-        song = g.model.songs.create_song(data)
+
+        data = validators.songs_request(data)
+        data['owner'] = current_user.get_id()
+        data['owner_unit'] = current_user.get_unit()
+        data['visibility'] = VISIBILITY.PRIVATE
+        data['edit_perm'] = EDIT_PERMISSION.PRIVATE
+
+        song = g.model.song.create_song(data)
 
         g.model.logs.create_log({'event': EVENTS.SONG_NEW,
                                  'user': current_user.get_id(),
@@ -54,30 +56,22 @@ def songs():
 @api.route('/songs/<song_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def song_single(song_id):
+    song = validators.song_existence(song_id)
+    if not permissions.check_perm(current_user, song, visibility=True):
+        raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+
     if request.method == 'GET':
-        song = validators.song_existence(song_id)
-
         if request.headers['Content-Type'] == 'application/pdf':
-            filename = generate_random_filename()
-            song.generate_tex(filename)
-
-            generate_tex_file(filename)
-            exported = export_to_pdf(filename)
-            return exported, 200
-
+            return export_song(songbook), 200
         return jsonify(song.get_serialized_data()), 200
 
     elif request.method == 'PUT':
+        if not permissions.check_perm(current_user, song, editing=True):
+            raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+
         data = request.get_json()
-        song = validators.song_existence(song_id)
-
         validators.json_request(data)
-        validators.songs_request(data)
-
-        if 'title' in data:
-            song.set_title(data['title'])
-        if 'text' in data:
-            song.set_text(data['text'])
+        data = validators.songs_request(data)
 
         for author in data['authors']['music']:
             validators.author_existence(author)
@@ -86,11 +80,9 @@ def song_single(song_id):
         for author in data['interpreters']:
             validators.author_existence(author)
 
-        song.set_authors(data['authors'])
-        song.set_interpreters(data['interpreters'])
+        song.set_data(data)
 
         data['song_id'] = song_id
-
         g.model.songs.save(song)
         g.model.logs.create_log({'event': EVENTS.SONG_EDIT,
                                  'user': current_user.get_id(),
@@ -99,7 +91,9 @@ def song_single(song_id):
         return jsonify(song.get_serialized_data()), 200
 
     else:
-        song = validators.song_existence(song_id)
+        if not permissions.check_perm(current_user, song, editing=True):
+            raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+
         g.model.songs.delete(song)
         g.model.logs.create_log({'event': EVENTS.SONG_DELETE,
                                  'user': current_user.get_id(),

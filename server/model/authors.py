@@ -29,8 +29,7 @@ class Authors(object):
         """Create new author and insert it into database.
 
         Args:
-          data (dict): Author data containing 'firstname'
-            and 'surname' dictionary keys.
+          data (dict): Author data containing 'name' dictionary keys.
 
         Returns:
           Author: Instance of the new author.
@@ -38,8 +37,7 @@ class Authors(object):
         author = Author({
             '_id': generate_random_uuid(),
             'created': datetime.utcnow(),
-            'firstname': data['firstname'],
-            'surname': data['surname']
+            'name': data['name']
         })
         self._collection.insert(author.serialize())
 
@@ -94,13 +92,12 @@ class Authors(object):
 
         return authors
 
-    def find_one(self, author_id=None, firstname=None, surname=None):
+    def find_one(self, author_id=None, name=None):
         """Find one author based on given arguments.
 
         Args:
           author_id (str, optional): Author UUID.
-          firstname (str, optional): First name of the author.
-          surname (str, optional): Surname of the author.
+          name (str, optional): Name of the author.
 
         Returns:
           Author: One Author or None if it does not exist.
@@ -108,10 +105,8 @@ class Authors(object):
         query = {}
         if author_id is not None:
             query['_id'] = uuid_from_str(author_id)
-        if firstname is not None:
-            query['firstname'] = firstname
-        if surname is not None:
-            query['surname'] = surname
+        if name is not None:
+            query['name'] = name
 
         doc = self._collection.find_one(query)
         if not doc:
@@ -129,15 +124,13 @@ class Author(object):
     Attributes:
       _id (str): Author UUID.
       _created (str): Timestamp of the author creation.
-      _firstname (str): Author first name.
-      _surname (str): Author surname.
+      _name (str): Author name.
     """
 
     def __init__(self, author):
         self._id = uuid_to_str(author['_id'])
         self._created = author['created']
-        self._surname = author['surname']
-        self._firstname = author['firstname']
+        self._name = author['name']
 
     def serialize(self, update=False):
         """Serialize author data for database operations.
@@ -147,8 +140,7 @@ class Author(object):
             update attributes or data for new database entry.
         """
         author = {
-            'firstname': self._firstname,
-            'surname': self._surname
+            'name': self._name
         }
 
         if not update:
@@ -161,22 +153,18 @@ class Author(object):
         return {
             'id': self._id,
             'created': self._created.isoformat(),
-            'firstname': self._firstname,
-            'surname': self._surname
+            'name': self._name,
         }
 
     def get_id(self):
         return self._id
 
-    def get_fullname(self):
-        return "{!s} {!s}".format(self._firstname, self._surname)
+    def get_name(self):
+        return self._name
 
-    def set_firstname(self, firstname):
-        self._firstname = firstname
-
-    def set_surname(self, surname):
-        self._surname = surname
+    def set_data(self, data):
+        self._name = data['name'] if 'name' in data else self._name
 
     def __repr__(self):
         return '<{!r} id={!r} name={!r}>' \
-            .format(self.__class__.__name__, self._id, self.get_fullname())
+            .format(self.__class__.__name__, self._id, self._name)

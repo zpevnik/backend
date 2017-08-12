@@ -54,14 +54,12 @@ app.config.from_pyfile('config.py')
 Compress(app)
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
-if 'DYNO' in os.environ: # only trigger SSLify if the app is running on Heroku
-    SSLify(app)
-
 setup_logging()
 
 parsed = urlsplit(app.config['MONGODB_URI'])
 
-skautis = SkautisApi(app.config['SKAUTIS']['APPID'], test=app.config['SKAUTIS']['TEST'])
+#skautis = SkautisApi(app.config['SKAUTIS']['APPID'], test=app.config['SKAUTIS']['TEST'])
+skautis = None
 mongoClient = MongoClient(app.config['MONGODB_URI'])
 db = mongoClient[parsed.path[1:]]
 

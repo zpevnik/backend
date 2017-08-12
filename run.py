@@ -1,3 +1,5 @@
+#!./venv/bin/python3.6
+
 import logging
 
 from server.app import app

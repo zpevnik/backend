@@ -2,15 +2,15 @@
 
 from os import getenv
 
-VERSION = '0.1'
+VERSION = '0.2'
 APP_NAME = 'Skautský zpěvník'
-SECRET_KEY = 'q@yqlen+yr03d$z8mcbyx005a&'
 
 SERVER_PORT = int(getenv('PORT', 5010))
 
+SECRET_KEY = getenv('SECRET_KEY', '')
 MONGODB_URI = getenv('MONGODB_URI', 'mongodb://localhost:27017/zpevnik')
 
 SKAUTIS = {
     'TEST': False,
-    'APPID': getenv('SKAUTIS_APPID', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx')
+    'APPID': getenv('SKAUTIS_APPID', '3d59cc18-b2b9-46d7-b2e7-9f480f99553d')
 }

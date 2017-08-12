@@ -44,9 +44,7 @@ types:
     properties:
       id:
         type: "string"
-      firstname:
-        type: "string"
-      surname:
+      name:
         type: "string"
       created:
         type: "datetime"
@@ -62,6 +60,8 @@ types:
         type: "string"
       text:
         type: "string"
+      description:
+        type: "string"
       authors:
         type: "array"
         items:
@@ -73,6 +73,8 @@ types:
       owner_unit:
         type: "string"
       visibility:
+        type: "string"
+      edit_perm:
         type: "string"
       created:
         type: "datetime"
@@ -93,6 +95,8 @@ types:
       owner_unit:
         type: "string"
       visibility:
+        type: "string"
+      edit_perm:
         type: "string"
       created:
         type: "datetime"
@@ -138,11 +142,8 @@ types:
   authors representation:
     type: "object"
     properties:
-      firstname:
+      name:
         type: "string"
-      surname:
-        type: "string"
-        required: false
   songbooks representation:
     type: "object"
     properties:
