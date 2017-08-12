@@ -58,7 +58,7 @@ def author_existence(author_id):
 def author_nonexistence(name):
     author = g.model.authors.find_one(name=name)
     if author is not None:
-        raise ValidationException(STRINGS.AUTHOR_ALREADY_EXISTS_ERROR, 422, 
+        raise ValidationException(STRINGS.AUTHOR_ALREADY_EXISTS_ERROR, 422,
                                   errors=[{'field': None,
                                            'code': 'already_exists',
                                            'message': STRINGS.AUTHOR_ALREADY_EXISTS_ERROR}])

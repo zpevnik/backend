@@ -1,9 +1,7 @@
-import os
 import logging
 
 from flask import Flask
 from pymongo import MongoClient
-from datetime import datetime
 from urllib.parse import urlsplit
 
 from server.model import Model

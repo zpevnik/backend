@@ -15,6 +15,9 @@ from flask_login import current_user
 from server.app import app
 from server.app import skautis
 
+from server.util import validators
+from server.util.exceptions import ClientException
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -45,15 +48,16 @@ def login():
     user_id = user_info['ID']
 
     user = g.model.users.find(user_id)
-    if (user is None):
-        user = g.model.users.create_user(user_id, user_info['UserName'], user_info['IsActive'], skautis_idunit)
+    if user is None:
+        user = g.model.users.create_user(user_id, user_info['UserName'], 
+                                         user_info['IsActive'], skautis_idunit)
 
     user.set_token(skautis_token)
     g.model.users.save(user)
     login_user(user)
 
     arg_next = request.args.get('next')
-    
+
     return redirect(arg_next or url_for('application'))
 
 

@@ -6,6 +6,10 @@ class Strings(object):
 
     REQUEST_SONGBOOK_TITLE_MISSING = 'Songbook title is missing.'
     REQUEST_SONG_TITLE_MISSING = 'Song title is missing.'
+    REQUEST_SONG_TEXT_MISSING =  'Song text is missing.'
+    REQUEST_SONG_DESCRIPTION_MISSING =  'Song description is missing.'
+    REQUEST_SONG_AUTHORS_MISSING =  'Song authors are missing.'
+    REQUEST_SONG_INTERPRETERS_MISSING =  'Song interpreters are missing.'
     REQUEST_AUTHOR_NAME_MISSING = 'Author name is missing.'
     REQUEST_PAGE_OOR_ERROR = 'Page number is out of range.'
     REQUEST_PER_PAGE_OOR_ERROR = 'Per page number is out of range.'

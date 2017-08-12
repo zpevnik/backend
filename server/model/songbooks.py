@@ -3,7 +3,6 @@ from datetime import datetime
 from server.util import generate_random_uuid
 from server.util import uuid_from_str
 from server.util import uuid_to_str
-from server.util.exceptions import ClientException
 
 from server.constants import permission_dict
 
@@ -88,7 +87,7 @@ class Songbooks(object):
         Returns:
           list: List of Songbook instances satisfying the query.
         """
-        if query is None or query == "":
+        if data['query'] is None or data['query'] == "":
             doc = self._collection.find({}).skip(data['page'] * data['per_page']) \
                                   .limit(data['per_page'])
         else:

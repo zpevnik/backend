@@ -9,9 +9,11 @@ from server.app import app
 from server.util import export_songbook
 from server.util import permissions
 from server.util import validators
+from server.util.exceptions import ClientException
 
 from server.constants import EVENTS
 from server.constants import STRINGS
+from server.constants import PERMISSION
 
 
 api = Blueprint('songbooks', __name__,)
@@ -39,8 +41,8 @@ def songbooks():
         data = validators.songbooks_request(data)
         data['owner'] = current_user.get_id()
         data['owner_unit'] = current_user.get_unit()
-        data['visibility'] = VISIBILITY.PRIVATE
-        data['edit_perm'] = EDIT_PERMISSION.PRIVATE
+        data['visibility'] = PERMISSION.PRIVATE
+        data['edit_perm'] = PERMISSION.PRIVATE
 
         songbook = g.model.songbooks.create_songbook(data)
 
@@ -74,7 +76,7 @@ def songbook_single(songbook_id):
 
         songbook.set_data(data)
 
-        data['song_id'] = song_id
+        data['songbook_id'] = songbook_id
         g.model.songbooks.save(songbook)
         g.model.logs.create_log({'event': EVENTS.SONGBOOK_EDIT,
                                  'user': current_user.get_id(),
@@ -89,7 +91,7 @@ def songbook_single(songbook_id):
         g.model.songbooks.delete(songbook)
         g.model.logs.create_log({'event': EVENTS.SONGBOOK_DELETE,
                                  'user': current_user.get_id(),
-                                 'data': song_id})
+                                 'data': songbook_id})
 
         return jsonify(), 204
 

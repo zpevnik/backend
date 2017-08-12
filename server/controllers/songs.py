@@ -2,7 +2,6 @@ from flask import g
 from flask import jsonify
 from flask import request
 from flask import Blueprint
-from flask_cors import cross_origin
 from flask_login import current_user
 from flask_login import login_required
 
@@ -10,9 +9,11 @@ from server.app import app
 from server.util import export_song
 from server.util import permissions
 from server.util import validators
+from server.util.exceptions import ClientException
 
 from server.constants import EVENTS
 from server.constants import STRINGS
+from server.constants import PERMISSION
 
 
 api = Blueprint('songs', __name__,)
@@ -40,10 +41,10 @@ def songs():
         data = validators.songs_request(data)
         data['owner'] = current_user.get_id()
         data['owner_unit'] = current_user.get_unit()
-        data['visibility'] = VISIBILITY.PRIVATE
-        data['edit_perm'] = EDIT_PERMISSION.PRIVATE
+        data['visibility'] = PERMISSION.PRIVATE
+        data['edit_perm'] = PERMISSION.PRIVATE
 
-        song = g.model.song.create_song(data)
+        song = g.model.songs.create_song(data)
 
         g.model.logs.create_log({'event': EVENTS.SONG_NEW,
                                  'user': current_user.get_id(),
@@ -62,7 +63,7 @@ def song_single(song_id):
 
     if request.method == 'GET':
         if request.headers['Content-Type'] == 'application/pdf':
-            return export_song(songbook), 200
+            return export_song(song), 200
         return jsonify(song.get_serialized_data()), 200
 
     elif request.method == 'PUT':

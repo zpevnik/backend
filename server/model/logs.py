@@ -45,7 +45,7 @@ class Logs(object):
 
         return log
 
-    def find(self, event=None, user=None):
+    def find(self, event=None, user=None): #TODO
         """Find logs in the database based on the query parameters.
 
         Args:
