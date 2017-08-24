@@ -2,12 +2,12 @@ import os
 import time
 import logging
 
-from flask import g
 from flask import abort
 from flask import request
 from flask import jsonify
 from flask import make_response
 from flask import render_template
+from flask import send_from_directory
 from flask_login import login_required
 from flask_login import current_user
 
@@ -22,28 +22,30 @@ from server.util import RequestException
 
 logger = logging.getLogger(__name__)
 
+
+# add logging
 @app.errorhandler(ClientException)
 def handle_ClientException(error):
     response = jsonify(message=error.message)
-    response.status_code = error._status_code
+    response.status_code = error.status_code
     return response
 
 @app.errorhandler(RequestException)
 def handle_RequestException(error):
     response = jsonify(message=error.message)
-    response.status_code = error._status_code
+    response.status_code = error.status_code
     return response
 
 @app.errorhandler(CompilationException)
 def handle_CompilationException(error):
     response = jsonify(message=error.message)
-    response.status_code = error._status_code
+    response.status_code = error.status_code
     return response
 
 @app.errorhandler(ValidationException)
 def handle_ValidationException(error):
     response = jsonify(error.get_json())
-    response.status_code = error._status_code
+    response.status_code = error.status_code
     return response
 
 @app.errorhandler(IOError)
@@ -55,15 +57,13 @@ def handle_IOError(error):
 @app.route("/test")
 @login_required
 def test_page():
+    ip = request.remote_addr
+    if ip != app.config['SERVER_IP']:
+        abort(404)
+
     user = current_user
     return render_template('test.html', logout_link=skautis.get_logout_url(user.get_token()),
                                         username=user.get_name())
-
-@app.route("/logs")
-def log_test():
-    logs = g.model.logs.find()
-    ready = [x.get_serialized_data() for x in logs]
-    return jsonify(ready), 200
 
 @app.route("/application")
 @login_required
@@ -76,6 +76,11 @@ def application():
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
+
+@app.route('/download/<path:filename>', methods=['GET'])
+def download(filename):
+    directory = os.path.join(os.getcwd(), 'songs/done')
+    return send_from_directory(directory=directory, filename=filename)
 
 @app.route("/cleanup")
 def cleanup():

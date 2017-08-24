@@ -45,7 +45,7 @@ class Songbooks(object):
             'owner_unit': data['owner_unit'],
             'visibility': data['visibility'],
             'edit_perm': data['edit_perm'],
-            'songs': [],
+            'songs': {},
         })
         self._collection.insert(songbook.serialize())
 

@@ -1,3 +1,4 @@
+from flask import g
 from datetime import datetime
 
 from server.util import generate_random_uuid
@@ -234,7 +235,7 @@ class Song(object):
     def set_data(self, data):
         self._title = data['title'] if 'title' in data else self._title
         self._text = data['text'] if 'text' in data else self._text
-        self._description = data['title'] if 'title' in data else self._description
+        self._description = data['description'] if 'description' in data else self._description
         self._authors = data['authors'] if 'authors' in data else self._authors
         self._interpreters = data['interpreters'] if 'interpreters' in data else self._interpreters
         if 'visibility' in data:
@@ -244,29 +245,22 @@ class Song(object):
             if data['edit_perm'] in permission_dict:
                 self._edit_perm = data['edit_perm']
 
-    def generate_sbd_output(self): #FIXME
+    def generate_sbd_output(self):
         """Generate tex output and return it."""
         with open('songs/sample/sample.sbd', 'r') as sample_file:
             filedata = sample_file.read()
 
         text = translate_to_tex(self._text)
 
-        #authors = []
-        #for author_id in self._authors:
-        #    author = g.model.authors.find_one(author_id=author_id)
-        #    authors.append(author.get_fullname())
+        authors = []
+        for author_id in self._interpreters:
+            author = g.model.authors.find_one(author_id=author_id)
+            authors.append(author.get_name())
 
         filedata = filedata.replace('$title$', self._title)
-        #filedata = filedata.replace('$authors$', ", ".join(authors))
+        filedata = filedata.replace('$authors$', ", ".join(authors))
         filedata = filedata.replace('$song$', text)
-
         return filedata
-
-        #sbd_file.write(filedata)
-
-        #with open('songs/temp/' + filename + '.sbd', 'a') as song_file:
-        #    song_file.write(filedata)
-
 
     def __repr__(self):
         return '<{!r} id={!r} title={!r} authors={!r} interpreters={!r}' \

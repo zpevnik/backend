@@ -58,15 +58,10 @@ setup_logging()
 
 parsed = urlsplit(app.config['MONGODB_URI'])
 
-#skautis = SkautisApi(app.config['SKAUTIS']['APPID'], test=app.config['SKAUTIS']['TEST'])
-skautis = None
+skautis = SkautisApi(app.config['SKAUTIS']['APPID'], test=app.config['SKAUTIS']['TEST'])
 mongoClient = MongoClient(app.config['MONGODB_URI'])
 db = mongoClient[parsed.path[1:]]
 
-# Authenticate
-if '@' in app.config['MONGODB_URI']:
-    user, password = parsed.netloc.split('@')[0].split(':')
-    db.authenticate(user, password)
 
 model = Model(db=db)
 

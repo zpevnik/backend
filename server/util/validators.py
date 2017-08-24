@@ -74,6 +74,7 @@ def authors_request(request):
 
 def songs_request(request):
     err = []
+    print(request)
     if 'title' not in request or not request['title']:
         err.append({'field': 'title',
                     'code': 'missing_field',
@@ -82,15 +83,15 @@ def songs_request(request):
         err.append({'field': 'text',
                     'code': 'missing_field',
                     'message': STRINGS.REQUEST_SONG_TEXT_MISSING})
-    if 'description' not in request or not request['description']:
+    if 'description' not in request:
         err = [{'field': 'description',
                 'code': 'missing_field',
                 'message': STRINGS.REQUEST_SONG_DESCRIPTION_MISSING}]
-    if 'authors' not in request or not request['authors']:
+    if 'authors' not in request:
         err = [{'field': 'authors',
                 'code': 'missing_field',
                 'message': STRINGS.REQUEST_SONG_AUTHORS_MISSING}]
-    if 'interpreters' not in request or not request['interpreters']:
+    if 'interpreters' not in request:
         err = [{'field': 'interpreters',
                 'code': 'missing_field',
                 'message': STRINGS.REQUEST_SONG_INTERPRETERS_MISSING}]

@@ -44,6 +44,13 @@ def songs():
         data['visibility'] = PERMISSION.PRIVATE
         data['edit_perm'] = PERMISSION.PRIVATE
 
+        for author in data['authors']['music']:
+            validators.author_existence(author)
+        for author in data['authors']['lyrics']:
+            validators.author_existence(author)
+        for author in data['interpreters']:
+            validators.author_existence(author)
+
         song = g.model.songs.create_song(data)
 
         g.model.logs.create_log({'event': EVENTS.SONG_NEW,

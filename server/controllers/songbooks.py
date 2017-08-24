@@ -96,7 +96,7 @@ def songbook_single(songbook_id):
         return jsonify(), 204
 
 
-@api.route('/songbooks/<songbook_id>/song/<song_id>/', methods=['POST', 'DELETE'])
+@api.route('/songbooks/<songbook_id>/song/<song_id>', methods=['POST', 'DELETE'])
 @login_required
 def songbook_song_variants(songbook_id, song_id):
     songbook = validators.songbook_existence(songbook_id)
@@ -108,10 +108,10 @@ def songbook_song_variants(songbook_id, song_id):
         if not permissions.check_perm(current_user, song, visibility=True):
             raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
-        data = request.get_json()
-        validators.json_request(data)
+        #data = request.get_json()
+        #validators.json_request(data)
 
-        songbook.add_song(song_id, data)
+        songbook.add_song(song_id, None)
         g.model.songbooks.save(songbook)
         return jsonify({'message': STRINGS.SONGBOOK_ADD_SONG_SUCCESS}), 200
 

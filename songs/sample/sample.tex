@@ -1,4 +1,5 @@
 \documentclass[letterpaper]{article}
+
 \usepackage[bookmarks]{hyperref}
 \usepackage[chorded]{../songs}
 
@@ -19,9 +20,32 @@
 \settowidth{\versenumwidth}{1.\ }
 \pagestyle{empty}
 
+%\usepackage{SKAUT}
+\usepackage{TheMixCFive}
+%\renewcommand*\sfdefault{TheMixCFive}
+%\renewcommand{\lyricfont}{\sffamily\small}
+
 \newindex{titleidx}{$filename$}
 
-%\renewcommand{\scripturefont}{\sffamily\it}
+\renewcommand{\everychorus}{\noindent\textnote{R:}} 	%Nazev chorusu
+\versesep=6pt plus 2pt minus 2pt 		%mezera mezi slokami a chorusy
+\MultiwordChords	% Akordy nezpusobuji mezery mezi slovy
+
+\renewcommand{\notebgcolor}{white} %barva za refrenem a podobne
+\renewcommand{\snumbgcolor}{white} %barva za cislem pisne
+\renewcommand{\extendprelude}{\showauthors} %nastaveni hlavicky kazde pisne
+\renewcommand{\extendpostlude}{} %nastaveni paticky kazde pisne
+
+\renewcommand{\clineparams}{ %nastaveni mezer mezi akordy a textem
+  \baselineskip=10pt
+  \lineskiplimit=1pt
+  \lineskip=1pt
+}
+
+\setlength{\cbarwidth}{0pt} %zrusi caru vedle refrenu
+\setlength{\sbarheight}{0pt} %zrusi caru mezi pisnickami
+
+\nosongnumbers %vypne cislovani pisnicek
 
 \begin{document}
 
@@ -35,4 +59,3 @@
 \showindex{Obsah}{titleidx}
 
 \end{document}
-
