@@ -1,10 +1,5 @@
+from bson import ObjectId
 from flask import g
-from datetime import datetime
-
-from server.util import generate_random_uuid
-from server.util import uuid_from_str
-from server.util import uuid_to_str
-from server.util import translate_to_tex
 
 from server.constants import permission_dict
 
@@ -41,15 +36,14 @@ class Songs(object):
           Song: Instance of the new song.
         """
         song = Song({
-            '_id': generate_random_uuid(),
-            'created': datetime.utcnow(),
-            'owner': data['owner'],
+            '_id': ObjectId(),
             'title': data['title'],
+            'owner': ObjectId(data['owner']),
+            'owner_unit': ObjectId(data['owner_unit']),
             'text': data['text'] if 'text' in data else '',
             'description': data['description'] if 'description' in data else '',
             'authors': data['authors'] if 'authors' in data else {'lyrics': [], 'music': []},
             'interpreters': data['interpreters'] if 'interpreters' in data else [],
-            'owner_unit': data['owner_unit'],
             'visibility': data['visibility'],
             'edit_perm': data['edit_perm']
         })
@@ -64,7 +58,7 @@ class Songs(object):
           song (Song): Instance of the song.
         """
         self._collection.update(
-            {'_id': uuid_from_str(song.get_id())},
+            {'_id': song._id},
             {'$set': song.serialize(update=True)}
         )
 
@@ -74,9 +68,17 @@ class Songs(object):
         Args:
           song (Song): Instance of the song.
         """
-        self._collection.delete_one(
-            {'_id': uuid_from_str(song.get_id())}
-        )
+        self._collection.delete_one({'_id': song._id})
+
+    def find(self):
+        """Find all authors in the database."""
+        doc = self._collection.find({})
+
+        songs = []
+        for song in doc:
+            songs.append(Song(song))
+
+        return songs
 
     def find_special(self, data): #FIXME
         """Find songs in the database based on query and page the result.
@@ -85,8 +87,8 @@ class Songs(object):
           query (str): Query string.
           page (int): Result page number.
           per_page (int): Number of songbooks per search result.
-          user (str): user UUID
-          unit (str): Unit UUID
+          user (str): user ObjectId string
+          unit (str): Unit ObjectId string
 
         If the query string is empty, whole database is returned (and paged).
 
@@ -112,7 +114,7 @@ class Songs(object):
         """Find one song based on given arguments.
 
         Args:
-          song_id (str, optional): Song UUID.
+          song_id (str, optional): Song ObjectId string.
           title (str, optional): Title of the song.
 
         Returns:
@@ -120,7 +122,7 @@ class Songs(object):
         """
         query = {}
         if song_id is not None:
-            query['_id'] = uuid_from_str(song_id)
+            query['_id'] = ObjectId(song_id)
         if title is not None:
             query['title'] = title
 
@@ -138,22 +140,20 @@ class Song(object):
       song (dict): Song dictionary.
 
     Attributes:
-      _id (str): Song UUID.
-      _created (str): Timestamp of the song creation.
+      _id (str): Song ObjectId.
       _title (str): Song title.
-      _owner (str): user UUID
+      _owner (str): user ObjectId
       _text (str): Song data itself (lyrics and chords).
       _description (str): Song description.
-      _authors (list): Dict of lists of Author UUIDs.
-      _interpreters (list): List of Interpreter UUIDs.
-      _owner_unit (str): Unit UUID
+      _authors (list): Dict of lists of Author ObjectId strings.
+      _interpreters (list): List of Interpreter ObjectId strings.
+      _owner_unit (str): Unit ObjectId
       _visibility (str): Song visibility status
       _edit_perm (str): Editing permission status
     """
 
     def __init__(self, song):
         self._id = uuid_to_str(song['_id'])
-        self._created = song['created']
         self._title = song['title']
         self._owner = song['owner']
         self._text = song['text']
@@ -185,28 +185,30 @@ class Song(object):
         }
 
         if not update:
-            song['_id'] = uuid_from_str(self._id)
-            song['created'] = self._created
+            song['_id'] = self._id
 
         return song
 
     def get_serialized_data(self):
         return {
-            'id': self._id,
-            'created': self._created.isoformat(),
+            'id': str(self._id),
+            'created': self._id.generation_time,
             'title': self._title,
-            'owner': self._owner,
+            'owner': str(self._owner),
+            'owner_unit': str(self._owner_unit),
             'text': self._text,
             'description': self._description,
             'authors': self._authors,
             'interpreters': self._interpreters,
-            'owner_unit': self._owner_unit,
             'visibility': self._visibility,
             'edit_perm': self._edit_perm
         }
 
     def get_id(self):
-        return self._id
+        return str(self._id)
+
+    def get_creation_date(self):
+        return self._id.generation_time
 
     def get_text(self):
         return self._text
@@ -221,10 +223,10 @@ class Song(object):
         return self._description
 
     def get_owner(self):
-        return self._owner
+        return str(self._owner)
 
     def get_owner_unit(self):
-        return self._owner_unit
+        return str(self._owner_unit)
 
     def get_visibility(self):
         return self._visibility

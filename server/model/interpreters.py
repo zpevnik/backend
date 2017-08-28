@@ -1,8 +1,8 @@
 from bson import ObjectId
 
 
-class Authors(object):
-    """Collection for managing CRUD operation in database for authors.
+class Interpreters(object):
+    """Collection for managing CRUD operation in database for interpreters.
 
     Args:
       model (server.model.Model): Reference to model.
@@ -14,70 +14,70 @@ class Authors(object):
       _collection: Reference to collection in database for this class.
     """
 
-    COLLECTION_NAME = 'authors'
+    COLLECTION_NAME = 'interpreters'
 
     def __init__(self, model, db):
         self._model = model
         self._db = db
         self._collection = db[self.COLLECTION_NAME]
 
-    def create_author(self, data):
-        """Create new author and insert it into database.
+    def create_interpreter(self, data):
+        """Create new interpreter and insert it into database.
 
         Args:
-          data (dict): Author data containing 'name' dictionary keys.
+          data (dict): Interpreter data containing 'name' dictionary keys.
 
         Returns:
-          Author: Instance of the new author.
+          Interpreter: Instance of the new interpreter.
         """
-        author = Author({
+        interpreter = Interpreter({
             '_id': ObjectId(),
             'name': data['name']
         })
-        self._collection.insert(author.serialize())
+        self._collection.insert(interpreter.serialize())
         return interpreter
 
-    def save(self, author):
-        """Save author into the database.
+    def save(self, interpreter):
+        """Save interpreter into the database.
 
         Args:
-          author (Author): Instance of the author.
+          interpreter (Interpreter): Instance of the interpreter.
         """
         self._collection.update(
-            {'_id': author._id},
-            {'$set': author.serialize(update=True)}
+            {'_id': interpreter._id},
+            {'$set': interpreter.serialize(update=True)}
         )
 
-    def delete(self, author):
-        """Delete author from the database.
+    def delete(self, interpreter):
+        """Delete interpreter from the database.
 
         Args:
-          author (Author): Instance of the author.
+          interpreter (Interpreter): Instance of the interpreter.
         """
-        self._collection.delete_one({'_id': author._id})
+        self._collection.delete_one({'_id': interpreter._id})
 
     def find(self):
-        """Find all authors in the database."""
+        """Find all interpreters in the database."""
         doc = self._collection.find({})
 
-        authors = []
-        for author in doc:
-            authors.append(Author(author))
+        interpreters = []
+        for interpreter in doc:
+            interpreters.append(Interpreter(interpreter))
 
-        return authors
+        return interpreters
 
     def find_special(self, query, page, per_page):
-        """Find authors from the database based on query and page the result.
+        """Find interpreters from the database based on query and page the result.
 
         Args:
           query (str): Query string.
           page (int): Result page number.
-          per_page (int): Number of authors per search result.
+          per_page (int): Number of interpreters per search result.
 
         If the query string is empty, whole database is returned (and paged).
 
         Returns:
-          list: List of Author instances satisfying the query.
+          list: List of Interpreter instances satisfying the query.
         """
         if query is None or query == "":
             doc = self._collection.find({}).skip(page * per_page) \
@@ -88,25 +88,25 @@ class Authors(object):
                                   .sort([('score', {'$meta': 'textScore'})]) \
                                   .skip(page * per_page).limit(per_page)
 
-        authors = []
-        for author in doc:
-            authors.append(Author(author))
+        interpreters = []
+        for interpreter in doc:
+            interpreters.append(Interpreter(interpreter))
 
-        return authors
+        return interpreters
 
-    def find_one(self, author_id=None, name=None):
-        """Find one author based on given arguments.
+    def find_one(self, interpreter_id=None, name=None):
+        """Find one interpreter based on given arguments.
 
         Args:
-          author_id (str, optional): Author ObjectId string.
-          name (str, optional): Name of the author.
+          interpreter_id (str, optional): Interpreter ObjectId string.
+          name (str, optional): Name of the interpreter.
 
         Returns:
-          Author: One Author or None if it does not exist.
+          Interpreter: One Interpreter or None if it does not exist.
         """
         query = {}
-        if author_id is not None:
-            query['_id'] = ObjectId(author_id)
+        if interpreter_id is not None:
+            query['_id'] = ObjectId(interpreter_id)
         if name is not None:
             query['name'] = name
 
@@ -114,37 +114,37 @@ class Authors(object):
         if not doc:
             return None
 
-        return Author(doc)
+        return Interpreter(doc)
 
 
-class Author(object):
-    """Class for author abstraction.
+class Interpreter(object):
+    """Class for interpreter abstraction.
 
     Args:
-      author (dict): Author dictionary.
+      interpreter (dict): Interpreter dictionary.
 
     Attributes:
-      _id (str): Author ObjectId.
-      _name (str): Author name.
+      _id (str): Interpreter ObjectId.
+      _name (str): Interpreter name.
     """
 
-    def __init__(self, author):
-        self._id = author['_id']
-        self._name = author['name']
+    def __init__(self, interpreter):
+        self._id = interpreter['_id']
+        self._name = interpreter['name']
 
     def serialize(self, update=False):
-        """Serialize author data for database operations.
+        """Serialize interpreter data for database operations.
 
         Args:
           update (bool, optional): Determines whether method returns only
             update attributes or data for new database entry.
         """
-        author = {'name': self._name}
+        interpreter = {'name': self._name}
 
         if not update:
-            author['_id'] = self._id
+            interpreter['_id'] = self._id
 
-        return author
+        return interpreter
 
     def get_serialized_data(self):
         return {
@@ -157,7 +157,7 @@ class Author(object):
         return str(self._id)
 
     def get_creation_date(self):
-        return self._id.generation_time
+    	return self._id.generation_time
 
     def get_name(self):
         return self._name

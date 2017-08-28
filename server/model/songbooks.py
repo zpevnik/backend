@@ -1,8 +1,4 @@
-from datetime import datetime
-
-from server.util import generate_random_uuid
-from server.util import uuid_from_str
-from server.util import uuid_to_str
+from bson import ObjectId
 
 from server.constants import permission_dict
 
@@ -38,11 +34,10 @@ class Songbooks(object):
           Songbook: Instance of the new songbook.
         """
         songbook = Songbook({
-            '_id': generate_random_uuid(),
-            'created': datetime.utcnow(),
+            '_id': ObjectId(),
             'title': data['title'],
-            'owner': data['owner'],
-            'owner_unit': data['owner_unit'],
+            'owner': ObjectId(data['owner']),
+            'owner_unit': ObjectId(data['owner_unit']),
             'visibility': data['visibility'],
             'edit_perm': data['edit_perm'],
             'songs': {},
@@ -58,7 +53,7 @@ class Songbooks(object):
           songbook (Songbook): Instance of the songbook.
         """
         self._collection.update(
-            {'_id': uuid_from_str(songbook.get_id())},
+            {'_id': songbook.get_id},
             {'$set': songbook.serialize(update=True)}
         )
 
@@ -68,9 +63,17 @@ class Songbooks(object):
         Args:
           songbook (Songbook): Instance of the songbook.
         """
-        self._collection.delete_one(
-            {'_id': uuid_from_str(songbook.get_id())}
-        )
+        self._collection.delete_one({'_id': songbook._id})
+
+    def find(self):
+        """Find all authors in the database."""
+        doc = self._collection.find({})
+
+        songbooks = []
+        for songbook in doc:
+            songbooks.append(Songbook(songbook))
+
+        return songbooks
 
     def find_special(self, data): # FIXME
         """Find songbooks from the database based on query and page the result.
@@ -79,8 +82,8 @@ class Songbooks(object):
           query (str): Query string.
           page (int): Result page number.
           per_page (int): Number of songbooks per search result.
-          user (str): user UUID
-          unit (str): Unit UUID
+          user (str): user ObjectId string
+          unit (str): Unit ObjectId string
 
         If the query string is empty, whole database is returned (and paged).
 
@@ -104,7 +107,7 @@ class Songbooks(object):
         """Find one songbook based on given arguments.
 
         Args:
-          songbook_id (str, optional): Songbook UUID.
+          songbook_id (str, optional): Songbook ObjectId string.
           title (str, optional): Title of the songbook.
 
         Returns:
@@ -112,7 +115,7 @@ class Songbooks(object):
         """
         query = {}
         if songbook_id is not None:
-            query['_id'] = uuid_from_str(songbook_id)
+            query['_id'] = ObjectId(songbook_id)
         if title is not None:
             query['title'] = title
 
@@ -130,19 +133,17 @@ class Songbook(object):
       songbook (dict): Songbook dictionary.
 
     Attributes:
-      _id (str): Songbook UUID.
-      _created (str): Timestamp of the songbook creation.
+      _id (str): Songbook ObjectId.
       _title (str): Songbook title.
       _songs (dict): Songs contained in this songbook.
-      _owner (str): user UUID
-      _owner_unit (str): Unit UUID
+      _owner (str): User ObjectId
+      _owner_unit (str): Unit ObjectId
       _visibility (str): Songbook visibility status
       _edit_perm (str): Editing permission status
     """
 
     def __init__(self, songbook):
-        self._id = uuid_to_str(songbook['_id'])
-        self._created = songbook['created']
+        self._id = songbook['_id']
         self._title = songbook['title']
         self._songs = songbook['songs']
         self._owner = songbook['owner']
@@ -167,34 +168,36 @@ class Songbook(object):
         }
 
         if not update:
-            songbook['_id'] = uuid_from_str(self._id)
-            songbook['created'] = self._created
+            songbook['_id'] = self._id
 
         return songbook
 
     def get_serialized_data(self):
         return {
-            'id': self._id,
-            'created': self._created.isoformat(),
+            'id': str(self._id),
+            'created': self._id.generation_time,
             'title': self._title,
             'songs': self._songs,
-            'owner': self._owner,
-            'owner_unit': self._owner_unit,
+            'owner': str(self._owner),
+            'owner_unit': str(self._owner_unit),
             'visibility': self._visibility,
             'edit_perm': self._edit_perm
         }
 
     def get_id(self):
-        return self._id
+        return str(self._id)
+
+    def get_creation_date(self):
+        return self._id.generation_time
 
     def get_songs(self):
         return self._songs
 
     def get_owner(self):
-        return self._owner
+        return str(self._owner)
 
     def get_owner_unit(self):
-        return self._owner_unit
+        return str(self._owner_unit)
 
     def get_visibility(self):
         return self._visibility

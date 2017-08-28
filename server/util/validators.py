@@ -72,6 +72,33 @@ def authors_request(request):
         raise ValidationException(STRINGS.POST_REQUEST_ERROR, 422, errors=err)
     return {'name': request['name']}
 
+def interpreter_existence(interpreter_id):
+    try:
+        interpreter = g.model.interpreters.find_one(interpreter_id=interpreter_id)
+    except ValueError:
+        raise ClientException(STRINGS.INTERPRETER_NOT_FOUND_ERROR, 404)
+
+    if interpreter is None:
+        raise ClientException(STRINGS.INTERPRETER_NOT_FOUND_ERROR, 404)
+    return interpreter
+
+def interpreter_nonexistence(name):
+    interpreter = g.model.interpreters.find_one(name=name)
+    if interpreter is not None:
+        raise ValidationException(STRINGS.INTERPRETER_ALREADY_EXISTS_ERROR, 422,
+                                  errors=[{'field': None,
+                                           'code': 'already_exists',
+                                           'message': STRINGS.INTERPRETER_ALREADY_EXISTS_ERROR}])
+    return True
+
+def interpreters_request(request):
+    if 'name' not in request or not request['name']:
+        err = [{'field': 'name',
+                'code': 'missing_field',
+                'message': STRINGS.REQUEST_INTERPRETER_NAME_MISSING}]
+        raise ValidationException(STRINGS.POST_REQUEST_ERROR, 422, errors=err)
+    return {'name': request['name']}
+
 def songs_request(request):
     err = []
     print(request)
