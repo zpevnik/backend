@@ -22,6 +22,14 @@ db = mongoClient[parsed.path[1:]]
 model = Model(db=db)
 
 
+
+# TODO
+# Push all authors to interpreters
+# Load all databases into memory
+# Change their ids to ObjectId (with mapping)
+# remove created column
+# Correctly map old ids to new ones
+
 def migration_2017_08_18_1():
     logger.info('12.08.2017 - Changing authors database to Zpevnik version 2.')
 

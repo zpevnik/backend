@@ -87,8 +87,8 @@ class Songs(object):
           query (str): Query string.
           page (int): Result page number.
           per_page (int): Number of songbooks per search result.
-          user (str): user ObjectId string
-          unit (str): Unit ObjectId string
+          user (str): user Id string
+          unit (str): Unit Id string
 
         If the query string is empty, whole database is returned (and paged).
 
@@ -142,12 +142,12 @@ class Song(object):
     Attributes:
       _id (str): Song ObjectId.
       _title (str): Song title.
-      _owner (str): user ObjectId
+      _owner (str): user Id
       _text (str): Song data itself (lyrics and chords).
       _description (str): Song description.
       _authors (list): Dict of lists of Author ObjectId strings.
       _interpreters (list): List of Interpreter ObjectId strings.
-      _owner_unit (str): Unit ObjectId
+      _owner_unit (str): Unit Id
       _visibility (str): Song visibility status
       _edit_perm (str): Editing permission status
     """
@@ -194,8 +194,8 @@ class Song(object):
             'id': str(self._id),
             'created': self._id.generation_time,
             'title': self._title,
-            'owner': str(self._owner),
-            'owner_unit': str(self._owner_unit),
+            'owner': self._owner,
+            'owner_unit': self._owner_unit,
             'text': self._text,
             'description': self._description,
             'authors': self._authors,
@@ -223,10 +223,10 @@ class Song(object):
         return self._description
 
     def get_owner(self):
-        return str(self._owner)
+        return self._owner
 
     def get_owner_unit(self):
-        return str(self._owner_unit)
+        return self._owner_unit
 
     def get_visibility(self):
         return self._visibility

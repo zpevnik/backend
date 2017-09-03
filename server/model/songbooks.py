@@ -36,8 +36,8 @@ class Songbooks(object):
         songbook = Songbook({
             '_id': ObjectId(),
             'title': data['title'],
-            'owner': ObjectId(data['owner']),
-            'owner_unit': ObjectId(data['owner_unit']),
+            'owner': data['owner'],
+            'owner_unit': data['owner_unit'],
             'visibility': data['visibility'],
             'edit_perm': data['edit_perm'],
             'songs': {},
@@ -82,8 +82,8 @@ class Songbooks(object):
           query (str): Query string.
           page (int): Result page number.
           per_page (int): Number of songbooks per search result.
-          user (str): user ObjectId string
-          unit (str): Unit ObjectId string
+          user (str): user Id string
+          unit (str): Unit Id string
 
         If the query string is empty, whole database is returned (and paged).
 
@@ -136,8 +136,8 @@ class Songbook(object):
       _id (str): Songbook ObjectId.
       _title (str): Songbook title.
       _songs (dict): Songs contained in this songbook.
-      _owner (str): User ObjectId
-      _owner_unit (str): Unit ObjectId
+      _owner (str): User Id
+      _owner_unit (str): Unit Id
       _visibility (str): Songbook visibility status
       _edit_perm (str): Editing permission status
     """
@@ -178,8 +178,8 @@ class Songbook(object):
             'created': self._id.generation_time,
             'title': self._title,
             'songs': self._songs,
-            'owner': str(self._owner),
-            'owner_unit': str(self._owner_unit),
+            'owner': self._owner,
+            'owner_unit': self._owner_unit,
             'visibility': self._visibility,
             'edit_perm': self._edit_perm
         }
@@ -194,10 +194,10 @@ class Songbook(object):
         return self._songs
 
     def get_owner(self):
-        return str(self._owner)
+        return self._owner
 
     def get_owner_unit(self):
-        return str(self._owner_unit)
+        return self._owner_unit
 
     def get_visibility(self):
         return self._visibility

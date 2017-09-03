@@ -1,4 +1,5 @@
 songs/done
+songs/temp
 venv
 *.pyc
 .env
