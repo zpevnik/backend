@@ -1,6 +1,6 @@
 #%RAML 1.0
 title: "Skautský zpěvník"
-version: "v0.1"
+version: "v0.2"
 protocols:
 - "HTTPS"
 baseUri: "https://zpevnik.skauting.cz/api/"
@@ -120,6 +120,16 @@ types:
       last_login:
         type: "datetime"
         required: false
+  Interpreter:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      name:
+        type: "string"
+      created:
+        type: "datetime"
+        required: false
   Response:
     type: "object"
     properties:
@@ -149,12 +159,17 @@ types:
     properties:
       title:
         type: "string"
+  interpreters representation:
+    type: "object"
+    properties:
+      name:
+        type: "string"
 securitySchemes:
   skautIS Auth:
     type: "x-custom"
 /songs:
   get:
-    description: "Slouží k získávání seznamu písní."
+    description: "Slouží k získání seznamu písní."
     queryParameters:
       query:
         type: "string"
@@ -184,7 +199,9 @@ securitySchemes:
             example: "</songs/?page=0&per_page=30>; rel=\"first\""
         body:
           application/json:
-            type: "Song"
+            type: "array"
+            items:
+              type: "Song"
       400:
         description: "Odpověď použitá v případě, že některý z parametrů obsahuje neplatná\
           \ data."
@@ -285,42 +302,14 @@ securitySchemes:
 /authors:
   get:
     description: "Slouží k získání seznamu autorů."
-    queryParameters:
-      query:
-        type: "string"
-        description: "Text použitý k vyhledávání mezi autory."
-        required: false
-      page:
-        type: "integer"
-        format: "int32"
-        description: "Stránka výpisu."
-        default: 0
-        minimum: 0
-        required: false
-      per_page:
-        type: "integer"
-        format: "int32"
-        description: "Upravuje počet autorů na stránce."
-        default: 30
-        minimum: 1
-        maximum: 200
-        required: false
     responses:
       200:
         description: "Odpověď použitá v případě nalezení 0+ autorů."
-        headers:
-          Link:
-            type: "string"
-            example: "</authors/?page=0&per_page=30>; rel=\"first\""
         body:
           application/json:
-            type: "Author"
-      400:
-        description: "Odpověď použitá v případě, že některý z parametrů obsahuje neplatná\
-          \ data."
-        body:
-          application/json:
-            type: "ClientError"
+            type: "array"
+            items:
+              type: "Author"
   post:
     description: "Slouží k vytváření autorů."
     body:
@@ -328,7 +317,7 @@ securitySchemes:
         type: "authors representation"
     responses:
       201:
-        description: "Odpověď použitá v případě úspěšného vytvoření písně."
+        description: "Odpověď použitá v případě úspěšného vytvoření autora."
         headers:
           Location:
             type: "string"
@@ -395,6 +384,91 @@ securitySchemes:
         body:
           application/json:
             type: "ClientError"
+/interpreters:
+  get:
+    description: "Slouží k získání seznamu interpretů."
+    responses:
+      200:
+        description: "Odpověď použitá v případě nalezení 0+ interpretů."
+        body:
+          application/json:
+            type: "array"
+            items:
+              type: "Interpreter"
+  post:
+    description: "Slouží k vytváření interpretů."
+    body:
+      application/json:
+        type: "interpreters representation"
+    responses:
+      201:
+        description: "Odpověď použitá v případě úspěšného vytvoření interpreta."
+        headers:
+          Location:
+            type: "string"
+            example: "/interpreters/1/"
+        body:
+          application/json:
+            type: "Redirect"
+      400:
+        body:
+          application/json:
+            type: "RequestError"
+      422:
+        description: "Odpověď použitá v případě, že při vytváření došlo k chybě."
+        body:
+          application/json:
+            type: "ValidationError"
+/interpreters/{interpreter_id}:
+  uriParameters:
+    interpreter_id:
+      type: "string"
+  get:
+    description: "Slouží k získání detailu interpreta."
+    responses:
+      200:
+        description: "Odpověď vrácená v případě nalezení interpreta."
+        body:
+          application/json:
+            type: "Interpreter"
+      404:
+        description: "Odpověď použitá v případě, že autor nebyl nalezen."
+        body:
+          application/json:
+            type: "ClientError"
+  put:
+    description: "Slouží k úpravě informací o interpretovi."
+    body:
+      application/json:
+        type: "interpreters representation"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Interpreter"
+      400:
+        body:
+          application/json:
+            type: "RequestError"
+      404:
+        description: "V případě nenalezeného interpreta."
+        body:
+          application/json:
+            type: "ClientError"
+      422:
+        description: "Odpověď použitá v případě, že při vytváření došlo k chybě."
+        body:
+          application/json:
+            type: "ValidationError"
+  delete:
+    description: "Slouží ke smazání interpreta."
+    responses:
+      204:
+        description: "Použije se v případě, že došlo ke smazání."
+      404:
+        body:
+          application/json:
+            type: "ClientError"
 /songbooks:
   get:
     description: "Slouží k získání seznamu zpěvníků. Součástí seznamu by měli\n bý\
@@ -428,7 +502,9 @@ securitySchemes:
             example: "</songbooks/?page=0&per_page=30>; rel=\"first\""
         body:
           application/json:
-            type: "Songbook"
+            type: "array"
+            items:
+              type: "Songbook"
       400:
         description: "Odpověď použitá v případě, že některý z parametrů obsahuje neplatná\
           \ data."

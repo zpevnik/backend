@@ -18,8 +18,9 @@ api = Blueprint('interpreters', __name__,)
 @login_required
 def interpreters():
     if request.method == 'GET':
-        data = validators.handle_GET_request(request.args)
-        result = g.model.interpreters.find_special(data['query'], data['page'], data['per_page'])
+        #data = validators.handle_GET_request(request.args)
+        #result = g.model.interpreters.find_special(data['query'], data['page'], data['per_page'])
+        result = g.model.interpreters.find()
         response = []
         for res in result:
             response.append(res.get_serialized_data())

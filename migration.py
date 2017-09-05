@@ -1,10 +1,14 @@
 #!./venv/bin/python3.6
 
+import time
+import random
 import logging
 
 from flask import Flask
 from pymongo import MongoClient
 from urllib.parse import urlsplit
+
+from bson import ObjectId
 
 from server.model import Model
 from server.constants import PERMISSION
@@ -22,13 +26,124 @@ db = mongoClient[parsed.path[1:]]
 model = Model(db=db)
 
 
+def migration_2017_09_05_2():
+    logger.info('05.09.2017 - Updating songs to new text format')
 
-# TODO
-# Push all authors to interpreters
-# Load all databases into memory
-# Change their ids to ObjectId (with mapping)
-# remove created column
-# Correctly map old ids to new ones
+    def translate(text):
+        state_chorus = False
+        state_verse = False
+        output = ""
+
+        def finish_part(state_chorus, state_verse):
+            return "[chorus]\n" if state_chorus else \
+                   "[verse]\n" if state_verse else \
+                   ""
+
+        content = [x.strip() for x in text.split('\n')]
+
+        for line in content:
+            if line == "##":
+                output += finish_part(state_chorus, state_verse)
+                state_chorus = False
+                state_verse = True
+                output += "[verse]"
+
+            elif line == "**":
+                output += finish_part(state_chorus, state_verse)
+                state_verse = False
+                state_chorus = True
+                output += "[chorus]"
+
+            elif line == "***":
+                output += finish_part(state_chorus, state_verse)
+                state_verse = False
+                state_chorus = False
+                output += "[chorus][chorus]\n"
+
+            else:
+                line = line.replace('>', '[echo]')
+                line = line.replace('<', '[echo]\n')
+                line = line.replace('||', '[repetition]\n')
+                line = line.replace('|', '[repetition]')
+                output += line + "\n"
+
+        return output
+
+    collection = db['songs']
+    songs = collection.find()
+
+    for song in songs:
+        if not song['text']:
+            continue
+
+        song['text'] = translate(song['text'])
+        collection.update(
+            {'_id': song['_id']},
+            {'$set': song}
+        )
+
+
+def migration_2017_09_05_1():
+    logger.info('05.09.2017 - Updating databse to ObjectId & splitting Authors and Interpreters')
+
+    # laod everything into the memory
+    songs = db['songs'].find()
+    authors = db['authors'].find()
+
+    # map all authors to new keys and reinsert them into the database
+    authormap = {}
+    for author in authors:
+        if 'created' not in author:
+            continue
+
+        temp = hex(int(author['created'].timestamp()))[2:]
+        temp += '0000000000'
+        temp += ''.join(random.choice('0123456789abcdef') for n in range(6))
+
+        authormap[author['_id'].hex] = temp
+        author['_id'] = ObjectId(temp)
+        author.pop('created', None)
+
+        db['authors'].insert_one(author)
+        db['interpreters'].insert_one(author)
+
+    for song in songs:
+        if 'created' not in song:
+            continue
+
+        temp = hex(int(song['created'].timestamp()))[2:]
+        temp += '0000000000'
+        temp += ''.join(random.choice('0123456789abcdef') for n in range(6))
+
+        song['_id'] = ObjectId(temp)
+        song.pop('created', None)
+
+        # get all interpreters and authors
+        interpreters = song['interpreters']
+        mauthors = song['authors']['music']
+        lauthors = song['authors']['lyrics']
+
+        # clean author and interpreter arrays
+        song['interpreters'] = []
+        song['authors'] = {'music': [], 'lyrics': []}
+
+        # insert new mapped values
+        for interpreter in interpreters:
+            key = authormap[interpreter]
+            song['interpreters'].append(key)
+        for author in mauthors:
+            key = authormap[author]
+            song['authors']['music'].append(key)
+        for author in lauthors:
+            key = authormap[author]
+            song['authors']['lyrics'].append(key)
+
+        db['songs'].insert_one(song)
+
+    # clean old database entries
+    db['authors'].delete_many({'created': {'$exists': True}})
+    db['songs'].delete_many({'created': {'$exists': True}})
+
 
 def migration_2017_08_18_1():
     logger.info('12.08.2017 - Changing authors database to Zpevnik version 2.')
@@ -119,3 +234,6 @@ def migration_2017_08_18_4():
 #migration_2017_08_18_2()
 #migration_2017_08_18_3()
 #migration_2017_08_18_4()
+
+#migration_2017_09_05_1()
+#migration_2017_09_05_2()
