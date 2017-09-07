@@ -35,7 +35,7 @@ class Authors(object):
             'name': data['name']
         })
         self._collection.insert(author.serialize())
-        return interpreter
+        return author
 
     def save(self, author):
         """Save author into the database.

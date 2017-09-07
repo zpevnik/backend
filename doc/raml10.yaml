@@ -63,9 +63,19 @@ types:
       description:
         type: "string"
       authors:
-        type: "array"
-        items:
-          type: "Author"
+        type: "object"
+        properties:
+          music:
+            type: "array"
+            items:
+              type: "Author"
+          lyrics:
+            type: "array"
+            items:
+              type: "Author"
+        example:
+          value: "{'music': [], 'lyrics': []}"
+          strict: false
       interpreters:
         type: "array"
         items:
@@ -88,6 +98,7 @@ types:
         type: "string"
       songs:
         type: "array"
+        description: "TODO: Exact object representation"
         items:
           type: "object"
       owner:
@@ -142,11 +153,32 @@ types:
         type: "string"
       text:
         type: "string"
-        required: false
+      description:
+        type: "string"
       authors:
+        type: "object"
+        properties:
+          music:
+            type: "array"
+            description: "Array of music authors"
+            items:
+              type: "Author"
+          lyrics:
+            type: "array"
+            description: "Array of lyrics authors"
+            items:
+              type: "Author"
+        example:
+          value: "{'music': [], 'lyrics': []}"
+          strict: false
+      interpreters:
+        type: "array"
+        items:
+          type: "Interpreter"
+      visibility:
         type: "string"
         required: false
-      interpreters:
+      edit_perm:
         type: "string"
         required: false
   authors representation:

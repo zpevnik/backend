@@ -1,17 +1,16 @@
-import os
 import time
 import logging
 
+from urllib.parse import urlsplit
+
 from flask import Flask
 from flask import g
-from flask_compress import Compress
 from flask_cors import CORS
-from flask_sslify import SSLify
+from flask_compress import Compress
 
 from colorlog import ColoredFormatter
 from pymongo import MongoClient
 from skautis import SkautisApi
-from urllib.parse import urlsplit
 
 from server.model import Model
 

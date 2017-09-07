@@ -1,6 +1,7 @@
 from bson import ObjectId
 from flask import g
 
+from server.util import translate_to_tex
 from server.constants import permission_dict
 
 
@@ -153,7 +154,7 @@ class Song(object):
     """
 
     def __init__(self, song):
-        self._id = uuid_to_str(song['_id'])
+        self._id = song['_id']
         self._title = song['title']
         self._owner = song['owner']
         self._text = song['text']

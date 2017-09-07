@@ -8,11 +8,10 @@ from flask_login import login_required
 from server.app import app
 from server.util import validators
 
-from server.constants import EVENTS
+#from server.constants import EVENTS
 
 
 api = Blueprint('interpreters', __name__,)
-
 
 @api.route('/interpreters', methods=['GET', 'POST'])
 @login_required

@@ -48,8 +48,8 @@ def songs():
             validators.author_existence(author)
         for author in data['authors']['lyrics']:
             validators.author_existence(author)
-        for author in data['interpreters']:
-            validators.author_existence(author)
+        for interpreter in data['interpreters']:
+            validators.interpreter_existence(interpreter)
 
         song = g.model.songs.create_song(data)
 
