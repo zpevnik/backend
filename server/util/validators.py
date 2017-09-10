@@ -29,30 +29,30 @@ def song_existence(song_id):
     try:
         song = g.model.songs.find_one(song_id=song_id)
     except ValueError:
-        raise ClientException(STRINGS.SONG_NOT_FOUND_ERROR, 404)
+        raise ClientException(STRINGS.SONG_NOT_FOUND_ERROR, 422)
 
     if song is None:
-        raise ClientException(STRINGS.SONG_NOT_FOUND_ERROR, 404)
+        raise ClientException(STRINGS.SONG_NOT_FOUND_ERROR, 422)
     return song
 
 def songbook_existence(songbook_id):
     try:
         songbook = g.model.songbooks.find_one(songbook_id=songbook_id)
     except ValueError:
-        raise ClientException(STRINGS.SONGBOOK_NOT_FOUND_ERROR, 404)
+        raise ClientException(STRINGS.SONGBOOK_NOT_FOUND_ERROR, 422)
 
     if songbook is None:
-        raise ClientException(STRINGS.SONGBOOK_NOT_FOUND_ERROR, 404)
+        raise ClientException(STRINGS.SONGBOOK_NOT_FOUND_ERROR, 422)
     return songbook
 
 def author_existence(author_id):
     try:
         author = g.model.authors.find_one(author_id=author_id)
     except ValueError:
-        raise ClientException(STRINGS.AUTHOR_NOT_FOUND_ERROR, 404)
+        raise ClientException(STRINGS.AUTHOR_NOT_FOUND_ERROR, 422)
 
     if author is None:
-        raise ClientException(STRINGS.AUTHOR_NOT_FOUND_ERROR, 404)
+        raise ClientException(STRINGS.AUTHOR_NOT_FOUND_ERROR, 422)
     return author
 
 def author_nonexistence(name):
