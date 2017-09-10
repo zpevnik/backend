@@ -57,9 +57,9 @@ def handle_IOError(error):
 @app.route("/test")
 @login_required
 def test_page():
-    ip = request.remote_addr
-    if ip != app.config['SERVER_IP']:
-        abort(404)
+    #ip = request.remote_addr
+    #if ip != app.config['SERVER_IP']:
+    #    abort(404)
 
     user = current_user
     return render_template('test.html', logout_link=skautis.get_logout_url(user.get_token()),

@@ -39,8 +39,8 @@ class Songs(object):
         song = Song({
             '_id': ObjectId(),
             'title': data['title'],
-            'owner': ObjectId(data['owner']),
-            'owner_unit': ObjectId(data['owner_unit']),
+            'owner': data['owner'],
+            'owner_unit': data['owner_unit'],
             'text': data['text'] if 'text' in data else '',
             'description': data['description'] if 'description' in data else '',
             'authors': data['authors'] if 'authors' in data else {'lyrics': [], 'music': []},
