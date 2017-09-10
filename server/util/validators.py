@@ -14,14 +14,14 @@ def handle_GET_request(request):
     }
 
     if 'page' in request and request['page'] is not None:
-        if request['page'] < 0:
+        if int(request['page']) < 0:
             raise ClientException(STRINGS.REQUEST_PAGE_OOR_ERROR, 400)
-        data['page'] = request['page']
+        data['page'] = int(request['page'])
 
     if 'per_page' in request and request['per_page'] is not None:
-        if request['per_page'] < 1 or request['per_page'] > 200:
+        if int(request['per_page']) < 1 or int(request['per_page']) > 200:
             raise ClientException(STRINGS.REQUEST_PER_PAGE_OOR_ERROR, 400)
-        data['per_page'] = request['per_page']
+        data['per_page'] = int(request['per_page'])
 
     return data
 
