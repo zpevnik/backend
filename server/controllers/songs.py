@@ -85,8 +85,8 @@ def song_single(song_id):
             validators.author_existence(author)
         for author in data['authors']['lyrics']:
             validators.author_existence(author)
-        for author in data['interpreters']:
-            validators.author_existence(author)
+        for interpreter in data['interpreters']:
+            validators.interpreter_existence(interpreter)
 
         song.set_data(data)
 

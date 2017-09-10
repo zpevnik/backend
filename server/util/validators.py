@@ -55,6 +55,16 @@ def author_existence(author_id):
         raise ClientException(STRINGS.AUTHOR_NOT_FOUND_ERROR, 422)
     return author
 
+def interpreter_existence(interpreter_id):
+    try:
+        interpreter = g.model.interpreters.find_one(interpreter_id=interpreter_id)
+    except ValueError:
+        raise ClientException(STRINGS.INTERPRETER_NOT_FOUND_ERROR, 422)
+
+    if interpreter is None:
+        raise ClientException(STRINGS.INTERPRETER_NOT_FOUND_ERROR, 422)
+    return interpreter
+
 def author_nonexistence(name):
     author = g.model.authors.find_one(name=name)
     if author is not None:
@@ -64,24 +74,6 @@ def author_nonexistence(name):
                                            'message': STRINGS.AUTHOR_ALREADY_EXISTS_ERROR}])
     return True
 
-def authors_request(request):
-    if 'name' not in request or not request['name']:
-        err = [{'field': 'name',
-                'code': 'missing_field',
-                'message': STRINGS.REQUEST_AUTHOR_NAME_MISSING}]
-        raise ValidationException(STRINGS.POST_REQUEST_ERROR, 422, errors=err)
-    return {'name': request['name']}
-
-def interpreter_existence(interpreter_id):
-    try:
-        interpreter = g.model.interpreters.find_one(interpreter_id=interpreter_id)
-    except ValueError:
-        raise ClientException(STRINGS.INTERPRETER_NOT_FOUND_ERROR, 404)
-
-    if interpreter is None:
-        raise ClientException(STRINGS.INTERPRETER_NOT_FOUND_ERROR, 404)
-    return interpreter
-
 def interpreter_nonexistence(name):
     interpreter = g.model.interpreters.find_one(name=name)
     if interpreter is not None:
@@ -90,6 +82,14 @@ def interpreter_nonexistence(name):
                                            'code': 'already_exists',
                                            'message': STRINGS.INTERPRETER_ALREADY_EXISTS_ERROR}])
     return True
+
+def authors_request(request):
+    if 'name' not in request or not request['name']:
+        err = [{'field': 'name',
+                'code': 'missing_field',
+                'message': STRINGS.REQUEST_AUTHOR_NAME_MISSING}]
+        raise ValidationException(STRINGS.POST_REQUEST_ERROR, 422, errors=err)
+    return {'name': request['name']}
 
 def interpreters_request(request):
     if 'name' not in request or not request['name']:
