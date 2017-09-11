@@ -34,7 +34,7 @@ class Interpreters(object):
             '_id': ObjectId(),
             'name': data['name']
         })
-        self._collection.insert(interpreter.serialize())
+        self._collection.insert_one(interpreter.serialize())
         return interpreter
 
     def save(self, interpreter):
@@ -43,7 +43,7 @@ class Interpreters(object):
         Args:
           interpreter (Interpreter): Instance of the interpreter.
         """
-        self._collection.update(
+        self._collection.update_one(
             {'_id': interpreter._id},
             {'$set': interpreter.serialize(update=True)}
         )

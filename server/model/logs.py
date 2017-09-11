@@ -41,7 +41,7 @@ class Logs(object):
             'event': data['event'],
             'user': data['user']
         })
-        self._collection.insert(log.serialize())
+        self._collection.insert_one(log.serialize())
 
         return log
 

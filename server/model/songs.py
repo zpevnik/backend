@@ -48,7 +48,7 @@ class Songs(object):
             'visibility': data['visibility'],
             'edit_perm': data['edit_perm']
         })
-        self._collection.insert(song.serialize())
+        self._collection.insert_one(song.serialize())
 
         return song
 
@@ -58,7 +58,7 @@ class Songs(object):
         Args:
           song (Song): Instance of the song.
         """
-        self._collection.update(
+        self._collection.update_one(
             {'_id': song._id},
             {'$set': song.serialize(update=True)}
         )

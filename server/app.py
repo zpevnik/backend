@@ -1,3 +1,4 @@
+import os
 import time
 import logging
 
@@ -49,6 +50,9 @@ def setup_logging():
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
+
+if os.getenv('ZPEVNIK_UNITTEST', False):
+    app.config['MONGODB_URI'] = os.getenv('ZPEVNIK_UNITTEST')
 
 Compress(app)
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])

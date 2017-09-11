@@ -34,7 +34,7 @@ class Authors(object):
             '_id': ObjectId(),
             'name': data['name']
         })
-        self._collection.insert(author.serialize())
+        self._collection.insert_one(author.serialize())
         return author
 
     def save(self, author):
@@ -43,7 +43,7 @@ class Authors(object):
         Args:
           author (Author): Instance of the author.
         """
-        self._collection.update(
+        self._collection.update_one(
             {'_id': author._id},
             {'$set': author.serialize(update=True)}
         )

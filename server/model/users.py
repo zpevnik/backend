@@ -40,12 +40,12 @@ class Users(object):
             'active_songbook': None,
             'token': None
         })
-        self._collection.insert(user.serialize())
+        self._collection.insert_one(user.serialize())
 
         return user
 
     def save(self, user):
-        self._collection.update(
+        self._collection.update_one(
             {'_id': user.get_id()},
             {'$set': user.serialize(update=True)}
         )

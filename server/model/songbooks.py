@@ -42,7 +42,7 @@ class Songbooks(object):
             'edit_perm': data['edit_perm'],
             'songs': {},
         })
-        self._collection.insert(songbook.serialize())
+        self._collection.insert_one(songbook.serialize())
 
         return songbook
 
@@ -52,7 +52,7 @@ class Songbooks(object):
         Args:
           songbook (Songbook): Instance of the songbook.
         """
-        self._collection.update(
+        self._collection.update_one(
             {'_id': songbook.get_id},
             {'$set': songbook.serialize(update=True)}
         )
