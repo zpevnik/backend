@@ -1,5 +1,4 @@
 #!./venv/bin/python3.6
-
 """Module for correct database key creation"""
 
 import os
@@ -31,11 +30,10 @@ def setup_database():
     db['songbooks'].create_index([("title", pymongo.TEXT)], name="SongbookIndex")
 
     # prepare songs database indexes
-    db['songs'].create_index([("title", pymongo.TEXT),
-                              ("text", pymongo.TEXT)],
-                             name="SongIndex",
-                             weights={"title": 3})
+    db['songs'].create_index(
+        [("title", pymongo.TEXT), ("text", pymongo.TEXT)], name="SongIndex", weights={"title": 3})
 
     print('Done!')
+
 
 setup_database()

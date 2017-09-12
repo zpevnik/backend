@@ -1,0 +1,16 @@
+[style]
+
+# One of the predefined styles
+BASED_ON_STYLE = google
+
+# The number of columns to use for indentation.
+INDENT_WIDTH = 4
+
+# The column limit (or max line-length)
+COLUMN_LIMIT = 100
+
+# Put closing brackets on a separate line, dedented, if the bracketed expression can't fit in a single line.
+# DEDENT_CLOSING_BRACKETS = True
+
+# Place each dictionary entry onto its own line.
+EACH_DICT_ENTRY_ON_SEPARATE_LINE = True

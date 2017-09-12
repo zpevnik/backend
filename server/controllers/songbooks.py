@@ -15,8 +15,7 @@ from server.constants import EVENTS
 from server.constants import STRINGS
 from server.constants import PERMISSION
 
-
-api = Blueprint('songbooks', __name__,)
+api = Blueprint('songbooks', __name__)
 
 
 @api.route('/songbooks', methods=['GET', 'POST'])
@@ -46,9 +45,11 @@ def songbooks():
 
         songbook = g.model.songbooks.create_songbook(data)
 
-        g.model.logs.create_log({'event': EVENTS.SONGBOOK_NEW,
-                                 'user': current_user.get_id(),
-                                 'data': data})
+        g.model.logs.create_log({
+            'event': EVENTS.SONGBOOK_NEW,
+            'user': current_user.get_id(),
+            'data': data
+        })
 
         return jsonify(link='songbooks/{}'.format(songbook.get_id())), 201, \
               {'location': '/songbooks/{}'.format(songbook.get_id())}
@@ -78,9 +79,11 @@ def songbook_single(songbook_id):
 
         data['songbook_id'] = songbook_id
         g.model.songbooks.save(songbook)
-        g.model.logs.create_log({'event': EVENTS.SONGBOOK_EDIT,
-                                 'user': current_user.get_id(),
-                                 'data': data})
+        g.model.logs.create_log({
+            'event': EVENTS.SONGBOOK_EDIT,
+            'user': current_user.get_id(),
+            'data': data
+        })
 
         return jsonify(songbook.get_serialized_data()), 200
 
@@ -89,9 +92,11 @@ def songbook_single(songbook_id):
             raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
         g.model.songbooks.delete(songbook)
-        g.model.logs.create_log({'event': EVENTS.SONGBOOK_DELETE,
-                                 'user': current_user.get_id(),
-                                 'data': songbook_id})
+        g.model.logs.create_log({
+            'event': EVENTS.SONGBOOK_DELETE,
+            'user': current_user.get_id(),
+            'data': songbook_id
+        })
 
         return jsonify(), 204
 

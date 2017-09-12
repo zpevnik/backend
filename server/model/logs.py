@@ -45,7 +45,7 @@ class Logs(object):
 
         return log
 
-    def find(self, event=None, user=None): #TODO
+    def find(self, event=None, user=None):  #TODO
         """Find logs in the database based on the query parameters.
 
         Args:
@@ -59,7 +59,7 @@ class Logs(object):
         """
         loc = locals()
         loc.pop('self', None)
-        criteria = {k:loc[k] for k in loc if loc[k] != None}
+        criteria = {k: loc[k] for k in loc if loc[k] != None}
         doc = self._collection.find(criteria)
 
         logs = [Log(x) for x in doc]

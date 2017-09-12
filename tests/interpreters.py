@@ -6,6 +6,7 @@ from pymongo import MongoClient
 
 
 class InterpreterTest(unittest.TestCase):
+
     def setUp(self):
         # enable testing environment
         os.environ['ZPEVNIK_UNITTEST'] = 'mongodb://localhost:27017/unittest'
@@ -32,11 +33,10 @@ class InterpreterTest(unittest.TestCase):
         assert b'[]' in rv.data
 
         # add interpreter into the database
-        rv = self.app.post('/api/v1/interpreters',
-                           content_type='application/json',
-                           data=json.dumps(dict(
-                               name='Jimmy Page'
-                           )))
+        rv = self.app.post(
+            '/api/v1/interpreters',
+            content_type='application/json',
+            data=json.dumps(dict(name='Jimmy Page')))
         assert rv.status_code == 201
         assert b'"link": "interpreters/' in rv.data
 
@@ -56,27 +56,24 @@ class InterpreterTest(unittest.TestCase):
         assert interpreter['id'] == interpreter_id
 
         # test put (edit) request
-        rv = self.app.put('/api/v1/interpreters/{}'.format(interpreter_id),
-                           content_type='application/json',
-                           data=json.dumps(dict(
-                               name='Jimmy Pager'
-                           )))
+        rv = self.app.put(
+            '/api/v1/interpreters/{}'.format(interpreter_id),
+            content_type='application/json',
+            data=json.dumps(dict(name='Jimmy Pager')))
         assert rv.status_code == 200
         interpreter = json.loads(rv.data)
         assert interpreter['name'] == 'Jimmy Pager'
         assert interpreter['id'] == interpreter_id
 
         # add more interpreters into the database
-        rv = self.app.post('/api/v1/interpreters',
-                           content_type='application/json',
-                           data=json.dumps(dict(
-                               name='Jimmy Hendrix'
-                           )))
-        rv = self.app.post('/api/v1/interpreters',
-                           content_type='application/json',
-                           data=json.dumps(dict(
-                               name='Eric Clapton'
-                           )))
+        rv = self.app.post(
+            '/api/v1/interpreters',
+            content_type='application/json',
+            data=json.dumps(dict(name='Jimmy Hendrix')))
+        rv = self.app.post(
+            '/api/v1/interpreters',
+            content_type='application/json',
+            data=json.dumps(dict(name='Eric Clapton')))
 
         # remember size of the database
         rv = self.app.get('/api/v1/interpreters')
@@ -107,55 +104,49 @@ class InterpreterTest(unittest.TestCase):
         assert rv.status_code == 400
 
         # test missing field
-        rv = self.app.post('/api/v1/interpreters',
-                           content_type='application/json',
-                           data=json.dumps(dict(
-                               field="field"
-                           )))
+        rv = self.app.post(
+            '/api/v1/interpreters',
+            content_type='application/json',
+            data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
         assert b'"field": "name"' in rv.data
 
         # test duplicate interpreters
-        rv = self.app.post('/api/v1/interpreters',
-                           content_type='application/json',
-                           data=json.dumps(dict(
-                               name='Slash'
-                           )))
+        rv = self.app.post(
+            '/api/v1/interpreters',
+            content_type='application/json',
+            data=json.dumps(dict(name='Slash')))
         assert rv.status_code == 201
-        rv = self.app.post('/api/v1/interpreters',
-                           content_type='application/json',
-                           data=json.dumps(dict(
-                               name='Slash'
-                           )))
+        rv = self.app.post(
+            '/api/v1/interpreters',
+            content_type='application/json',
+            data=json.dumps(dict(name='Slash')))
         assert rv.status_code == 422
         assert b'"code": "already_exists"' in rv.data
 
     def test_put_request(self):
         # insert test interpreter for further testing
-        rv = self.app.post('/api/v1/interpreters',
-                           content_type='application/json',
-                           data=json.dumps(dict(
-                               name='Jack Black'
-                           )))
+        rv = self.app.post(
+            '/api/v1/interpreters',
+            content_type='application/json',
+            data=json.dumps(dict(name='Jack Black')))
         assert rv.status_code == 201
         interpreter = json.loads(rv.data)
         interpreter_id = interpreter['link'].split('/')[1]
 
         # test wrong interpreter
-        rv = self.app.put('/api/v1/interpreters/{}'.format('000000000000000000000000'),
-                           content_type='application/json',
-                           data=json.dumps(dict(
-                               field="field"
-                           )))
+        rv = self.app.put(
+            '/api/v1/interpreters/{}'.format('000000000000000000000000'),
+            content_type='application/json',
+            data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
 
         # test missing field
-        rv = self.app.put('/api/v1/interpreters/{}'.format(interpreter_id),
-                           content_type='application/json',
-                           data=json.dumps(dict(
-                               field="field"
-                           )))
+        rv = self.app.put(
+            '/api/v1/interpreters/{}'.format(interpreter_id),
+            content_type='application/json',
+            data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
         assert b'"field": "name"' in rv.data

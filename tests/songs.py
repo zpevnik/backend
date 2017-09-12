@@ -6,6 +6,7 @@ from pymongo import MongoClient
 
 
 class SongTest(unittest.TestCase):
+
     def setUp(self):
         # enable testing environment
         os.environ['ZPEVNIK_UNITTEST'] = 'mongodb://localhost:27017/unittest'

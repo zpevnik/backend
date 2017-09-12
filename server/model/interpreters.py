@@ -30,10 +30,7 @@ class Interpreters(object):
         Returns:
           Interpreter: Instance of the new interpreter.
         """
-        interpreter = Interpreter({
-            '_id': ObjectId(),
-            'name': data['name']
-        })
+        interpreter = Interpreter({'_id': ObjectId(), 'name': data['name']})
         self._collection.insert_one(interpreter.serialize())
         return interpreter
 
@@ -44,9 +41,9 @@ class Interpreters(object):
           interpreter (Interpreter): Instance of the interpreter.
         """
         self._collection.update_one(
-            {'_id': interpreter._id},
-            {'$set': interpreter.serialize(update=True)}
-        )
+            {
+                '_id': interpreter._id
+            }, {'$set': interpreter.serialize(update=True)})
 
     def delete(self, interpreter):
         """Delete interpreter from the database.

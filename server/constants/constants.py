@@ -1,4 +1,3 @@
-
 class Events(object):
     AUTHOR_NEW = 'author_new'
     AUTHOR_EDIT = 'author_edit'
@@ -16,6 +15,7 @@ class Events(object):
     SONGBOOK_EDIT = 'songbook_edit'
     SONGBOOK_DELETE = 'songbook_delete'
 
+
 EVENTS = Events()
 
 
@@ -24,10 +24,7 @@ class Permissions(object):
     UNIT = 'unit'
     PUBLIC = 'public'
 
+
 PERMISSION = Permissions()
 
-permission_dict = [
-    PERMISSION.PRIVATE,
-    PERMISSION.UNIT,
-    PERMISSION.PUBLIC
-]
+permission_dict = [PERMISSION.PRIVATE, PERMISSION.UNIT, PERMISSION.PUBLIC]

@@ -43,7 +43,10 @@ class Songs(object):
             'owner_unit': data['owner_unit'],
             'text': data['text'] if 'text' in data else '',
             'description': data['description'] if 'description' in data else '',
-            'authors': data['authors'] if 'authors' in data else {'lyrics': [], 'music': []},
+            'authors': data['authors'] if 'authors' in data else {
+                'lyrics': [],
+                'music': []
+            },
             'interpreters': data['interpreters'] if 'interpreters' in data else [],
             'visibility': data['visibility'],
             'edit_perm': data['edit_perm']
@@ -58,10 +61,7 @@ class Songs(object):
         Args:
           song (Song): Instance of the song.
         """
-        self._collection.update_one(
-            {'_id': song._id},
-            {'$set': song.serialize(update=True)}
-        )
+        self._collection.update_one({'_id': song._id}, {'$set': song.serialize(update=True)})
 
     def delete(self, song):
         """Delete song from the database.

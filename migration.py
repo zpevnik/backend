@@ -13,7 +13,6 @@ from bson import ObjectId
 from server.model import Model
 from server.constants import PERMISSION
 
-
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
@@ -77,10 +76,7 @@ def migration_2017_09_05_2():
             continue
 
         song['text'] = translate(song['text'])
-        collection.update(
-            {'_id': song['_id']},
-            {'$set': song}
-        )
+        collection.update({'_id': song['_id']}, {'$set': song})
 
 
 def migration_2017_09_05_1():
@@ -160,18 +156,10 @@ def migration_2017_08_18_1():
         else:
             author['name'] = author['firstname']
 
-        collection.update(
-            {'_id': author['_id']},
-            {'$set': author}
-        )
+        collection.update({'_id': author['_id']}, {'$set': author})
 
-        collection.update(
-            {'_id': author['_id']},
-            {'$unset': {
-                'firstname': '',
-                'surname': ''
-            }}
-        )
+        collection.update({'_id': author['_id']}, {'$unset': {'firstname': '', 'surname': ''}})
+
 
 def migration_2017_08_18_2():
     logger.info('12.08.2017 - Changing songbooks database to Zpevnik version 2.')
@@ -182,13 +170,13 @@ def migration_2017_08_18_2():
     for songbook in songbooks:
         songbook['owner'] = None if 'owner' not in songbook else songbook['owner']
         songbook['owner_unit'] = None if 'owner_unit' not in songbook else songbook['owner_unit']
-        songbook['visibility'] = PERMISSION.PUBLIC if 'visibility' not in songbook else songbook['visibility']
-        songbook['edit_perm'] = PERMISSION.PUBLIC if 'edit_perm' not in songbook else songbook['edit_perm']
+        songbook['visibility'] = PERMISSION.PUBLIC if 'visibility' not in songbook else songbook[
+            'visibility']
+        songbook['edit_perm'] = PERMISSION.PUBLIC if 'edit_perm' not in songbook else songbook[
+            'edit_perm']
 
-        collection.update(
-            {'_id': songbook['_id']},
-            {'$set': songbook}
-        )
+        collection.update({'_id': songbook['_id']}, {'$set': songbook})
+
 
 def migration_2017_08_18_3():
     logger.info('12.08.2017 - Changing users database to Zpevnik version 2.')
@@ -200,17 +188,10 @@ def migration_2017_08_18_3():
         user['active_songbook'] = None if 'active_songbook' not in user else user['active_songbook']
         user['last_login'] = user['lastLogin'] if 'last_login' not in user else user['last_login']
 
-        collection.update(
-            {'_id': user['_id']},
-            {'$set': user}
-        )
+        collection.update({'_id': user['_id']}, {'$set': user})
 
-        collection.update(
-            {'_id': user['_id']},
-            {'$unset': {
-                'lastLogin': ''
-            }}
-        )
+        collection.update({'_id': user['_id']}, {'$unset': {'lastLogin': ''}})
+
 
 def migration_2017_08_18_4():
     logger.info('12.08.2017 - Changing songs database to Zpevnik version 2.')
@@ -225,10 +206,8 @@ def migration_2017_08_18_4():
         song['visibility'] = PERMISSION.PUBLIC if 'visibility' not in song else song['visibility']
         song['edit_perm'] = PERMISSION.PUBLIC if 'edit_perm' not in song else song['edit_perm']
 
-        collection.update(
-            {'_id': song['_id']},
-            {'$set': song}
-        )
+        collection.update({'_id': song['_id']}, {'$set': song})
+
 
 #migration_2017_08_18_1()
 #migration_2017_08_18_2()

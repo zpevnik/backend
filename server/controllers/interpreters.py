@@ -10,8 +10,8 @@ from server.util import validators
 
 #from server.constants import EVENTS
 
+api = Blueprint('interpreters', __name__)
 
-api = Blueprint('interpreters', __name__,)
 
 @api.route('/interpreters', methods=['GET', 'POST'])
 @login_required
@@ -35,9 +35,9 @@ def interpreters():
 
         interpreter = g.model.interpreters.create_interpreter(data)
 
-#        g.model.logs.create_log({'event': EVENTS.AUTHOR_NEW,
-#                                 'user': current_user.get_id(),
-#                                 'data': data})
+        #        g.model.logs.create_log({'event': EVENTS.AUTHOR_NEW,
+        #                                 'user': current_user.get_id(),
+        #                                 'data': data})
 
         return jsonify(link='interpreters/{}'.format(interpreter.get_id())), 201, \
               {'location': '/interpreters/{}'.format(interpreter.get_id())}
@@ -62,18 +62,19 @@ def interpreter_single(interpreter_id):
 
         data['interpreter_id'] = interpreter_id
         g.model.interpreters.save(interpreter)
-#        g.model.logs.create_log({'event': EVENTS.AUTHOR_EDIT,
-#                                 'user': current_user.get_id(),
-#                                 'data': data})
+        #        g.model.logs.create_log({'event': EVENTS.AUTHOR_EDIT,
+        #                                 'user': current_user.get_id(),
+        #                                 'data': data})
 
         return jsonify(interpreter.get_serialized_data()), 200
 
     else:
         g.model.interpreters.delete(interpreter)
-#        g.model.logs.create_log({'event': EVENTS.AUTHOR_DELETE,
-#                                 'user': current_user.get_id(),
-#                                 'data': author_id})
+        #        g.model.logs.create_log({'event': EVENTS.AUTHOR_DELETE,
+        #                                 'user': current_user.get_id(),
+        #                                 'data': author_id})
 
         return jsonify(), 204
+
 
 app.register_blueprint(api, url_prefix='/api/v1')

@@ -19,7 +19,6 @@ from server.util import ValidationException
 from server.util import CompilationException
 from server.util import RequestException
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -30,11 +29,13 @@ def handle_ClientException(error):
     response.status_code = error.status_code
     return response
 
+
 @app.errorhandler(RequestException)
 def handle_RequestException(error):
     response = jsonify(message=error.message)
     response.status_code = error.status_code
     return response
+
 
 @app.errorhandler(CompilationException)
 def handle_CompilationException(error):
@@ -42,17 +43,20 @@ def handle_CompilationException(error):
     response.status_code = error.status_code
     return response
 
+
 @app.errorhandler(ValidationException)
 def handle_ValidationException(error):
     response = jsonify(error.get_json())
     response.status_code = error.status_code
     return response
 
+
 @app.errorhandler(IOError)
 def handle_IOError(error):
     response = jsonify(error.filename + ": " + error.strerror)
     response.status_code = 500
     return response
+
 
 @app.route("/test")
 @login_required
@@ -62,8 +66,9 @@ def test_page():
     #    abort(404)
 
     user = current_user
-    return render_template('test.html', logout_link=skautis.get_logout_url(user.get_token()),
-                                        username=user.get_name())
+    return render_template(
+        'test.html', logout_link=skautis.get_logout_url(user.get_token()), username=user.get_name())
+
 
 @app.route("/application")
 @login_required
@@ -77,10 +82,12 @@ def application():
     response.headers["Expires"] = "0"
     return response
 
+
 @app.route('/download/<path:filename>', methods=['GET'])
 def download(filename):
     directory = os.path.join(os.getcwd(), 'songs/done')
     return send_from_directory(directory=directory, filename=filename)
+
 
 @app.route("/cleanup")
 def cleanup():

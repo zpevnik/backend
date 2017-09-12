@@ -30,10 +30,7 @@ class Authors(object):
         Returns:
           Author: Instance of the new author.
         """
-        author = Author({
-            '_id': ObjectId(),
-            'name': data['name']
-        })
+        author = Author({'_id': ObjectId(), 'name': data['name']})
         self._collection.insert_one(author.serialize())
         return author
 
@@ -43,10 +40,7 @@ class Authors(object):
         Args:
           author (Author): Instance of the author.
         """
-        self._collection.update_one(
-            {'_id': author._id},
-            {'$set': author.serialize(update=True)}
-        )
+        self._collection.update_one({'_id': author._id}, {'$set': author.serialize(update=True)})
 
     def delete(self, author):
         """Delete author from the database.

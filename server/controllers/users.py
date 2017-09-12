@@ -33,12 +33,13 @@ login_manager.login_message_category = "info"
 def load_user(userid):
     return g.model.users.find(userid)
 
+
 @app.route('/')
 def index():
     # Render out the login page
-    return render_template('login.html',
-                           login_link=skautis.get_login_url(),
-                           app_name=app.config['APP_NAME'])
+    return render_template(
+        'login.html', login_link=skautis.get_login_url(), app_name=app.config['APP_NAME'])
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -49,13 +50,13 @@ def login():
     try:
         user_info = skautis.UserManagement.UserDetail(skautis_token, None)
     except zeep.exceptions.Fault:
-        return redirect(url_for('/'))        
+        return redirect(url_for('/'))
 
     user_id = user_info['ID']
     user = g.model.users.find(user_id)
     if user is None:
-        user = g.model.users.create_user(user_id, user_info['UserName'], 
-                                         user_info['IsActive'], skautis_idunit)
+        user = g.model.users.create_user(user_id, user_info['UserName'], user_info['IsActive'],
+                                         skautis_idunit)
 
     user.set_token(skautis_token)
     g.model.users.save(user)
@@ -64,6 +65,7 @@ def login():
     arg_next = request.args.get('next')
 
     return redirect(arg_next or url_for('application'))
+
 
 @app.route('/logout', methods=['POST'])
 @login_required
@@ -74,6 +76,7 @@ def logout():
 
     logout_user()
     return redirect(url_for('index'))
+
 
 @app.route('/test_login', methods=['GET'])
 def test_login():
@@ -93,8 +96,8 @@ def test_login():
     return redirect(url_for('test_page'))
 
 
+api = Blueprint('users', __name__)
 
-api = Blueprint('users', __name__,)
 
 @api.route('/user', methods=['GET'])
 @login_required
@@ -117,5 +120,6 @@ def user_songbook(songbook_id):
     g.model.users.save(current_user)
 
     return jsonify({'message': 'Aktivní zpěvník byl změněn.'}), 200
+
 
 app.register_blueprint(api, url_prefix='/api/v1')

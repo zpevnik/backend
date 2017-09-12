@@ -10,8 +10,7 @@ from server.util import validators
 
 from server.constants import EVENTS
 
-
-api = Blueprint('authors', __name__,)
+api = Blueprint('authors', __name__)
 
 
 @api.route('/authors', methods=['GET', 'POST'])
@@ -34,9 +33,11 @@ def authors():
 
         author = g.model.authors.create_author(data)
 
-        g.model.logs.create_log({'event': EVENTS.AUTHOR_NEW,
-                                 'user': current_user.get_id(),
-                                 'data': data})
+        g.model.logs.create_log({
+            'event': EVENTS.AUTHOR_NEW,
+            'user': current_user.get_id(),
+            'data': data
+        })
 
         return jsonify(link='authors/{}'.format(author.get_id())), 201, \
               {'location': '/authors/{}'.format(author.get_id())}
@@ -61,18 +62,23 @@ def author_single(author_id):
 
         data['author_id'] = author_id
         g.model.authors.save(author)
-        g.model.logs.create_log({'event': EVENTS.AUTHOR_EDIT,
-                                 'user': current_user.get_id(),
-                                 'data': data})
+        g.model.logs.create_log({
+            'event': EVENTS.AUTHOR_EDIT,
+            'user': current_user.get_id(),
+            'data': data
+        })
 
         return jsonify(author.get_serialized_data()), 200
 
     else:
         g.model.authors.delete(author)
-        g.model.logs.create_log({'event': EVENTS.AUTHOR_DELETE,
-                                 'user': current_user.get_id(),
-                                 'data': author_id})
+        g.model.logs.create_log({
+            'event': EVENTS.AUTHOR_DELETE,
+            'user': current_user.get_id(),
+            'data': author_id
+        })
 
         return jsonify(), 204
+
 
 app.register_blueprint(api, url_prefix='/api/v1')

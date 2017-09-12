@@ -21,20 +21,22 @@ logger = logging.getLogger(__name__)
 def setup_handler(handler, level, fmt, use_colors=False):
     handler.setLevel(level)
     if use_colors:
-        handler.setFormatter(ColoredFormatter(
-            "%(log_color)s" + fmt,
-            datefmt=None,
-            reset=True,
-            log_colors={
-                'DEBUG': 'cyan',
-                'INFO': 'green',
-                'WARNING': 'yellow',
-                'ERROR': 'red',
-                'CRITICAL': 'red',
-            }))
+        handler.setFormatter(
+            ColoredFormatter(
+                "%(log_color)s" + fmt,
+                datefmt=None,
+                reset=True,
+                log_colors={
+                    'DEBUG': 'cyan',
+                    'INFO': 'green',
+                    'WARNING': 'yellow',
+                    'ERROR': 'red',
+                    'CRITICAL': 'red',
+                }))
     else:
         handler.setFormatter(logging.Formatter(fmt))
     return handler
+
 
 def setup_logging():
     logging.Formatter.converter = time.gmtime
@@ -43,9 +45,10 @@ def setup_logging():
     rootLogger.setLevel(logging.DEBUG)
 
     consoleFormat = ('[%(asctime)s] %(levelname)s %(name)s: %(message)s')
-    consoleHandler = setup_handler(logging.StreamHandler(), logging.DEBUG,
-                                   consoleFormat, use_colors=True)
+    consoleHandler = setup_handler(
+        logging.StreamHandler(), logging.DEBUG, consoleFormat, use_colors=True)
     rootLogger.addHandler(consoleHandler)
+
 
 # create Flask application
 app = Flask(__name__)
@@ -72,8 +75,10 @@ db = mongoClient[parsed.path[1:]]
 # init model for Zpevnik application
 model = Model(db=db)
 
+
 @app.before_request
 def before_request():
     g.model = model
+
 
 from server import controllers

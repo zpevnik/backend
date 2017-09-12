@@ -25,6 +25,7 @@ def handle_GET_request(request):
 
     return data
 
+
 def song_existence(song_id):
     try:
         song = g.model.songs.find_one(song_id=song_id)
@@ -34,6 +35,7 @@ def song_existence(song_id):
     if song is None:
         raise ClientException(STRINGS.SONG_NOT_FOUND_ERROR, 422)
     return song
+
 
 def songbook_existence(songbook_id):
     try:
@@ -45,6 +47,7 @@ def songbook_existence(songbook_id):
         raise ClientException(STRINGS.SONGBOOK_NOT_FOUND_ERROR, 422)
     return songbook
 
+
 def author_existence(author_id):
     try:
         author = g.model.authors.find_one(author_id=author_id)
@@ -54,6 +57,7 @@ def author_existence(author_id):
     if author is None:
         raise ClientException(STRINGS.AUTHOR_NOT_FOUND_ERROR, 422)
     return author
+
 
 def interpreter_existence(interpreter_id):
     try:
@@ -65,63 +69,90 @@ def interpreter_existence(interpreter_id):
         raise ClientException(STRINGS.INTERPRETER_NOT_FOUND_ERROR, 422)
     return interpreter
 
+
 def author_nonexistence(name):
     author = g.model.authors.find_one(name=name)
     if author is not None:
-        raise ValidationException(STRINGS.AUTHOR_ALREADY_EXISTS_ERROR, 422,
-                                  errors=[{'field': None,
-                                           'code': 'already_exists',
-                                           'message': STRINGS.AUTHOR_ALREADY_EXISTS_ERROR}])
+        raise ValidationException(
+            STRINGS.AUTHOR_ALREADY_EXISTS_ERROR,
+            422,
+            errors=[{
+                'field': None,
+                'code': 'already_exists',
+                'message': STRINGS.AUTHOR_ALREADY_EXISTS_ERROR
+            }])
     return True
+
 
 def interpreter_nonexistence(name):
     interpreter = g.model.interpreters.find_one(name=name)
     if interpreter is not None:
-        raise ValidationException(STRINGS.INTERPRETER_ALREADY_EXISTS_ERROR, 422,
-                                  errors=[{'field': None,
-                                           'code': 'already_exists',
-                                           'message': STRINGS.INTERPRETER_ALREADY_EXISTS_ERROR}])
+        raise ValidationException(
+            STRINGS.INTERPRETER_ALREADY_EXISTS_ERROR,
+            422,
+            errors=[{
+                'field': None,
+                'code': 'already_exists',
+                'message': STRINGS.INTERPRETER_ALREADY_EXISTS_ERROR
+            }])
     return True
+
 
 def authors_request(request):
     if 'name' not in request or not request['name']:
-        err = [{'field': 'name',
-                'code': 'missing_field',
-                'message': STRINGS.REQUEST_AUTHOR_NAME_MISSING}]
+        err = [{
+            'field': 'name',
+            'code': 'missing_field',
+            'message': STRINGS.REQUEST_AUTHOR_NAME_MISSING
+        }]
         raise ValidationException(STRINGS.POST_REQUEST_ERROR, 422, errors=err)
     return {'name': request['name']}
 
+
 def interpreters_request(request):
     if 'name' not in request or not request['name']:
-        err = [{'field': 'name',
-                'code': 'missing_field',
-                'message': STRINGS.REQUEST_INTERPRETER_NAME_MISSING}]
+        err = [{
+            'field': 'name',
+            'code': 'missing_field',
+            'message': STRINGS.REQUEST_INTERPRETER_NAME_MISSING
+        }]
         raise ValidationException(STRINGS.POST_REQUEST_ERROR, 422, errors=err)
     return {'name': request['name']}
+
 
 def songs_request(request):
     err = []
     print(request)
     if 'title' not in request or not request['title']:
-        err.append({'field': 'title',
-                    'code': 'missing_field',
-                    'message': STRINGS.REQUEST_SONG_TITLE_MISSING})
+        err.append({
+            'field': 'title',
+            'code': 'missing_field',
+            'message': STRINGS.REQUEST_SONG_TITLE_MISSING
+        })
     if 'text' not in request or not request['text']:
-        err.append({'field': 'text',
-                    'code': 'missing_field',
-                    'message': STRINGS.REQUEST_SONG_TEXT_MISSING})
+        err.append({
+            'field': 'text',
+            'code': 'missing_field',
+            'message': STRINGS.REQUEST_SONG_TEXT_MISSING
+        })
     if 'description' not in request:
-        err = [{'field': 'description',
-                'code': 'missing_field',
-                'message': STRINGS.REQUEST_SONG_DESCRIPTION_MISSING}]
+        err = [{
+            'field': 'description',
+            'code': 'missing_field',
+            'message': STRINGS.REQUEST_SONG_DESCRIPTION_MISSING
+        }]
     if 'authors' not in request:
-        err = [{'field': 'authors',
-                'code': 'missing_field',
-                'message': STRINGS.REQUEST_SONG_AUTHORS_MISSING}]
+        err = [{
+            'field': 'authors',
+            'code': 'missing_field',
+            'message': STRINGS.REQUEST_SONG_AUTHORS_MISSING
+        }]
     if 'interpreters' not in request:
-        err = [{'field': 'interpreters',
-                'code': 'missing_field',
-                'message': STRINGS.REQUEST_SONG_INTERPRETERS_MISSING}]
+        err = [{
+            'field': 'interpreters',
+            'code': 'missing_field',
+            'message': STRINGS.REQUEST_SONG_INTERPRETERS_MISSING
+        }]
 
     if err:
         raise ValidationException(STRINGS.POST_REQUEST_ERROR, 422, errors=err)
@@ -139,11 +170,14 @@ def songs_request(request):
         data['edit_perm'] = request['edit_perm']
     return data
 
+
 def songbooks_request(request):
     if 'title' not in request or not request['title']:
-        err = [{'field': 'title',
-                'code': 'missing_field',
-                'message': STRINGS.REQUEST_SONGBOOK_TITLE_MISSING}]
+        err = [{
+            'field': 'title',
+            'code': 'missing_field',
+            'message': STRINGS.REQUEST_SONGBOOK_TITLE_MISSING
+        }]
         raise ValidationException(STRINGS.POST_REQUEST_ERROR, 422, errors=err)
 
     data = {'title': request['title']}
@@ -153,6 +187,7 @@ def songbooks_request(request):
         data['edit_perm'] = request['edit_perm']
 
     return data
+
 
 def json_request(request):
     if not request:

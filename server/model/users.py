@@ -45,10 +45,7 @@ class Users(object):
         return user
 
     def save(self, user):
-        self._collection.update_one(
-            {'_id': user.get_id()},
-            {'$set': user.serialize(update=True)}
-        )
+        self._collection.update_one({'_id': user.get_id()}, {'$set': user.serialize(update=True)})
 
     def find(self, userid):
         doc = self._collection.find_one(userid)

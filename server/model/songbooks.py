@@ -53,9 +53,9 @@ class Songbooks(object):
           songbook (Songbook): Instance of the songbook.
         """
         self._collection.update_one(
-            {'_id': songbook.get_id},
-            {'$set': songbook.serialize(update=True)}
-        )
+            {
+                '_id': songbook.get_id
+            }, {'$set': songbook.serialize(update=True)})
 
     def delete(self, songbook):
         """Delete songbook from the database.

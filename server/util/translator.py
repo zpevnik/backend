@@ -1,4 +1,4 @@
-def translate_to_tex(song): #FIXME
+def translate_to_tex(song):  #FIXME
 
     state_chorus = False
     state_verse = False
@@ -48,6 +48,7 @@ def translate_to_tex(song): #FIXME
     output = output.replace('%', '\\%')
 
     return output
+
 
 #def translate_to_tex(song):
 #    _log = []
@@ -137,7 +138,7 @@ def translate_to_tex(song): #FIXME
 #
 #        _log.append(STRINGS.TRANSLATOR.UNKNOWN_TAG.format(_idx, match.group()))
 #        return '[{}]'.format(tag)
-#    
+#
 #    content = [x.strip() for x in song.split('\n')]
 #
 #    for _idx, line in enumerate(content):
