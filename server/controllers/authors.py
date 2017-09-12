@@ -7,6 +7,7 @@ from flask_login import login_required
 
 from server.app import app
 from server.util import validators
+from server.util import log_event
 
 from server.constants import EVENTS
 
@@ -32,12 +33,7 @@ def authors():
         validators.author_nonexistence(data['name'])
 
         author = g.model.authors.create_author(data)
-
-        g.model.logs.create_log({
-            'event': EVENTS.AUTHOR_NEW,
-            'user': current_user.get_id(),
-            'data': data
-        })
+        log_event(EVENTS.AUTHOR_NEW, current_user.get_id(), data)
 
         return jsonify(link='authors/{}'.format(author.get_id())), 201, \
               {'location': '/authors/{}'.format(author.get_id())}
@@ -62,21 +58,13 @@ def author_single(author_id):
 
         data['author_id'] = author_id
         g.model.authors.save(author)
-        g.model.logs.create_log({
-            'event': EVENTS.AUTHOR_EDIT,
-            'user': current_user.get_id(),
-            'data': data
-        })
+        log_event(EVENTS.AUTHOR_EDIT, current_user.get_id(), data)
 
         return jsonify(author.get_serialized_data()), 200
 
     else:
         g.model.authors.delete(author)
-        g.model.logs.create_log({
-            'event': EVENTS.AUTHOR_DELETE,
-            'user': current_user.get_id(),
-            'data': author_id
-        })
+        log_event(EVENTS.AUTHOR_DELETE, current_user.get_id(), author_id)
 
         return jsonify(), 204
 

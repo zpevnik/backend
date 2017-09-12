@@ -15,14 +15,12 @@ class Model(object):
     """
 
     def __init__(self, db):
-        from server.model.logs import Logs
         from server.model.users import Users
         from server.model.songs import Songs
         from server.model.authors import Authors
         from server.model.songbooks import Songbooks
         from server.model.interpreters import Interpreters
 
-        self.logs = Logs(model=self, db=db)
         self.users = Users(model=self, db=db)
         self.songs = Songs(model=self, db=db)
         self.authors = Authors(model=self, db=db)

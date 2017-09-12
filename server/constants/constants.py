@@ -1,19 +1,25 @@
 class Events(object):
-    AUTHOR_NEW = 'author_new'
-    AUTHOR_EDIT = 'author_edit'
-    AUTHOR_DELETE = 'author_delete'
+    AUTHOR_NEW = 'AUTHOR NEW'
+    AUTHOR_EDIT = 'AUTHOR EDIT'
+    AUTHOR_DELETE = 'AUTHOR DELETE'
 
-    SONG_NEW = 'song_new'
-    SONG_EDIT = 'song_edit'
-    SONG_DELETE = 'song_delete'
+    INTERPRETER_NEW = 'INTERPRETER NEW'
+    INTERPRETER_EDIT = 'INTERPRETER EDIT'
+    INTERPRETER_DELETE = 'INTERPRETER DELETE'
 
-    VARIANT_NEW = 'variant_new'
-    VARIANT_EDIT = 'variant_edit'
-    VARIANT_DELETE = 'variant_delete'
+    SONG_NEW = 'SONG NEW'
+    SONG_EDIT = 'SONG EDIT'
+    SONG_DELETE = 'SONG DELETE'
 
-    SONGBOOK_NEW = 'songbook_new'
-    SONGBOOK_EDIT = 'songbook_edit'
-    SONGBOOK_DELETE = 'songbook_delete'
+    VARIANT_NEW = 'VARIANT NEW'
+    VARIANT_EDIT = 'VARIANT EDIT'
+    VARIANT_DELETE = 'VARIANT DELETE'
+
+    SONGBOOK_NEW = 'SONGBOOK NEW'
+    SONGBOOK_EDIT = 'SONGBOOK EDIT'
+    SONGBOOK_DELETE = 'SONGBOOK DELETE'
+    SONGBOOK_ADD_SONG = 'SONGBOOK ADD SONG'
+    SONGBOOK_REMOVE_SONG = 'SONGBOOK REMOVE SONG'
 
 
 EVENTS = Events()

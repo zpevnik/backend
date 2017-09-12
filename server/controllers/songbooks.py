@@ -9,6 +9,7 @@ from server.app import app
 from server.util import export_songbook
 from server.util import permissions
 from server.util import validators
+from server.util import log_event
 from server.util.exceptions import ClientException
 
 from server.constants import EVENTS
@@ -44,12 +45,7 @@ def songbooks():
         data['edit_perm'] = PERMISSION.PRIVATE
 
         songbook = g.model.songbooks.create_songbook(data)
-
-        g.model.logs.create_log({
-            'event': EVENTS.SONGBOOK_NEW,
-            'user': current_user.get_id(),
-            'data': data
-        })
+        log_event(EVENTS.SONGBOOK_NEW, current_user.get_id(), data)
 
         return jsonify(link='songbooks/{}'.format(songbook.get_id())), 201, \
               {'location': '/songbooks/{}'.format(songbook.get_id())}
@@ -79,11 +75,7 @@ def songbook_single(songbook_id):
 
         data['songbook_id'] = songbook_id
         g.model.songbooks.save(songbook)
-        g.model.logs.create_log({
-            'event': EVENTS.SONGBOOK_EDIT,
-            'user': current_user.get_id(),
-            'data': data
-        })
+        log_event(EVENTS.SONGBOOK_EDIT, current_user.get_id(), data)
 
         return jsonify(songbook.get_serialized_data()), 200
 
@@ -92,11 +84,7 @@ def songbook_single(songbook_id):
             raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
         g.model.songbooks.delete(songbook)
-        g.model.logs.create_log({
-            'event': EVENTS.SONGBOOK_DELETE,
-            'user': current_user.get_id(),
-            'data': songbook_id
-        })
+        log_event(EVENTS.SONGBOOK_DELETE, current_user.get_id(), songbook_id)
 
         return jsonify(), 204
 
@@ -113,16 +101,19 @@ def songbook_song_variants(songbook_id, song_id):
         if not permissions.check_perm(current_user, song, visibility=True):
             raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
-        #data = request.get_json()
-        #validators.json_request(data)
-
         songbook.add_song(song_id, None)
         g.model.songbooks.save(songbook)
+        log_event(EVENTS.SONGBOOK_ADD_SONG,
+                  current_user.get_id(), {'songbook': songbook_id,
+                                          'song': song_id})
+
         return jsonify({'message': STRINGS.SONGBOOK_ADD_SONG_SUCCESS}), 200
 
     else:
         songbook.remove_song(song_id)
         g.model.songbooks.save(songbook)
+        log_event(EVENTS.SONGBOOK_REMOVE_SONG, current_user.get_id(), song_id)
+
         return jsonify(), 204
 
 

@@ -9,6 +9,7 @@ from server.app import app
 from server.util import export_song
 from server.util import permissions
 from server.util import validators
+from server.util import log_event
 from server.util.exceptions import ClientException
 
 from server.constants import EVENTS
@@ -51,12 +52,7 @@ def songs():
             validators.interpreter_existence(interpreter)
 
         song = g.model.songs.create_song(data)
-
-        g.model.logs.create_log({
-            'event': EVENTS.SONG_NEW,
-            'user': current_user.get_id(),
-            'data': data
-        })
+        log_event(EVENTS.SONG_NEW, current_user.get_id(), data)
 
         return jsonify(link='songs/{}'.format(song.get_id())), 201, \
               {'location': '/songs/{}'.format(song.get_id())}
@@ -93,11 +89,7 @@ def song_single(song_id):
 
         data['song_id'] = song_id
         g.model.songs.save(song)
-        g.model.logs.create_log({
-            'event': EVENTS.SONG_EDIT,
-            'user': current_user.get_id(),
-            'data': data
-        })
+        log_event(EVENTS.SONG_EDIT, current_user.get_id(), data)
 
         return jsonify(song.get_serialized_data()), 200
 
@@ -106,11 +98,7 @@ def song_single(song_id):
             raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
         g.model.songs.delete(song)
-        g.model.logs.create_log({
-            'event': EVENTS.SONG_DELETE,
-            'user': current_user.get_id(),
-            'data': song_id
-        })
+        log_event(EVENTS.SONG_DELETE, current_user.get_id(), song_id)
 
         return jsonify(), 204
 

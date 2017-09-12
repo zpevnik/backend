@@ -1,11 +1,8 @@
 from server.util.export import export_song
 from server.util.export import export_songbook
 
-from server.util.docid import generate_random_filename
-from server.util.docid import generate_random_uuid
-from server.util.docid import uuid_to_str
-from server.util.docid import uuid_from_str
-from server.util.docid import check_valid_uuid
+from server.util.misc import generate_random_filename
+from server.util.misc import log_event
 
 from server.util.translator import translate_to_tex
 

@@ -2,7 +2,7 @@ import os
 import subprocess
 
 from server.util import validators
-from server.util.docid import generate_random_filename
+from server.util.misc import generate_random_filename
 from server.util.exceptions import CompilationException
 
 

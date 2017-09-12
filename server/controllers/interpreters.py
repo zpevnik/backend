@@ -7,8 +7,9 @@ from flask_login import login_required
 
 from server.app import app
 from server.util import validators
+from server.util import log_event
 
-#from server.constants import EVENTS
+from server.constants import EVENTS
 
 api = Blueprint('interpreters', __name__)
 
@@ -17,8 +18,6 @@ api = Blueprint('interpreters', __name__)
 @login_required
 def interpreters():
     if request.method == 'GET':
-        #data = validators.handle_GET_request(request.args)
-        #result = g.model.interpreters.find_special(data['query'], data['page'], data['per_page'])
         result = g.model.interpreters.find()
         response = []
         for res in result:
@@ -34,10 +33,7 @@ def interpreters():
         validators.interpreter_nonexistence(data['name'])
 
         interpreter = g.model.interpreters.create_interpreter(data)
-
-        #        g.model.logs.create_log({'event': EVENTS.AUTHOR_NEW,
-        #                                 'user': current_user.get_id(),
-        #                                 'data': data})
+        log_event(EVENTS.INTERPRETER_NEW, current_user.get_id(), data)
 
         return jsonify(link='interpreters/{}'.format(interpreter.get_id())), 201, \
               {'location': '/interpreters/{}'.format(interpreter.get_id())}
@@ -62,17 +58,13 @@ def interpreter_single(interpreter_id):
 
         data['interpreter_id'] = interpreter_id
         g.model.interpreters.save(interpreter)
-        #        g.model.logs.create_log({'event': EVENTS.AUTHOR_EDIT,
-        #                                 'user': current_user.get_id(),
-        #                                 'data': data})
+        log_event(EVENTS.INTERPRETER_EDIT, current_user.get_id(), data)
 
         return jsonify(interpreter.get_serialized_data()), 200
 
     else:
         g.model.interpreters.delete(interpreter)
-        #        g.model.logs.create_log({'event': EVENTS.AUTHOR_DELETE,
-        #                                 'user': current_user.get_id(),
-        #                                 'data': author_id})
+        log_event(EVENTS.INTERPRETER_DELETE, current_user.get_id(), interpreter_id)
 
         return jsonify(), 204
 
