@@ -10,6 +10,7 @@ class AuthorTest(unittest.TestCase):
     def setUp(self):
         # enable testing environment
         os.environ['ZPEVNIK_UNITTEST'] = 'mongodb://localhost:27017/unittest'
+        self.mongo_client = MongoClient('mongodb://localhost:27017/unittest')
 
         # get application for testing
         from server.app import app
@@ -23,8 +24,7 @@ class AuthorTest(unittest.TestCase):
         del os.environ['ZPEVNIK_UNITTEST']
 
         # delete all test database entries
-        mongoClient = MongoClient('mongodb://localhost:27017/unittest')
-        mongoClient.drop_database('unittest')
+        self.mongo_client.drop_database('unittest')
 
     def test_author_basics(self):
         # check empty database get request
@@ -98,6 +98,9 @@ class AuthorTest(unittest.TestCase):
         rv = self.app.delete('/api/v1/authors/{}'.format(author_id))
         assert rv.status_code == 422
 
+        # clean the database
+        self.mongo_client.drop_database('unittest')
+
     def test_post_requests(self):
         # test json request error
         rv = self.app.post('/api/v1/authors')
@@ -120,6 +123,9 @@ class AuthorTest(unittest.TestCase):
             '/api/v1/authors', content_type='application/json', data=json.dumps(dict(name='Slash')))
         assert rv.status_code == 422
         assert b'"code": "already_exists"' in rv.data
+
+        # clean the database
+        self.mongo_client.drop_database('unittest')
 
     def test_put_request(self):
         # insert test author for further testing
@@ -146,3 +152,6 @@ class AuthorTest(unittest.TestCase):
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
         assert b'"field": "name"' in rv.data
+
+        # clean the database
+        self.mongo_client.drop_database('unittest')

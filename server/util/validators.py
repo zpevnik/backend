@@ -122,7 +122,6 @@ def interpreters_request(request):
 
 def songs_request(request):
     err = []
-    print(request)
     if 'title' not in request or not request['title']:
         err.append({
             'field': 'title',

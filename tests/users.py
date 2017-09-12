@@ -10,6 +10,7 @@ class UserTest(unittest.TestCase):
     def setUp(self):
         # enable testing environment
         os.environ['ZPEVNIK_UNITTEST'] = 'mongodb://localhost:27017/unittest'
+        self.mongo_client = MongoClient('mongodb://localhost:27017/unittest')
 
         # get application for testing
         from server.app import app
@@ -23,8 +24,7 @@ class UserTest(unittest.TestCase):
         del os.environ['ZPEVNIK_UNITTEST']
 
         # delete all test database entries
-        mongoClient = MongoClient('mongodb://localhost:27017/unittest')
-        mongoClient.drop_database('unittest')
+        self.mongo_client.drop_database('unittest')
 
     def test_user_basics(self):
         # check user info

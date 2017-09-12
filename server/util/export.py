@@ -75,9 +75,11 @@ def export_to_pdf(filename):
 
     # move finished pdf file to other folder and clean up temp
     os.rename('songs/temp/' + filename + '.pdf', 'songs/done/' + filename + '.pdf')
-    #    for fname in os.listdir('songs/temp'):
-    #        if fname.startswith(filename):
-    #            os.remove(os.path.join('songs/temp', fname))
+
+    # remove all aux files
+    for fname in os.listdir('songs/temp'):
+        if fname.startswith(filename):
+            os.remove(os.path.join('songs/temp', fname))
 
     if not os.path.isfile("songs/done/" + filename + ".pdf"):
         raise CompilationException('Final pdf file does not exist.', 500)

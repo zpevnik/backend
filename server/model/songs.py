@@ -253,7 +253,7 @@ class Song(object):
         with open('songs/sample/sample.sbd', 'r') as sample_file:
             filedata = sample_file.read()
 
-        text = translate_to_tex(self._text)
+        text, log = translate_to_tex(self._text)
 
         authors = []
         for author_id in self._interpreters:
