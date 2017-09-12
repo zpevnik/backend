@@ -25,8 +25,22 @@ db = mongoClient[parsed.path[1:]]
 model = Model(db=db)
 
 
+def migration_2017_09_12_1():
+    logger.info('12.08.2017 - Adding export cache to songs.')
+
+    collection = db['songs']
+    songs = collection.find()
+
+    for song in songs:
+        if 'export_cache' in song:
+            continue
+        song['export_cache'] = None
+
+        collection.update_one({'_id': song['_id']}, {'$set': song})
+
+
 def migration_2017_09_05_2():
-    logger.info('05.09.2017 - Updating songs to new text format')
+    logger.info('05.09.2017 - Updating songs to new text format.')
 
     def translate(text):
         state_chorus = False
@@ -76,11 +90,11 @@ def migration_2017_09_05_2():
             continue
 
         song['text'] = translate(song['text'])
-        collection.update({'_id': song['_id']}, {'$set': song})
+        collection.update_one({'_id': song['_id']}, {'$set': song})
 
 
 def migration_2017_09_05_1():
-    logger.info('05.09.2017 - Updating databse to ObjectId & splitting Authors and Interpreters')
+    logger.info('05.09.2017 - Updating databse to ObjectId & splitting Authors and Interpreters.')
 
     # laod everything into the memory
     songs = db['songs'].find()
@@ -156,9 +170,9 @@ def migration_2017_08_18_1():
         else:
             author['name'] = author['firstname']
 
-        collection.update({'_id': author['_id']}, {'$set': author})
+        collection.update_one({'_id': author['_id']}, {'$set': author})
 
-        collection.update({'_id': author['_id']}, {'$unset': {'firstname': '', 'surname': ''}})
+        collection.update_one({'_id': author['_id']}, {'$unset': {'firstname': '', 'surname': ''}})
 
 
 def migration_2017_08_18_2():
@@ -175,7 +189,7 @@ def migration_2017_08_18_2():
         songbook['edit_perm'] = PERMISSION.PUBLIC if 'edit_perm' not in songbook else songbook[
             'edit_perm']
 
-        collection.update({'_id': songbook['_id']}, {'$set': songbook})
+        collection.update_one({'_id': songbook['_id']}, {'$set': songbook})
 
 
 def migration_2017_08_18_3():
@@ -188,9 +202,9 @@ def migration_2017_08_18_3():
         user['active_songbook'] = None if 'active_songbook' not in user else user['active_songbook']
         user['last_login'] = user['lastLogin'] if 'last_login' not in user else user['last_login']
 
-        collection.update({'_id': user['_id']}, {'$set': user})
+        collection.update_one({'_id': user['_id']}, {'$set': user})
 
-        collection.update({'_id': user['_id']}, {'$unset': {'lastLogin': ''}})
+        collection.update_one({'_id': user['_id']}, {'$unset': {'lastLogin': ''}})
 
 
 def migration_2017_08_18_4():
@@ -206,7 +220,7 @@ def migration_2017_08_18_4():
         song['visibility'] = PERMISSION.PUBLIC if 'visibility' not in song else song['visibility']
         song['edit_perm'] = PERMISSION.PUBLIC if 'edit_perm' not in song else song['edit_perm']
 
-        collection.update({'_id': song['_id']}, {'$set': song})
+        collection.update_one({'_id': song['_id']}, {'$set': song})
 
 
 #migration_2017_08_18_1()
@@ -216,3 +230,5 @@ def migration_2017_08_18_4():
 
 #migration_2017_09_05_1()
 #migration_2017_09_05_2()
+
+#migration_2017_09_12_1()

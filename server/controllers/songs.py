@@ -67,7 +67,7 @@ def song_single(song_id):
 
     if request.method == 'GET':
         if request.headers['Content-Type'] == 'application/pdf':
-            return export_song(song), 200
+            return jsonify(export_song(song)), 200
         return jsonify(song.get_serialized_data()), 200
 
     elif request.method == 'PUT':

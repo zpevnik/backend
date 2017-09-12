@@ -9,29 +9,47 @@ from server.util.exceptions import CompilationException
 def export_song(song):
     filename = generate_random_filename()
 
+    # get sbd song data and save them into aux sbd file
     with open('songs/temp/' + filename + '.sbd', 'w') as file:
-        file.write(song.generate_sbd_output())
+        data, log = song.generate_sbd_output()
+        file.write(data)
 
+    # generate tex file for given export
     generate_tex_file(filename)
-    return export_to_pdf(filename)
+
+    # export song to pdf file
+    link = export_to_pdf(filename)
+    return {'link': link, 'log': log}
 
 
 def export_songbook(songbook):
+    log = {}
     filename = generate_random_filename()
 
+    # get sbd song data and save them into aux sbd file
     with open('songs/temp/' + filename + '.sbd', 'a') as file:
         for song_id in songbook.get_songs().iterkeys():
             song = validators.song_existence(song_id)
-            file.write(song.generate_sbd_output())
+            data, song_log = song.generate_sbd_output()
+            if song_log:
+                log[song.get_title()] = song_log
 
+            file.write(data)
+
+    # generate tex file for given export
     generate_tex_file(filename)
-    return export_to_pdf(filename)
+
+    # export songbook to pdf file
+    link = export_to_pdf(filename)
+    return {'link': link, 'log': log}
 
 
 def generate_tex_file(filename):
+    # read template file
     with open('songs/sample/sample.tex', 'r') as sample_file:
         filedata = sample_file.read()
 
+    # replace data in template and save it into tex file
     filedata = filedata.replace('$filename$', filename)
     with open('songs/temp/' + filename + '.tex', 'w') as temp_file:
         temp_file.write(filedata)

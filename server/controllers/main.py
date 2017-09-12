@@ -17,6 +17,7 @@ from server.app import skautis
 from server.util import ClientException
 from server.util import ValidationException
 from server.util import CompilationException
+from server.util import TranslationException
 from server.util import RequestException
 
 logger = logging.getLogger(__name__)
@@ -45,6 +46,13 @@ def handle_CompilationException(error):
 
 @app.errorhandler(ValidationException)
 def handle_ValidationException(error):
+    response = jsonify(error.get_json())
+    response.status_code = error.status_code
+    return response
+
+
+@app.errorhandler(TranslationException)
+def handle_TranslationException(error):
     response = jsonify(error.get_json())
     response.status_code = error.status_code
     return response

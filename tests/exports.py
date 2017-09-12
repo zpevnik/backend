@@ -52,8 +52,13 @@ class ExportTest(unittest.TestCase):
         assert rv.status_code == 200
         assert b'download/' in rv.data
 
+        # check correct json structure
+        data = json.loads(rv.data)
+        assert 'link' in data
+        assert 'log' in data
+
         # delete generated file
-        filename = str(rv.data).split('/')[1][:-1]
+        filename = str(data['link']).split('/')[1]
         os.remove(os.path.join('./songs/done', filename))
 
         # clean the database

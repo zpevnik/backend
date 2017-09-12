@@ -274,8 +274,8 @@ securitySchemes:
       Accept:
         type: "string"
         description: "Je-li hlavička Accept explicitně nastavena na `application/pdf`,\
-          \ vrátí endpoint vygenerovaný soubor. V opačném případě je vrácen detail\
-          \ písně standardně v `json`u."
+          \ vrátí json s endpointem na vygenerovaný soubor a obsahující log překladu.\
+          \ V opačném případě je vrácen detail písně standardně v `json`u."
         default: "application/json"
         enum:
         - "application/json"
@@ -286,6 +286,13 @@ securitySchemes:
         body:
           application/json:
             type: "Song"
+          application/pdf:
+            type: "object"
+            description: "Odpověď v případě generovaného pdf"
+            example:
+              value: "{\"link\": \"/download/2b573863-71b1-4463-96a7-e7fae9ba3865.pdf\"\
+                , \"log\": \"[1] WARNING: Unknown tag [X].\"}"
+              strict: false
       404:
         description: "Odpověď použitá v případě, že píseň nebyla nalezena."
         body:
@@ -572,8 +579,8 @@ securitySchemes:
       Accept:
         type: "string"
         description: "Je-li hlavička Accept explicitně nastavena na `application/pdf`,\
-          \ vrátí endpoint vygenerovaný soubor. V opačném případě je vrácen detail\
-          \ písně standardně v `json`u."
+          \ vrátí json s endpointem na vygenerovaný soubor a obsahující log překladu.\
+          \ V opačném případě je vrácen detail písně standardně v `json`u."
         default: "application/json"
         enum:
         - "application/json"
@@ -585,7 +592,13 @@ securitySchemes:
           application/json:
             type: "Songbook"
           application/pdf:
-            type: "Songbook"
+            type: "object"
+            description: "Odpověď v případě generovaného pdf"
+            example:
+              value: "{\"link\": \"/download/2b573863-71b1-4463-96a7-e7fae9ba3865.pdf\"\
+                , \"log\": {\n     \"Madness\": [1] WARNING: Unknown tag [X].\",\n\
+                \     \"Panic Station\": [3] WARNING: Unknown tag [chors].\"}\n}"
+              strict: false
       404:
         description: "Odpověď použitá v případě, že zpěvník nebyl nalezen."
         body:

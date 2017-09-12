@@ -49,7 +49,8 @@ class Songs(object):
             },
             'interpreters': data['interpreters'] if 'interpreters' in data else [],
             'visibility': data['visibility'],
-            'edit_perm': data['edit_perm']
+            'edit_perm': data['edit_perm'],
+            'export_cache': None
         })
         self._collection.insert_one(song.serialize())
 
@@ -164,6 +165,7 @@ class Song(object):
         self._owner_unit = song['owner_unit']
         self._visibility = song['visibility']
         self._edit_perm = song['edit_perm']
+        self._export_cache = song['export_cache']
 
     def serialize(self, update=False):
         """Serialize song data for database operations.
@@ -182,7 +184,8 @@ class Song(object):
             'interpreters': self._interpreters,
             'owner_unit': self._owner_unit,
             'visibility': self._visibility,
-            'edit_perm': self._edit_perm
+            'edit_perm': self._edit_perm,
+            'export_cache': self._export_cache
         }
 
         if not update:
@@ -202,7 +205,8 @@ class Song(object):
             'authors': self._authors,
             'interpreters': self._interpreters,
             'visibility': self._visibility,
-            'edit_perm': self._edit_perm
+            'edit_perm': self._edit_perm,
+            'export_cache': self._export_cache
         }
 
     def get_id(self):
@@ -248,10 +252,17 @@ class Song(object):
             if data['edit_perm'] in permission_dict:
                 self._edit_perm = data['edit_perm']
 
+        # invalidate export cache
+        self._export_cache = None
+
     def generate_sbd_output(self):
         """Generate tex output and return it."""
         with open('songs/sample/sample.sbd', 'r') as sample_file:
             filedata = sample_file.read()
+
+        # check for cached song translation in export cache
+        if self._export_cache is not None:
+            return self._export_cache, []
 
         text, log = translate_to_tex(self._text)
 
@@ -263,7 +274,11 @@ class Song(object):
         filedata = filedata.replace('$title$', self._title)
         filedata = filedata.replace('$authors$', ", ".join(authors))
         filedata = filedata.replace('$song$', text)
-        return filedata
+
+        # save song to export cache if no log information is present
+        self._export_cache = filedata if not log else None
+
+        return filedata, log
 
     def __repr__(self):
         return '<{!r} id={!r} title={!r} authors={!r} interpreters={!r}' \
