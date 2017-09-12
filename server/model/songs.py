@@ -81,7 +81,7 @@ class Songs(object):
 
         return songs
 
-    def find_special(self, data): #FIXME
+    def find_special(self, data):
         """Find songs in the database based on query and page the result.
 
         Args in dict:

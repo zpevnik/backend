@@ -115,7 +115,7 @@ class InterpreterTest(unittest.TestCase):
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
         assert b'"field": "name"' in rv.data
-        
+
         # test duplicate interpreters
         rv = self.app.post('/api/v1/interpreters',
                            content_type='application/json',

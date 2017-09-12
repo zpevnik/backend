@@ -47,25 +47,29 @@ def setup_logging():
                                    consoleFormat, use_colors=True)
     rootLogger.addHandler(consoleHandler)
 
-
+# create Flask application
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
+# check for unit testing database address
 if os.getenv('ZPEVNIK_UNITTEST', False):
     app.config['MONGODB_URI'] = os.getenv('ZPEVNIK_UNITTEST')
 
+# compress the application and handle CORS
 Compress(app)
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
 setup_logging()
 
-parsed = urlsplit(app.config['MONGODB_URI'])
-
+# initialize SkautIs library
 skautis = SkautisApi(app.config['SKAUTIS']['APPID'], test=app.config['SKAUTIS']['TEST'])
+
+# prepare database connection
+parsed = urlsplit(app.config['MONGODB_URI'])
 mongoClient = MongoClient(app.config['MONGODB_URI'])
 db = mongoClient[parsed.path[1:]]
 
-
+# init model for Zpevnik application
 model = Model(db=db)
 
 @app.before_request

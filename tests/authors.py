@@ -115,7 +115,7 @@ class AuthorTest(unittest.TestCase):
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
         assert b'"field": "name"' in rv.data
-        
+
         # test duplicate authors
         rv = self.app.post('/api/v1/authors',
                            content_type='application/json',
