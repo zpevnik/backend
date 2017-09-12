@@ -23,6 +23,14 @@
         <h3>Testovací formulář</h3>
         <form action="#" id="main-form">
           <div class="form-group">
+            <label for="target">Target:</label>
+            <select name="target" class="form-control">
+              <option value="http://localhost:5010/api/v1">localhost</option>
+              <option value="http://zpevnik-test.herokuapp.com/api/v1" selected="selected">Heroku</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label for="address">Address:</label>
             <input name="address" type="text" class="form-control" id="address" value="/authors">
           </div>
@@ -57,8 +65,6 @@
 </div> <!-- /container -->
 
 <script type="text/javascript">
-  var base_url = "http://localhost:5010/api/v1";
-
   $("select[name=method]").change(function () {
     var method = $("select[name=method]").val();
     switch(method) {
@@ -82,9 +88,11 @@
   $("#main-form").submit(function( event ) {
     event.preventDefault();
 
+    var base_url = $("select[name=target] option:selected").val();
     var method = $("select[name=method] option:selected").text();
     var address = $("input[name=address]").val();
     var args = $("textarea[name=args]").val();
+
 
     var url = base_url + address;
 
@@ -105,6 +113,7 @@
 
   $("#pdf-button").click(function( event ) {
     event.preventDefault();
+    var base_url = $("select[name=target] option:selected").val();
     var address = $("input[name=address]").val();
     var url = base_url + address;
 
