@@ -103,4 +103,23 @@ def song_single(song_id):
         return jsonify(), 204
 
 
+@api.route('/songs/duplicate/<song_id>', methods=['GET'])
+@login_required
+def song_duplicate(song_id):
+    if not permissions.check_perm(current_user, song, visibility=True):
+        raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+
+    data = validators.song_existence(song_id).get_serialized_data()
+    data['owner'] = current_user.get_id()
+    data['owner_unit'] = current_user.get_unit()
+    data['visibility'] = PERMISSION.PRIVATE
+    data['edit_perm'] = PERMISSION.PRIVATE
+
+    song = g.model.songs.create_song(data)
+    log_event(EVENTS.SONG_NEW, current_user.get_id(), data)
+
+    return jsonify(link='songs/{}'.format(song.get_id())), 201, \
+          {'location': '/songs/{}'.format(song.get_id())}
+
+
 app.register_blueprint(api, url_prefix='/api/v1')
