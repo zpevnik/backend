@@ -257,13 +257,12 @@ class Song(object):
 
     def generate_sbd_output(self):
         """Generate tex output and return it."""
-        with open('songs/sample/sample.sbd', 'r') as sample_file:
-            filedata = sample_file.read()
 
         # check for cached song translation in export cache
         if self._export_cache is not None:
             return self._export_cache, []
 
+        # translate song lyrics and chords to tex output
         text, log = translate_to_tex(self._text)
 
         authors = []
@@ -271,9 +270,9 @@ class Song(object):
             author = g.model.authors.find_one(author_id=author_id)
             authors.append(author.get_name())
 
-        filedata = filedata.replace('$title$', self._title)
-        filedata = filedata.replace('$authors$', ", ".join(authors))
-        filedata = filedata.replace('$song$', text)
+        # create sbd export data
+        filedata = '''\\beginsong{{{}}}[by={{{}}},index={{{}}}]{}\endsong'''.format(
+            self._title, ", ".join(authors), self._title, text)
 
         # save song to export cache if no log information is present
         self._export_cache = filedata if not log else None

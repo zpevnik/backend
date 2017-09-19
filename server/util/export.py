@@ -46,7 +46,7 @@ def export_songbook(songbook):
 
 def generate_tex_file(filename):
     # read template file
-    with open('songs/sample/sample.tex', 'r') as sample_file:
+    with open('songs/misc/template.tex', 'r') as sample_file:
         filedata = sample_file.read()
 
     # replace data in template and save it into tex file
@@ -66,7 +66,7 @@ def export_to_pdf(filename):
         raise CompilationException(error, 500)
 
     process = subprocess.Popen(
-        ["pdflatex", "-halt-on-error", filename + ".tex"], stdout=subprocess.PIPE, cwd='songs/temp')
+        ["xelatex", "-halt-on-error", filename + ".tex"], stdout=subprocess.PIPE, cwd='songs/temp')
     output = process.communicate()[0]
     exit_code = process.wait()
 
@@ -84,7 +84,7 @@ def export_to_pdf(filename):
         error("index generation", output)
 
     process = subprocess.Popen(
-        ["pdflatex", "-halt-on-error", filename + ".tex"], stdout=subprocess.PIPE, cwd='songs/temp')
+        ["xelatex", "-halt-on-error", filename + ".tex"], stdout=subprocess.PIPE, cwd='songs/temp')
     output = process.communicate()[0]
     exit_code = process.wait()
 

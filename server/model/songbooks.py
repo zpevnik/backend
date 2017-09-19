@@ -54,7 +54,7 @@ class Songbooks(object):
         """
         self._collection.update_one(
             {
-                '_id': songbook.get_id
+                '_id': songbook.get_id()
             }, {'$set': songbook.serialize(update=True)})
 
     def delete(self, songbook):

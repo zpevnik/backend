@@ -2,10 +2,10 @@
 
 \usepackage[bookmarks]{hyperref}
 \usepackage[chorded]{../songs}
-
 \usepackage[czech]{babel}
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+
+\usepackage{fontspec}
 
 \usepackage[final]{pdfpages}
 
@@ -20,16 +20,30 @@
 \settowidth{\versenumwidth}{1.\ }
 \pagestyle{empty}
 
-%\usepackage{SKAUT}
-\usepackage{TheMixCFive}
-%\renewcommand*\sfdefault{TheMixCFive}
-%\renewcommand{\lyricfont}{\sffamily\small}
+\newfontfamily\themixfont[
+    Path = ../misc/fonts/,
+    Extension = .otf,
+    UprightFont = TheMixC5-4_SemiLight,
+    ItalicFont = TheMixC5-4iSemiLightIta.otf,
+    BoldFont = TheMixC5-7_Bold.otf,
+    BoldItalicFont = TheMixC5-7iBoldItalic.otf
+]{TheMixC5}
 
-\newindex{titleidx}{$filename$}
+\newfontfamily\skautfont[
+    Path = ../misc/fonts/,
+    Extension = .otf,
+    UprightFont = SKAUT-Bold
+]{SkautBold}
 
-\renewcommand{\everychorus}{\noindent\textnote{R:}} 	%Nazev chorusu
-\versesep=6pt plus 2pt minus 2pt 		%mezera mezi slokami a chorusy
-\MultiwordChords	% Akordy nezpusobuji mezery mezi slovy
+\renewcommand{\lyricfont}{\themixfont\small} % song lyrics font style
+\renewcommand{\stitlefont}{ % song title font style
+  \skautfont\Large\baselineskip=20pt\lineskiplimit=0pt
+}
+\renewcommand{\echofont}{\themixfont\it\small} % song lyrics font style
+\renewcommand{\printchord}[1]{\rmfamily\bf\normalsize#1} % chords font style
+\renewcommand{\everychorus}{\noindent\textnote{R:}}     %Nazev chorusu
+\versesep=6pt plus 2pt minus 2pt        %mezera mezi slokami a chorusy
+\MultiwordChords    % Akordy nezpusobuji mezery mezi slovy
 
 \renewcommand{\notebgcolor}{white} %barva za refrenem a podobne
 \renewcommand{\snumbgcolor}{white} %barva za cislem pisne
@@ -47,11 +61,14 @@
 
 \nosongnumbers %vypne cislovani pisnicek
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newindex{titleidx}{$filename$}
+
 \begin{document}
 
-\includepdf[pages={1}]{../sample/titlePageA4.pdf}
+\includepdf[pages={1}]{../misc/titlepages/titlePageA4.pdf}
 
-% \songsection{Worship Songs}
 \begin{songs}{titleidx}
 \input{$filename$.sbd}
 \end{songs}
