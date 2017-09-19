@@ -271,8 +271,8 @@ class Song(object):
             authors.append(author.get_name())
 
         # create sbd export data
-        filedata = '''\\beginsong{{{}}}[by={{{}}},index={{{}}}]{}\endsong'''.format(
-            self._title, ", ".join(authors), self._title, text)
+        filedata = '''\\beginsong{{{}}}[by={{{}}}] {}\endsong'''.format(
+            self._title, ", ".join(authors), text)
 
         # save song to export cache if no log information is present
         self._export_cache = filedata if not log else None

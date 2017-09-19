@@ -20,7 +20,7 @@
 \settowidth{\versenumwidth}{1.\ }
 \pagestyle{empty}
 
-\newfontfamily\themixfont[
+\setmainfont[
     Path = ../misc/fonts/,
     Extension = .otf,
     UprightFont = TheMixC5-4_SemiLight,
@@ -35,11 +35,11 @@
     UprightFont = SKAUT-Bold
 ]{SkautBold}
 
-\renewcommand{\lyricfont}{\themixfont\small} % song lyrics font style
+\renewcommand{\lyricfont}{\small} % song lyrics font style
 \renewcommand{\stitlefont}{ % song title font style
   \skautfont\Large\baselineskip=20pt\lineskiplimit=0pt
 }
-\renewcommand{\echofont}{\themixfont\it\small} % song lyrics font style
+\renewcommand{\echofont}{\it\small} % song lyrics font style
 \renewcommand{\printchord}[1]{\rmfamily\bf\normalsize#1} % chords font style
 \renewcommand{\everychorus}{\noindent\textnote{R:}}     %Nazev chorusu
 \versesep=6pt plus 2pt minus 2pt        %mezera mezi slokami a chorusy
@@ -73,6 +73,6 @@
 \input{$filename$.sbd}
 \end{songs}
 
-\showindex{Obsah}{titleidx}
+\showindex{\skautfont Obsah}{titleidx}
 
 \end{document}

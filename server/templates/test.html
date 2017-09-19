@@ -123,8 +123,7 @@
         contentType: "application/pdf",
       }).done(function (result) {
         console.log("success");
-        console.log(result.link);
-        window.open('http://localhost:5010/' + result, 'Zpevnik'); 
+        window.open('http://localhost:5010/' + result.link, 'Zpevnik');
       }).fail(function (result) {
         console.log(result);
         if (result)
