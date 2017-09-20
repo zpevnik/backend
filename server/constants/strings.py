@@ -33,6 +33,7 @@ class Strings(object):
     INTERPRETER_NOT_FOUND_ERROR = 'Interpreter was not found.'
     SONG_NOT_FOUND_ERROR = 'Song was not found.'
     SONGBOOK_NOT_FOUND_ERROR = 'Songbook was not found.'
+    USER_NOT_FOUND_ERROR = 'User was not found.'
 
     SONGBOOK_SET_SONG_SUCCESS = 'Píseň byla úspěšně upravená do zpěvníku.'
 
