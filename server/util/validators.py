@@ -26,6 +26,13 @@ def handle_GET_request(request):
     return data
 
 
+def user_existence(user_id):
+    user = g.model.users.find_one(userid=user_id)
+    if user is None:
+        raise ClientException(STRINGS.USER_NOT_FOUND_ERROR, 422)
+    return user
+
+
 def song_existence(song_id):
     try:
         song = g.model.songs.find_one(song_id=song_id)
@@ -184,6 +191,24 @@ def songbooks_request(request):
         data['visibility'] = request['visibility']
     if 'edit_perm' in request:
         data['edit_perm'] = request['edit_perm']
+
+    return data
+
+
+def songbooks_song_request(request):
+    if 'song' not in request or not request['song']:
+        err = [{
+            'field': 'song',
+            'code': 'missing_field',
+            'message': STRINGS.REQUEST_SONGBOOK_ADD_SONG_MISSING
+        }]
+        raise ValidationException(STRINGS.POST_REQUEST_ERROR, 422, errors=err)
+
+    data = {'song': request['song']}
+    if 'order' in request:
+        data['order'] = request['order']
+    if 'options' in request:
+        data['options'] = request['options']
 
     return data
 

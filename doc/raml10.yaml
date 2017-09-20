@@ -97,10 +97,11 @@ types:
       title:
         type: "string"
       songs:
-        type: "array"
-        description: "TODO: Exact object representation"
-        items:
-          type: "object"
+        type: "object"
+        example:
+          value: "{'595007f100000000008c81b8': {\n  'id': '595007f100000000008c81b8',\n\
+            \  'order': 1,\n  'options': {}\n}}"
+          strict: false
       owner:
         type: "string"
       owner_unit:
@@ -131,6 +132,8 @@ types:
       last_login:
         type: "datetime"
         required: false
+      logout_link:
+        type: "string"
   Interpreter:
     type: "object"
     properties:
@@ -191,6 +194,17 @@ types:
     properties:
       title:
         type: "string"
+  songbook song representation:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      order:
+        type: "number"
+        required: false
+      options:
+        type: "object"
+        required: false
   interpreters representation:
     type: "object"
     properties:
@@ -646,23 +660,46 @@ securitySchemes:
         body:
           application/json:
             type: "ClientError"
+/songbooks/{songbook_id}/songs:
+  uriParameters:
+    songbook_id:
+      type: "string"
+  put:
+    description: "Slouží k přidání více písní do zpěvníku."
+    body:
+      application/json:
+        type: "array"
+        items:
+          type: "songbook song representation"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Response"
+      404:
+        body:
+          application/json:
+            type: "ClientError"
+      422:
+        body:
+          application/json:
+            type: "ValidationError"
 /songbooks/{songbook_id}/song/{song_id}:
   uriParameters:
     songbook_id:
       type: "string"
     song_id:
       type: "string"
-  post:
+  put:
     description: "Slouží k přidání písně do zpěvníku."
+    body:
+      application/json:
+        type: "songbook song representation"
     responses:
       200:
         body:
           application/json:
             type: "Response"
-      400:
-        body:
-          application/json:
-            type: "RequestError"
       404:
         body:
           application/json:
@@ -680,6 +717,30 @@ securitySchemes:
         body:
           application/json:
             type: "ClientError"
+/user:
+  get:
+    description: "Vrátí informace o aktivním uživateli"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "User"
+/users/{user_id}:
+  uriParameters:
+    user_id:
+      type: "string"
+  get:
+    description: "Vrátí informace o daném uživateli"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "string"
+            description: "Vrací pouze jméno daného uživatele."
+      422:
+        body:
+          application/json:
+            type: "ValidationError"
 /users/songbook/{songbook_id}:
   uriParameters:
     songbook_id:

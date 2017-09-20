@@ -214,8 +214,19 @@ class Songbook(object):
             if data['edit_perm'] in permission_dict:
                 self._edit_perm = data['edit_perm']
 
-    def add_song(self, song_id, data):
-        self._songs[song_id] = data
+    def get_position(self):
+        return max(x['order'] for x in self._songs.values()) + 1
+
+    def set_song(self, song_id, data):
+        if song_id not in self._songs:
+            self._songs[song_id] = {'id': song_id}
+            if 'order' not in data:
+                self._songs[song_id]['order'] = self.get_position()
+
+        if 'options' in data:
+            self._songs[song_id]['options'] = data['options']
+        if 'order' in data:
+            self._songs[song_id]['order'] = data['order']
 
     def remove_song(self, song_id):
         self._songs.pop(song_id, None)

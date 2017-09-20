@@ -25,6 +25,8 @@ class Strings(object):
     REQUEST_PAGE_OOR_ERROR = 'Page number is out of range.'
     REQUEST_PER_PAGE_OOR_ERROR = 'Per page number is out of range.'
 
+    REQUEST_SONGBOOK_ADD_SONG_MISSING = 'Song id is missing.'
+
     AUTHOR_ALREADY_EXISTS_ERROR = 'Author already exists.'
     AUTHOR_NOT_FOUND_ERROR = 'Author was not found.'
     INTERPRETER_ALREADY_EXISTS_ERROR = 'Interpreter already exists.'
@@ -32,7 +34,7 @@ class Strings(object):
     SONG_NOT_FOUND_ERROR = 'Song was not found.'
     SONGBOOK_NOT_FOUND_ERROR = 'Songbook was not found.'
 
-    SONGBOOK_ADD_SONG_SUCCESS = 'Píseň byla úspěšně přidána do zpěvníku.'
+    SONGBOOK_SET_SONG_SUCCESS = 'Píseň byla úspěšně upravená do zpěvníku.'
 
     TRANSLATOR = TranslatorStrings()
 
