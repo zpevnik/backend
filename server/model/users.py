@@ -47,8 +47,8 @@ class Users(object):
     def save(self, user):
         self._collection.update_one({'_id': user.get_id()}, {'$set': user.serialize(update=True)})
 
-    def find(self, userid):
-        doc = self._collection.find_one(userid)
+    def find(self, user_id):
+        doc = self._collection.find_one(user_id)
         if not doc:
             return None
 

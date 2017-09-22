@@ -38,3 +38,30 @@ class UserTest(unittest.TestCase):
         # check login page accessibility
         rv = self.app.get('/')
         assert rv.status_code == 200
+
+    def test_user_basics(self):
+        # insert some test users into the database
+        self.mongo_client['unittest']['users'].insert_one({
+            '_id': 1001,
+            'name': 'John Bonham',
+            'token': 0,
+            'created': 0,
+            'last_login': 0,
+            'active_songbook': None,
+            'active': True,
+            'unit': 1001,
+        })
+
+        # check test user get request
+        rv = self.app.get('/api/v1/users/{}'.format(0))
+        assert rv.status_code == 200
+        assert b'Test' in rv.data
+
+        # check inserted user get request
+        rv = self.app.get('/api/v1/users/{}'.format(1001))
+        assert rv.status_code == 200
+        assert b'John Bonham' in rv.data
+
+        # check nonexisting user
+        rv = self.app.get('/api/v1/users/{}'.format(1002))
+        assert rv.status_code == 422

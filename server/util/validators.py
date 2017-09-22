@@ -27,7 +27,7 @@ def handle_GET_request(request):
 
 
 def user_existence(user_id):
-    user = g.model.users.find_one(userid=user_id)
+    user = g.model.users.find(int(user_id))
     if user is None:
         raise ClientException(STRINGS.USER_NOT_FOUND_ERROR, 422)
     return user
