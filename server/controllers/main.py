@@ -1,6 +1,5 @@
 import os
 import time
-import logging
 
 from flask import abort
 from flask import request
@@ -19,14 +18,16 @@ from server.util import ValidationException
 from server.util import CompilationException
 from server.util import TranslationException
 from server.util import RequestException
+from server.util import log_event
 
-logger = logging.getLogger(__name__)
+from server.constants import EVENTS
 
 
 @app.errorhandler(ClientException)
 def handle_ClientException(error):
     response = jsonify(message=error.message)
     response.status_code = error.status_code
+    log_event(EVENTS.CLIENT_EXCEPTION, current_user.get_id(), error.message)
     return response
 
 
@@ -34,6 +35,7 @@ def handle_ClientException(error):
 def handle_RequestException(error):
     response = jsonify(message=error.message)
     response.status_code = error.status_code
+    log_event(EVENTS.REQUEST_EXCEPTION, current_user.get_id(), error.message)
     return response
 
 
@@ -41,6 +43,7 @@ def handle_RequestException(error):
 def handle_CompilationException(error):
     response = jsonify(message=error.message)
     response.status_code = error.status_code
+    log_event(EVENTS.COMPILATION_EXCEPTION, current_user.get_id(), error.message)
     return response
 
 
@@ -48,6 +51,7 @@ def handle_CompilationException(error):
 def handle_ValidationException(error):
     response = jsonify(error.get_json())
     response.status_code = error.status_code
+    log_event(EVENTS.VALIDATION_EXCEPTION, current_user.get_id(), error.message)
     return response
 
 
@@ -55,6 +59,7 @@ def handle_ValidationException(error):
 def handle_TranslationException(error):
     response = jsonify(error.get_json())
     response.status_code = error.status_code
+    log_event(EVENTS.TRANSLATION_EXCEPTION, current_user.get_id(), error.message)
     return response
 
 
@@ -62,6 +67,7 @@ def handle_TranslationException(error):
 def handle_IOError(error):
     response = jsonify(error.filename + ": " + error.strerror)
     response.status_code = 500
+    log_event(EVENTS.IO_ERROR, current_user.get_id(), error.message)
     return response
 
 
@@ -98,7 +104,7 @@ def cleanup():
     if ip != app.config['SERVER_IP']:
         abort(404)
 
-    logger.info('Cleaning up the temp folder from %s ...', ip)
+    log_event(EVENTS.CLEANUP, None, 'Cleaning up the temp folder from {}.'.format(ip))
 
     current_time = time.time()
 
