@@ -735,8 +735,11 @@ securitySchemes:
       200:
         body:
           application/json:
-            type: "string"
+            type: "Response"
             description: "Vrací pouze jméno daného uživatele."
+            example:
+              value: "{\"name\": \"John Bonham\"}"
+              strict: false
       422:
         body:
           application/json:

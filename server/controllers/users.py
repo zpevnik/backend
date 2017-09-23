@@ -114,7 +114,7 @@ def get_user_info():
 @login_required
 def get_other_user_info(user_id):
     user = validators.user_existence(user_id)
-    return jsonify(user.get_name()), 200
+    return jsonify({'name': user.get_name()}), 200
 
 
 @api.route('/users/songbook/<songbook_id>', methods=['PUT'])
