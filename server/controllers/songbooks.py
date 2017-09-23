@@ -96,7 +96,7 @@ def songbook_song_single(songbook_id, song_id):
     if not permissions.check_perm(current_user, songbook, visibility=True, editing=True):
         raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
-    if request.method == 'POST':
+    if request.method == 'PUT':
         song = validators.song_existence(song_id)
 
         data = request.get_json()
@@ -126,29 +126,27 @@ def songbook_song_single(songbook_id, song_id):
 
 @api.route('/songbooks/<songbook_id>/songs', methods=['PUT'])
 @login_required
-def songbook_song_bulk(songbook_id, song_id):
+def songbook_song_bulk(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if not permissions.check_perm(current_user, songbook, visibility=True, editing=True):
         raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     data = request.get_json()
     validators.json_request(data)
-    data = validators.songbooks_request(data)
 
     for entry in data:
-        song = validators.song_existence(entry['id'])
+        song = validators.song_existence(entry['song'])
         if not permissions.check_perm(current_user, song, visibility=True):
             raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
-        songbook.set_song(song_id, entry)
-        g.model.songbooks.save(songbook)
+        songbook.set_song(entry['song'], entry)
 
-        entry['id'] = song_id
         log_event(EVENTS.SONGBOOK_SET_SONG,
                   current_user.get_id(), {'songbook': songbook_id,
-                                          'song': song_id})
+                                          'song': entry['song']})
 
-        return jsonify({'message': STRINGS.SONGBOOK_SET_SONG_SUCCESS}), 200
+    g.model.songbooks.save(songbook)
+    return jsonify({'message': STRINGS.SONGBOOK_SET_SONG_SUCCESS}), 200
 
 
 app.register_blueprint(api, url_prefix='/api/v1')

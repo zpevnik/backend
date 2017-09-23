@@ -54,7 +54,7 @@ class Songbooks(object):
         """
         self._collection.update_one(
             {
-                '_id': songbook.get_id()
+                '_id': songbook._id
             }, {'$set': songbook.serialize(update=True)})
 
     def delete(self, songbook):
@@ -215,7 +215,7 @@ class Songbook(object):
                 self._edit_perm = data['edit_perm']
 
     def get_position(self):
-        return max(x['order'] for x in self._songs.values()) + 1
+        return max((x['order'] if 'order' in x else 0) for x in self._songs.values()) + 1
 
     def set_song(self, song_id, data):
         if song_id not in self._songs:

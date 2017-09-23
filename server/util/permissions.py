@@ -17,7 +17,7 @@ def check_perm_aux(user, perm, user_id, unit_id):
     if perm == PERMISSION.PRIVATE:
         if user.get_id() == user_id:
             return True
-    return True
+    return False
 
 
 def check_perm(user, obj, visibility=False, editing=False):

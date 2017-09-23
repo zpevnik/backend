@@ -126,7 +126,7 @@ class SongTest(unittest.TestCase):
         assert rv.status_code == 422
 
         # clean the database
-        self.mongo_client.drop_database('unittest')
+        self.mongo_client.drop_database(self.db_name)
 
     def test_post_requests(self):
         # test json request error
@@ -209,7 +209,7 @@ class SongTest(unittest.TestCase):
         assert b'"field": "interpreters"' in rv.data
 
         # clean the database
-        self.mongo_client.drop_database('unittest')
+        self.mongo_client.drop_database(self.db_name)
 
     def test_put_request(self):
         # insert test song for further testing
@@ -320,7 +320,7 @@ class SongTest(unittest.TestCase):
         assert b'"field": "interpreters"' in rv.data
 
         # clean the database
-        self.mongo_client.drop_database('unittest')
+        self.mongo_client.drop_database(self.db_name)
 
     def test_authors_and_interpreters(self):
         # insert test author for further testing
@@ -401,4 +401,31 @@ class SongTest(unittest.TestCase):
         assert b'"link": "songs/' in rv.data
 
         # clean the database
-        self.mongo_client.drop_database('unittest')
+        self.mongo_client.drop_database(self.db_name)
+
+    def test_duplication(self):
+        # insert test song for further testing
+        rv = self.app.post(
+            '/api/v1/songs',
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Invincible",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[])))
+        assert rv.status_code == 201
+        song = json.loads(rv.data)
+        song_id = song['link'].split('/')[1]
+
+        # duplicate song
+        rv = self.app.get('/api/v1/songs/duplicate/{}'.format(song_id))
+        assert rv.status_code == 201
+        assert b'"link": "songs/' in rv.data
+
+        # try to duplicate wrong song
+        rv = self.app.get('/api/v1/songs/duplicate/{}'.format('000000000000000000000000'))
+        assert rv.status_code == 422
+        assert b'"message": "Song was not found."' in rv.data

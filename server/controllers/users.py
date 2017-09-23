@@ -17,7 +17,10 @@ from server.app import app
 from server.app import skautis
 
 from server.util import validators
+from server.util import permissions
 from server.util.exceptions import ClientException
+
+from server.constants import STRINGS
 
 import zeep
 
@@ -118,14 +121,13 @@ def get_other_user_info(user_id):
 @login_required
 def user_songbook(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
-    if songbook.get_owner() != current_user and \
-       songbook.get_owner_unit() != current_user.get_unit():
-        raise ClientException('Tento zpěvník není vlastněn ani tebou ani tvoji jednotkou.', 404)
+    if not permissions.check_perm(current_user, songbook, editing=True):
+        raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     current_user.set_active_songbook(songbook_id)
     g.model.users.save(current_user)
 
-    return jsonify({'message': 'Aktivní zpěvník byl změněn.'}), 200
+    return jsonify({'message': STRINGS.USER_SET_ACTIVE_SONGBOOK}), 200
 
 
 app.register_blueprint(api, url_prefix='/api/v1')

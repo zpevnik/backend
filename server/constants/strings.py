@@ -36,6 +36,7 @@ class Strings(object):
     USER_NOT_FOUND_ERROR = 'User was not found.'
 
     SONGBOOK_SET_SONG_SUCCESS = 'Píseň byla úspěšně upravená do zpěvníku.'
+    USER_SET_ACTIVE_SONGBOOK = 'Aktivní zpěvník byl změněn.'
 
     TRANSLATOR = TranslatorStrings()
 

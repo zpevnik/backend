@@ -62,4 +62,4 @@ class ExportTest(unittest.TestCase):
         os.remove(os.path.join('./songs/done', filename))
 
         # clean the database
-        self.mongo_client.drop_database('unittest')
+        self.mongo_client.drop_database(self.db_name)

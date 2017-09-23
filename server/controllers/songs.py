@@ -106,10 +106,11 @@ def song_single(song_id):
 @api.route('/songs/duplicate/<song_id>', methods=['GET'])
 @login_required
 def song_duplicate(song_id):
+    song = validators.song_existence(song_id)
     if not permissions.check_perm(current_user, song, visibility=True):
         raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
-    data = validators.song_existence(song_id).get_serialized_data()
+    data = song.get_serialized_data()
     data['owner'] = current_user.get_id()
     data['owner_unit'] = current_user.get_unit()
     data['visibility'] = PERMISSION.PRIVATE

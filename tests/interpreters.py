@@ -98,7 +98,7 @@ class InterpreterTest(unittest.TestCase):
         assert rv.status_code == 422
 
         # clean the database
-        self.mongo_client.drop_database('unittest')
+        self.mongo_client.drop_database(self.db_name)
 
     def test_post_requests(self):
         # test json request error
@@ -128,7 +128,7 @@ class InterpreterTest(unittest.TestCase):
         assert b'"code": "already_exists"' in rv.data
 
         # clean the database
-        self.mongo_client.drop_database('unittest')
+        self.mongo_client.drop_database(self.db_name)
 
     def test_put_request(self):
         # insert test interpreter for further testing
@@ -157,4 +157,4 @@ class InterpreterTest(unittest.TestCase):
         assert b'"field": "name"' in rv.data
 
         # clean the database
-        self.mongo_client.drop_database('unittest')
+        self.mongo_client.drop_database(self.db_name)
