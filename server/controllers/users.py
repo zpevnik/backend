@@ -84,10 +84,9 @@ def test_login():
     if ip != app.config['SERVER_IP']:
         abort(404)
 
-    user_id = 0
-    user = g.model.users.find(user_id)
+    user = g.model.users.find(0)
     if user is None:
-        user = g.model.users.create_user(user_id, 'Test', True, 0)
+        user = g.model.users.create_user(0, 'Test', True, 0)
 
     user.set_token('skautis_token')
     g.model.users.save(user)

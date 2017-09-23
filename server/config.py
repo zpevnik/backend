@@ -9,7 +9,8 @@ SERVER_PORT = int(getenv('PORT', 5010))
 SERVER_IP = getenv('SERVER_IP', '127.0.0.1')
 
 SECRET_KEY = getenv('SECRET_KEY', 'test_secret')
-MONGODB_URI = getenv('MONGODB_URI', 'mongodb://localhost:27017/zpevnik')
+MONGODB_URI = getenv('MONGODB_UNITTEST_URI',
+                     getenv('MONGODB_URI', 'mongodb://localhost:27017/zpevnik'))
 
 SKAUTIS = {
     'TEST': getenv('SKAUTIS_TEST', False),

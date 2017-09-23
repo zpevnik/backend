@@ -1,30 +1,29 @@
-import os
 import json
 import unittest
 
+from urllib.parse import urlsplit
 from pymongo import MongoClient
+
+from server.app import app
 
 
 class AuthorTest(unittest.TestCase):
 
     def setUp(self):
-        # enable testing environment
-        os.environ['ZPEVNIK_UNITTEST'] = 'mongodb://localhost:27017/unittest'
-        self.mongo_client = MongoClient('mongodb://localhost:27017/unittest')
-
         # get application for testing
-        from server.app import app
         self.app = app.test_client()
+
+        # get testing mongo client and database
+        self.db_name = urlsplit(app.config['MONGODB_URI']).path[1:]
+        self.mongo_client = MongoClient(app.config['MONGODB_URI'])
+        self.mongo_db = self.mongo_client[self.db_name]
 
         # login into the application via test login endpoint
         self.app.get('/test_login')
 
     def tearDown(self):
-        # disable testing environment
-        del os.environ['ZPEVNIK_UNITTEST']
-
         # delete all test database entries
-        self.mongo_client.drop_database('unittest')
+        self.mongo_client.drop_database(self.db_name)
 
     def test_author_basics(self):
         # check empty database get request
