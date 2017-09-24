@@ -28,7 +28,7 @@ def export_songbook(songbook):
 
     # get sbd song data and save them into aux sbd file
     with open('songs/temp/' + filename + '.sbd', 'a') as file:
-        for song_id in songbook.get_songs().iterkeys():
+        for song_id in songbook.get_songs().keys():
             song = validators.song_existence(song_id)
             data, song_log = song.generate_sbd_output()
             if song_log:
