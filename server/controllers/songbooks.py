@@ -135,15 +135,16 @@ def songbook_song_bulk(songbook_id):
     validators.json_request(data)
 
     for entry in data:
-        song = validators.song_existence(entry['song'])
+        entry = validators.songbooks_song_request(entry)
+        song = validators.song_existence(entry['id'])
         if not permissions.check_perm(current_user, song, visibility=True):
             raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
-        songbook.set_song(entry['song'], entry)
+        songbook.set_song(entry['id'], entry)
 
         log_event(EVENTS.SONGBOOK_SET_SONG,
                   current_user.get_id(), {'songbook': songbook_id,
-                                          'song': entry['song']})
+                                          'song': entry['id']})
 
     g.model.songbooks.save(songbook)
     return jsonify({'message': STRINGS.SONGBOOK_SET_SONG_SUCCESS}), 200

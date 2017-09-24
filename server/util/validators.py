@@ -196,15 +196,15 @@ def songbooks_request(request):
 
 
 def songbooks_song_request(request):
-    if 'song' not in request or not request['song']:
+    if 'id' not in request or not request['id']:
         err = [{
-            'field': 'song',
+            'field': 'id',
             'code': 'missing_field',
             'message': STRINGS.REQUEST_SONGBOOK_ADD_SONG_MISSING
         }]
         raise ValidationException(STRINGS.POST_REQUEST_ERROR, 422, errors=err)
 
-    data = {'song': request['song']}
+    data = {'id': request['id']}
     if 'order' in request:
         data['order'] = request['order']
     if 'options' in request:

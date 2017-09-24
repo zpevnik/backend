@@ -193,7 +193,7 @@ class SongbookTest(unittest.TestCase):
         rv = self.app.put(
             '/api/v1/songbooks/{}/song/{}'.format(songbook_id, song_id),
             content_type='application/json',
-            data=json.dumps(dict(song=song_id)))
+            data=json.dumps(dict(id=song_id)))
         assert rv.status_code == 200
 
         # test correct insertion
@@ -207,7 +207,7 @@ class SongbookTest(unittest.TestCase):
         rv = self.app.put(
             '/api/v1/songbooks/{}/song/{}'.format(songbook_id, song_id),
             content_type='application/json',
-            data=json.dumps(dict(song=song_id, options={'chorded': False})))
+            data=json.dumps(dict(id=song_id, options={'chorded': False})))
         assert rv.status_code == 200
 
         # check correct option changes
@@ -277,7 +277,7 @@ class SongbookTest(unittest.TestCase):
         rv = self.app.put(
             '/api/v1/songbooks/{}/songs'.format(songbook_id),
             content_type='application/json',
-            data=json.dumps([dict(song=song_ids[0]), dict(song=song_ids[1])]))
+            data=json.dumps([dict(id=song_ids[0]), dict(id=song_ids[1])]))
         assert rv.status_code == 200
 
         # check correct option changes
