@@ -97,11 +97,9 @@ types:
       title:
         type: "string"
       songs:
-        type: "object"
-        example:
-          value: "{'595007f100000000008c81b8': {\n  'id': '595007f100000000008c81b8',\n\
-            \  'order': 1,\n  'options': {}\n}}"
-          strict: false
+        type: "array"
+        items:
+          type: "songbook song representation"
       owner:
         type: "string"
       owner_unit:

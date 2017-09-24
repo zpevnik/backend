@@ -177,7 +177,7 @@ class Songbook(object):
             'id': str(self._id),
             'created': self._id.generation_time,
             'title': self._title,
-            'songs': self._songs,
+            'songs': list(self._songs.values()),
             'owner': self._owner,
             'owner_unit': self._owner_unit,
             'visibility': self._visibility,
