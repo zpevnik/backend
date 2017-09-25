@@ -99,7 +99,7 @@ types:
       songs:
         type: "array"
         items:
-          type: "songbook song representation"
+          type: "songbook_song_representation"
       owner:
         type: "string"
       owner_unit:
@@ -147,7 +147,7 @@ types:
     properties:
       message:
         type: "string"
-  songs representation:
+  songs_representation:
     type: "object"
     properties:
       title:
@@ -182,17 +182,17 @@ types:
       edit_perm:
         type: "string"
         required: false
-  authors representation:
+  authors_representation:
     type: "object"
     properties:
       name:
         type: "string"
-  songbooks representation:
+  songbooks_representation:
     type: "object"
     properties:
       title:
         type: "string"
-  songbook song representation:
+  songbook_song_representation:
     type: "object"
     properties:
       id:
@@ -203,7 +203,7 @@ types:
       options:
         type: "object"
         required: false
-  interpreters representation:
+  interpreters_representation:
     type: "object"
     properties:
       name:
@@ -256,7 +256,7 @@ securitySchemes:
     description: "Slouží k vytváření nových písní."
     body:
       application/json:
-        type: "songs representation"
+        type: "songs_representation"
     responses:
       201:
         description: "Odpověď použitá v případě úspěšného vytvoření písně."
@@ -319,7 +319,7 @@ securitySchemes:
     description: "Slouží k úpravě detailů písně."
     body:
       application/json:
-        type: "songs representation"
+        type: "songs_representation"
     responses:
       200:
         description: "Odpověď vrácená v případě úspěšného uložení písně"
@@ -365,7 +365,7 @@ securitySchemes:
     description: "Slouží k vytváření autorů."
     body:
       application/json:
-        type: "authors representation"
+        type: "authors_representation"
     responses:
       201:
         description: "Odpověď použitá v případě úspěšného vytvoření autora."
@@ -406,7 +406,7 @@ securitySchemes:
     description: "Slouží k úpravě informací o autorovi."
     body:
       application/json:
-        type: "authors representation"
+        type: "authors_representation"
     responses:
       200:
         body:
@@ -450,7 +450,7 @@ securitySchemes:
     description: "Slouží k vytváření interpretů."
     body:
       application/json:
-        type: "interpreters representation"
+        type: "interpreters_representation"
     responses:
       201:
         description: "Odpověď použitá v případě úspěšného vytvoření interpreta."
@@ -491,7 +491,7 @@ securitySchemes:
     description: "Slouží k úpravě informací o interpretovi."
     body:
       application/json:
-        type: "interpreters representation"
+        type: "interpreters_representation"
     responses:
       200:
         body:
@@ -566,7 +566,7 @@ securitySchemes:
     description: "Slouží k založení nového zpěvníku."
     body:
       application/json:
-        type: "songbooks representation"
+        type: "songbooks_representation"
     responses:
       201:
         body:
@@ -629,7 +629,7 @@ securitySchemes:
     description: "Slouží k úpravě zpěvníku."
     body:
       application/json:
-        type: "songbooks representation"
+        type: "songbooks_representation"
     responses:
       200:
         body:
@@ -668,7 +668,7 @@ securitySchemes:
       application/json:
         type: "array"
         items:
-          type: "songbook song representation"
+          type: "songbook_song_representation"
     responses:
       200:
         body:
@@ -692,7 +692,7 @@ securitySchemes:
     description: "Slouží k přidání písně do zpěvníku."
     body:
       application/json:
-        type: "songbook song representation"
+        type: "songbook_song_representation"
     responses:
       200:
         body:
