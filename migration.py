@@ -19,10 +19,24 @@ app = Flask(__name__)
 app.config.from_pyfile('server/config.py')
 
 parsed = urlsplit(app.config['MONGODB_URI'])
-mongoClient = MongoClient(app.config['MONGODB_URI'])
-db = mongoClient[parsed.path[1:]]
+mongo_client = MongoClient(app.config['MONGODB_URI'])
+db = mongo_client[parsed.path[1:]]
 
 model = Model(db=db)
+
+
+def migration_2017_09_25_1():
+    logger.info('12.08.2017 - Adding options to songbooks.')
+
+    collection = db['songbooks']
+    songbooks = collection.find()
+
+    for songbook in songbooks:
+        if 'options' in songbook:
+            continue
+        songbook['options'] = {}
+
+        collection.update_one({'_id': songbook['_id']}, {'$set': songbook})
 
 
 def migration_2017_09_12_1():
@@ -232,3 +246,5 @@ def migration_2017_08_18_4():
 #migration_2017_09_05_2()
 
 #migration_2017_09_12_1()
+
+#migration_2017_09_25_1()

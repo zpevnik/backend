@@ -3,7 +3,9 @@ from server.util.exceptions import ClientException
 from server.util.exceptions import ValidationException
 from server.util.exceptions import RequestException
 
+from server.constants import OPTIONS
 from server.constants import STRINGS
+from server.constants import size_dict
 
 
 def handle_GET_request(request):
@@ -211,6 +213,33 @@ def songbooks_song_request(request):
         data['options'] = request['options']
 
     return data
+
+
+def songbook_options(data):
+    options = {}
+    if 'size' in data:
+        if data['size'] not in size_dict:
+            raise ValidationException(
+                STRINGS.SONGBOOK_OPTIONS_ERROR,
+                422,
+                errors=[{
+                    'field': 'size',
+                    'code': 'wrong_value',
+                    'message': STRINGS.SONGBOOK_OPTIONS_SIZE_ERROR
+                }])
+        options['size'] = data['size']
+    if 'columns' in data:
+        options['columns'] = int(data['columns'])
+    if 'index' in data:
+        options['index'] = bool(data['index'])
+    if 'chorded' in data:
+        options['chorded'] = bool(data['chorded'])
+    if 'font_index' in data:
+        options['font_index'] = bool(data['font_index'])
+    if 'page_numbering' in data:
+        options['page_numbering'] = bool(data['page_numbering'])
+
+    return options
 
 
 def json_request(request):

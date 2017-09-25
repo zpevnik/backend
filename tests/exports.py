@@ -128,9 +128,8 @@ class ExportTest(unittest.TestCase):
         assert rv.status_code == 200
 
         # export test songbook as pdf
-        rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id), content_type='application/pdf')
-        print(rv.status_code)
-        print(rv.data)
+        rv = self.app.get(
+            '/api/v1/songbooks/{}'.format(songbook_id), content_type='application/pdf')
         assert rv.status_code == 200
         assert b'download/' in rv.data
 

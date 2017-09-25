@@ -34,6 +34,20 @@ class Events(object):
 EVENTS = Events()
 
 
+class Options(object):
+
+    class Sizes(object):
+        A4 = 'A4'
+        A5 = 'A5'
+        A4_WIDE = 'A4 WIDE'
+        A5_WIDE = 'A5 WIDE'
+
+    SIZE = Sizes()
+
+
+OPTIONS = Options()
+
+
 class Permissions(object):
     PRIVATE = 'private'
     UNIT = 'unit'
@@ -43,3 +57,4 @@ class Permissions(object):
 PERMISSION = Permissions()
 
 permission_dict = [PERMISSION.PRIVATE, PERMISSION.UNIT, PERMISSION.PUBLIC]
+size_dict = [OPTIONS.SIZE.A4, OPTIONS.SIZE.A5, OPTIONS.SIZE.A4_WIDE, OPTIONS.SIZE.A5_WIDE]

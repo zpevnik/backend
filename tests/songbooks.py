@@ -200,23 +200,23 @@ class SongbookTest(unittest.TestCase):
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
         songbook = json.loads(rv.data)
         assert rv.status_code == 200
-        assert song_id in songbook['songs']
+        assert song_id in songbook['songs'][0]['id']
         assert len(songbook['songs']) == 1
 
         # edit song in the songbook
         rv = self.app.put(
             '/api/v1/songbooks/{}/song/{}'.format(songbook_id, song_id),
             content_type='application/json',
-            data=json.dumps(dict(id=song_id, options={'chorded': False})))
+            data=json.dumps(dict(id=song_id, order=3)))
         assert rv.status_code == 200
 
-        # check correct option changes
+        # check correct changes
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
         songbook = json.loads(rv.data)
         assert rv.status_code == 200
-        assert song_id in songbook['songs']
-        assert 'options' in songbook['songs'][song_id]
-        assert 'chorded' in songbook['songs'][song_id]['options']
+        assert song_id in songbook['songs'][0]['id']
+        assert 'order' in songbook['songs'][0]
+        assert songbook['songs'][0]['order'] == 3
 
         # delete song from songbook
         rv = self.app.delete('/api/v1/songbooks/{}/song/{}'.format(songbook_id, song_id))
@@ -300,6 +300,7 @@ class SongbookTest(unittest.TestCase):
             'owner_unit': 0,
             'visibility': PERMISSION.PRIVATE,
             'edit_perm': PERMISSION.PRIVATE,
+            'options': {},
             'songs': {}
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
@@ -314,6 +315,7 @@ class SongbookTest(unittest.TestCase):
             'owner_unit': 0,
             'visibility': PERMISSION.PRIVATE,
             'edit_perm': PERMISSION.PRIVATE,
+            'options': {},
             'songs': {}
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
@@ -327,6 +329,7 @@ class SongbookTest(unittest.TestCase):
             'owner_unit': 0,
             'visibility': PERMISSION.UNIT,
             'edit_perm': PERMISSION.PRIVATE,
+            'options': {},
             'songs': {}
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
@@ -340,6 +343,7 @@ class SongbookTest(unittest.TestCase):
             'owner_unit': 0,
             'visibility': PERMISSION.UNIT,
             'edit_perm': PERMISSION.UNIT,
+            'options': {},
             'songs': {}
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
@@ -354,6 +358,7 @@ class SongbookTest(unittest.TestCase):
             'owner_unit': 1,
             'visibility': PERMISSION.PRIVATE,
             'edit_perm': PERMISSION.PRIVATE,
+            'options': {},
             'songs': {}
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
@@ -367,6 +372,7 @@ class SongbookTest(unittest.TestCase):
             'owner_unit': 1,
             'visibility': PERMISSION.UNIT,
             'edit_perm': PERMISSION.PRIVATE,
+            'options': {},
             'songs': {}
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
@@ -380,6 +386,7 @@ class SongbookTest(unittest.TestCase):
             'owner_unit': 1,
             'visibility': PERMISSION.PUBLIC,
             'edit_perm': PERMISSION.PRIVATE,
+            'options': {},
             'songs': {}
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
@@ -393,6 +400,7 @@ class SongbookTest(unittest.TestCase):
             'owner_unit': 1,
             'visibility': PERMISSION.UNIT,
             'edit_perm': PERMISSION.UNIT,
+            'options': {},
             'songs': {}
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
@@ -406,6 +414,7 @@ class SongbookTest(unittest.TestCase):
             'owner_unit': 1,
             'visibility': PERMISSION.PUBLIC,
             'edit_perm': PERMISSION.UNIT,
+            'options': {},
             'songs': {}
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
@@ -419,6 +428,7 @@ class SongbookTest(unittest.TestCase):
             'owner_unit': 1,
             'visibility': PERMISSION.PUBLIC,
             'edit_perm': PERMISSION.PUBLIC,
+            'options': {},
             'songs': {}
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))

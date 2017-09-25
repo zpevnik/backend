@@ -38,6 +38,9 @@ class Strings(object):
     SONGBOOK_SET_SONG_SUCCESS = 'Píseň byla úspěšně upravená do zpěvníku.'
     USER_SET_ACTIVE_SONGBOOK = 'Aktivní zpěvník byl změněn.'
 
+    SONGBOOK_OPTIONS_ERROR = 'Cannot process songbook options.'
+    SONGBOOK_OPTIONS_SIZE_ERROR = 'Songbook size has invalid value.'
+
     TRANSLATOR = TranslatorStrings()
 
 

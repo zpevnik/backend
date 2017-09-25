@@ -1,5 +1,6 @@
 from bson import ObjectId
 
+from server.util import validators
 from server.constants import permission_dict
 
 
@@ -40,6 +41,7 @@ class Songbooks(object):
             'owner_unit': data['owner_unit'],
             'visibility': data['visibility'],
             'edit_perm': data['edit_perm'],
+            'options': {},
             'songs': {},
         })
         self._collection.insert_one(songbook.serialize())
@@ -147,6 +149,7 @@ class Songbook(object):
         self._title = songbook['title']
         self._songs = songbook['songs']
         self._owner = songbook['owner']
+        self._options = songbook['options']
         self._owner_unit = songbook['owner_unit']
         self._visibility = songbook['visibility']
         self._edit_perm = songbook['edit_perm']
@@ -162,6 +165,7 @@ class Songbook(object):
             'title': self._title,
             'songs': self._songs,
             'owner': self._owner,
+            'options': self._options,
             'owner_unit': self._owner_unit,
             'visibility': self._visibility,
             'edit_perm': self._edit_perm
@@ -179,6 +183,7 @@ class Songbook(object):
             'title': self._title,
             'songs': list(self._songs.values()),
             'owner': self._owner,
+            'options': self._options,
             'owner_unit': self._owner_unit,
             'visibility': self._visibility,
             'edit_perm': self._edit_perm
@@ -205,6 +210,9 @@ class Songbook(object):
     def get_edit_perm(self):
         return self._edit_perm
 
+    def get_options(self):
+        return self._options
+
     def set_data(self, data):
         self._title = data['title'] if 'title' in data else self._title
         if 'visibility' in data:
@@ -213,6 +221,8 @@ class Songbook(object):
         if 'edit_perm' in data:
             if data['edit_perm'] in permission_dict:
                 self._edit_perm = data['edit_perm']
+        if 'options' in data:
+            self._options = validators.songbook_options(data['options'])
 
     def get_position(self):
         return max((x['order'] if 'order' in x else 0) for x in self._songs.values()) + 1
@@ -222,9 +232,6 @@ class Songbook(object):
             self._songs[song_id] = {'id': song_id}
             if 'order' not in data:
                 self._songs[song_id]['order'] = self.get_position()
-
-        if 'options' in data:
-            self._songs[song_id]['options'] = data['options']
         if 'order' in data:
             self._songs[song_id]['order'] = data['order']
 
