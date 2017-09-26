@@ -234,8 +234,8 @@ def songbook_options(data):
         options['index'] = bool(data['index'])
     if 'chorded' in data:
         options['chorded'] = bool(data['chorded'])
-    if 'font_index' in data:
-        options['font_index'] = bool(data['font_index'])
+    if 'front_index' in data:
+        options['front_index'] = bool(data['front_index'])
     if 'page_numbering' in data:
         options['page_numbering'] = bool(data['page_numbering'])
 

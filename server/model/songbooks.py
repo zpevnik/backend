@@ -1,6 +1,8 @@
 from bson import ObjectId
 
 from server.util import validators
+from server.constants import OPTIONS
+from server.constants import DEFAULTS
 from server.constants import permission_dict
 
 
@@ -41,7 +43,7 @@ class Songbooks(object):
             'owner_unit': data['owner_unit'],
             'visibility': data['visibility'],
             'edit_perm': data['edit_perm'],
-            'options': {},
+            'options': DEFAULTS.SONGBOOK_OPTIONS,
             'songs': {},
         })
         self._collection.insert_one(songbook.serialize())

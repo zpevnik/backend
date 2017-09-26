@@ -5,6 +5,8 @@ from server.util import validators
 from server.util.misc import generate_random_filename
 from server.util.exceptions import CompilationException
 
+from server.constants import DEFAULTS
+
 
 def export_song(song):
     filename = generate_random_filename()
@@ -15,7 +17,7 @@ def export_song(song):
         file.write(data)
 
     # generate tex file for given export
-    generate_tex_file(filename)
+    generate_tex_file(filename, DEFAULTS.SONGBOOK_OPTIONS)
 
     # export song to pdf file
     link = export_to_pdf(filename)
@@ -37,14 +39,14 @@ def export_songbook(songbook):
             file.write(data)
 
     # generate tex file for given export
-    generate_tex_file(filename)
+    generate_tex_file(filename, songbook.get_options())
 
     # export songbook to pdf file
     link = export_to_pdf(filename)
     return {'link': link, 'log': log}
 
 
-def generate_tex_file(filename):
+def generate_tex_file(filename, options):
     # read template file
     with open('songs/misc/template.tex', 'r') as sample_file:
         filedata = sample_file.read()

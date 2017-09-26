@@ -11,6 +11,7 @@ from urllib.parse import urlsplit
 from bson import ObjectId
 
 from server.model import Model
+from server.constants import OPTIONS
 from server.constants import PERMISSION
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ db = mongo_client[parsed.path[1:]]
 model = Model(db=db)
 
 
-def migration_2017_09_25_1():
+def migration_2017_09_26_1():
     logger.info('12.08.2017 - Adding options to songbooks.')
 
     collection = db['songbooks']
@@ -34,7 +35,14 @@ def migration_2017_09_25_1():
     for songbook in songbooks:
         if 'options' in songbook:
             continue
-        songbook['options'] = {}
+        songbook['options'] = {
+            'size': OPTIONS.SIZE.A4,
+            'columns': 2,
+            'index': True,
+            'chorded': True,
+            'front_index': False,
+            'page_numbering': True
+        }
 
         collection.update_one({'_id': songbook['_id']}, {'$set': songbook})
 
@@ -247,4 +255,4 @@ def migration_2017_08_18_4():
 
 #migration_2017_09_12_1()
 
-#migration_2017_09_25_1()
+#migration_2017_09_26_1()
