@@ -275,7 +275,10 @@ class Song(object):
             self._title, ", ".join(authors), text)
 
         # save song to export cache if no log information is present
-        self._export_cache = filedata if not log else None
+        if not log:
+            self._export_cache = filedata
+            # save cached song into the database
+            g.model.songs.save(self)
 
         return filedata, log
 
