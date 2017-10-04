@@ -26,6 +26,21 @@ db = mongo_client[parsed.path[1:]]
 model = Model(db=db)
 
 
+def migration_2017_10_04_1():
+    logger.info('12.08.2017 - Adding songbook cache.')
+
+    collection = db['songbooks']
+    songbooks = collection.find()
+
+    for songbook in songbooks:
+        if 'cached_file' in songbook:
+            continue
+        songbook['cached_file'] = None
+        songbook['cache_expiration'] = None
+
+        collection.update_one({'_id': songbook['_id']}, {'$set': songbook})
+
+
 def migration_2017_09_26_1():
     logger.info('12.08.2017 - Adding options to songbooks.')
 
@@ -256,3 +271,5 @@ def migration_2017_08_18_4():
 #migration_2017_09_12_1()
 
 #migration_2017_09_26_1()
+
+#migration_2017_10_04_1()

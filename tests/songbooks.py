@@ -301,7 +301,9 @@ class SongbookTest(unittest.TestCase):
             'visibility': PERMISSION.PRIVATE,
             'edit_perm': PERMISSION.PRIVATE,
             'options': {},
-            'songs': {}
+            'songs': {},
+            'cached_file': None,
+            'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 200
@@ -316,7 +318,9 @@ class SongbookTest(unittest.TestCase):
             'visibility': PERMISSION.PRIVATE,
             'edit_perm': PERMISSION.PRIVATE,
             'options': {},
-            'songs': {}
+            'songs': {},
+            'cached_file': None,
+            'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 404
@@ -330,7 +334,9 @@ class SongbookTest(unittest.TestCase):
             'visibility': PERMISSION.UNIT,
             'edit_perm': PERMISSION.PRIVATE,
             'options': {},
-            'songs': {}
+            'songs': {},
+            'cached_file': None,
+            'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 404
@@ -344,7 +350,9 @@ class SongbookTest(unittest.TestCase):
             'visibility': PERMISSION.UNIT,
             'edit_perm': PERMISSION.UNIT,
             'options': {},
-            'songs': {}
+            'songs': {},
+            'cached_file': None,
+            'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 200
@@ -359,7 +367,9 @@ class SongbookTest(unittest.TestCase):
             'visibility': PERMISSION.PRIVATE,
             'edit_perm': PERMISSION.PRIVATE,
             'options': {},
-            'songs': {}
+            'songs': {},
+            'cached_file': None,
+            'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 404
@@ -373,7 +383,9 @@ class SongbookTest(unittest.TestCase):
             'visibility': PERMISSION.UNIT,
             'edit_perm': PERMISSION.PRIVATE,
             'options': {},
-            'songs': {}
+            'songs': {},
+            'cached_file': None,
+            'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 404
@@ -387,7 +399,9 @@ class SongbookTest(unittest.TestCase):
             'visibility': PERMISSION.PUBLIC,
             'edit_perm': PERMISSION.PRIVATE,
             'options': {},
-            'songs': {}
+            'songs': {},
+            'cached_file': None,
+            'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 404
@@ -401,7 +415,9 @@ class SongbookTest(unittest.TestCase):
             'visibility': PERMISSION.UNIT,
             'edit_perm': PERMISSION.UNIT,
             'options': {},
-            'songs': {}
+            'songs': {},
+            'cached_file': None,
+            'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 404
@@ -415,7 +431,9 @@ class SongbookTest(unittest.TestCase):
             'visibility': PERMISSION.PUBLIC,
             'edit_perm': PERMISSION.UNIT,
             'options': {},
-            'songs': {}
+            'songs': {},
+            'cached_file': None,
+            'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 404
@@ -429,7 +447,9 @@ class SongbookTest(unittest.TestCase):
             'visibility': PERMISSION.PUBLIC,
             'edit_perm': PERMISSION.PUBLIC,
             'options': {},
-            'songs': {}
+            'songs': {},
+            'cached_file': None,
+            'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 200

@@ -1,4 +1,7 @@
+import datetime
+
 from bson import ObjectId
+from flask import g
 
 from server.util import validators
 from server.constants import OPTIONS
@@ -45,6 +48,8 @@ class Songbooks(object):
             'edit_perm': data['edit_perm'],
             'options': DEFAULTS.SONGBOOK_OPTIONS,
             'songs': {},
+            'cached_file': None,
+            'cache_expiration': None,
         })
         self._collection.insert_one(songbook.serialize())
 
@@ -144,6 +149,8 @@ class Songbook(object):
       _owner_unit (str): Unit Id
       _visibility (str): Songbook visibility status
       _edit_perm (str): Editing permission status
+      _cached_file (str): Filename of cached songbook
+      _cache_expiration (str): Timestamp of the cache expiration creation.
     """
 
     def __init__(self, songbook):
@@ -155,6 +162,9 @@ class Songbook(object):
         self._owner_unit = songbook['owner_unit']
         self._visibility = songbook['visibility']
         self._edit_perm = songbook['edit_perm']
+
+        self._cached_file = songbook['cached_file']
+        self._cache_expiration = songbook['cache_expiration']
 
     def serialize(self, update=False):
         """Serialize songbook data for database operations.
@@ -170,7 +180,9 @@ class Songbook(object):
             'options': self._options,
             'owner_unit': self._owner_unit,
             'visibility': self._visibility,
-            'edit_perm': self._edit_perm
+            'edit_perm': self._edit_perm,
+            'cached_file': self._cached_file,
+            'cache_expiration': self._cache_expiration
         }
 
         if not update:
@@ -215,7 +227,30 @@ class Songbook(object):
     def get_options(self):
         return self._options
 
+    def is_cached(self):
+        return self._cached_file is not None
+
+    def get_cached_file(self):
+        self.extend_cache()
+        return self._cached_file
+
+    def extend_cache(self):
+        self._cache_expiration = datetime.datetime.utcnow() + datetime.timedelta(days=14)
+
+    def cache_file(self, link):
+        self._cached_file = link
+        self._cache_expiration = datetime.datetime.utcnow() + datetime.timedelta(days=14)
+
+        # save cached songbook into database
+        g.model.songbooks.save(self)
+
+    def invalidate_cache(self):
+        self._cached_file = None
+        self._cache_expiration = None
+
     def set_data(self, data):
+        self.invalidate_cache()
+
         self._title = data['title'] if 'title' in data else self._title
         if 'visibility' in data:
             if data['visibility'] in permission_dict:
@@ -230,6 +265,8 @@ class Songbook(object):
         return max((x['order'] if 'order' in x else 0) for x in self._songs.values()) + 1
 
     def set_song(self, song_id, data):
+        self.invalidate_cache()
+
         if song_id not in self._songs:
             self._songs[song_id] = {'id': song_id}
             if 'order' not in data:
@@ -238,6 +275,7 @@ class Songbook(object):
             self._songs[song_id]['order'] = data['order']
 
     def remove_song(self, song_id):
+        self.invalidate_cache()
         self._songs.pop(song_id, None)
 
     def __repr__(self):

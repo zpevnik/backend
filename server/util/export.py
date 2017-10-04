@@ -25,6 +25,10 @@ def export_song(song):
 
 
 def export_songbook(songbook):
+    # check if songbook is cached
+    if songbook.is_cached():
+        return {'link': songbook.get_cached_file(), 'log': {}}
+
     log = {}
     filename = generate_random_filename()
 
@@ -43,6 +47,9 @@ def export_songbook(songbook):
 
     # export songbook to pdf file
     link = export_to_pdf(filename)
+
+    # cache songbook
+    songbook.cache_file(link)
     return {'link': link, 'log': log}
 
 

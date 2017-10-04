@@ -144,3 +144,37 @@ class ExportTest(unittest.TestCase):
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
+
+    def test_songbook_export(self):
+        # insert test songbook for further testing
+        rv = self.app.post(
+            '/api/v1/songbooks',
+            content_type='application/json',
+            data=json.dumps(dict(title="Cache songbook")))
+        assert rv.status_code == 201
+        songbook = json.loads(rv.data)
+        songbook_id = songbook['link'].split('/')[1]
+
+        # export test songbook as pdf
+        rv = self.app.get(
+            '/api/v1/songbooks/{}'.format(songbook_id), content_type='application/pdf')
+        assert rv.status_code == 200
+        assert b'download/' in rv.data
+
+        first_link = json.loads(rv.data)['link']
+
+        # test export cache
+        rv = self.app.get(
+            '/api/v1/songbooks/{}'.format(songbook_id), content_type='application/pdf')
+        assert rv.status_code == 200
+        assert b'download/' in rv.data
+
+        second_link = json.loads(rv.data)['link']
+        assert first_link == second_link
+
+        # delete generated file
+        filename = str(first_link).split('/')[1]
+        os.remove(os.path.join('./songs/done', filename))
+
+        # clean the database
+        self.mongo_client.drop_database(self.db_name)
