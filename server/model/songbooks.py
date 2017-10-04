@@ -230,8 +230,13 @@ class Songbook(object):
     def is_cached(self):
         return self._cached_file is not None
 
-    def get_cached_file(self):
-        self.extend_cache()
+    def is_cache_valid(self):
+        return self._cache_expiration is not None and \
+            datetime.datetime.utcnow() < self._cache_expiration
+
+    def get_cached_file(self, extend=False):
+        if extend:
+            self.extend_cache()
         return self._cached_file
 
     def extend_cache(self):

@@ -57,10 +57,6 @@ class ExportTest(unittest.TestCase):
         assert 'link' in data
         assert 'log' in data
 
-        # delete generated file
-        filename = str(data['link']).split('/')[1]
-        os.remove(os.path.join('./songs/done', filename))
-
         # clean the database
         self.mongo_client.drop_database(self.db_name)
 
@@ -138,10 +134,6 @@ class ExportTest(unittest.TestCase):
         assert 'link' in data
         assert 'log' in data
 
-        # delete generated file
-        filename = str(data['link']).split('/')[1]
-        os.remove(os.path.join('./songs/done', filename))
-
         # clean the database
         self.mongo_client.drop_database(self.db_name)
 
@@ -173,8 +165,8 @@ class ExportTest(unittest.TestCase):
         assert first_link == second_link
 
         # delete generated file
-        filename = str(first_link).split('/')[1]
-        os.remove(os.path.join('./songs/done', filename))
+        # filename = str(first_link).split('/')[1]
+        # os.remove(os.path.join('./songs/done', filename))
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)

@@ -1,6 +1,7 @@
 import os
 import time
 
+from flask import g
 from flask import abort
 from flask import request
 from flask import jsonify
@@ -94,11 +95,11 @@ def application():
 
 @app.route('/download/<path:filename>', methods=['GET'])
 def download(filename):
-    directory = os.path.join(os.getcwd(), 'songs/done')
+    directory = os.path.join(os.getcwd(), app.config['SONGBOOK_DONE_FOLDER'])
     return send_from_directory(directory=directory, filename=filename)
 
 
-@app.route("/cleanup")
+@app.route("/cleanup")  # NOT TESTED!
 def cleanup():
     ip = request.remote_addr
     if ip != app.config['SERVER_IP']:
@@ -106,11 +107,23 @@ def cleanup():
 
     log_event(EVENTS.CLEANUP, None, 'Cleaning up the temp folder from {}.'.format(ip))
 
-    current_time = time.time()
+    # go through every songbook and check its cache
+    valid_files = []
+    songbooks = g.model.songbooks.find()
+    for songbook in songbooks:
+        # check whether this songbook is cached
+        if songbook.is_cached():
+            if not songbook.is_cache_valid():
+                # invalidate cache in case that time is up
+                songbook.invalidate_cache()
+                g.model.songbooks.save(songbook)
+            else:
+                # append cached file as valid
+                valid_files.append(get_cached_file() + '.pdf')
 
-    for temp_file in os.listdir("songs/done"):
-        creation_time = os.path.getctime("songs/done/" + temp_file)
-        if (current_time - creation_time) > 1800:
-            os.unlink("songs/done/" + temp_file)
+    # check every file in done folder and delete invalid ones
+    for temp_file in os.listdir(app.config['SONGBOOK_DONE_FOLDER']):
+        if temp_file not in valid_files:
+            os.unlink(app.config['SONGBOOK_DONE_FOLDER'] + temp_file)
 
     return 'Ok'

@@ -28,7 +28,7 @@ def export_song(song):
 def export_songbook(songbook):
     # check if songbook is cached
     if songbook.is_cached():
-        filename = songbook.get_cached_file()
+        filename = songbook.get_cached_file(extend=True)
 
         # check if file really exists
         if os.path.isfile(app.config['SONGBOOK_DONE_FOLDER'] + filename + ".pdf"):
