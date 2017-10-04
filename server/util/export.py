@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+from server.app import app
 from server.util import validators
 from server.util.misc import generate_random_filename
 from server.util.exceptions import CompilationException
@@ -12,7 +13,7 @@ def export_song(song):
     filename = generate_random_filename()
 
     # get sbd song data and save them into aux sbd file
-    with open('songs/temp/' + filename + '.sbd', 'w') as file:
+    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'w') as file:
         data, log = song.generate_sbd_output()
         file.write(data)
 
@@ -27,13 +28,18 @@ def export_song(song):
 def export_songbook(songbook):
     # check if songbook is cached
     if songbook.is_cached():
-        return {'link': songbook.get_cached_file(), 'log': {}}
+        filename = songbook.get_cached_file()
 
+        # check if file really exists
+        if os.path.isfile(app.config['SONGBOOK_DONE_FOLDER'] + filename + ".pdf"):
+            return {'link': "download/{}.pdf".format(filename), 'log': {}}
+
+    # start export process
     log = {}
     filename = generate_random_filename()
 
     # get sbd song data and save them into aux sbd file
-    with open('songs/temp/' + filename + '.sbd', 'a') as file:
+    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'a') as file:
         for song_id in songbook.get_songs().keys():
             song = validators.song_existence(song_id)
             data, song_log = song.generate_sbd_output()
@@ -49,7 +55,7 @@ def export_songbook(songbook):
     link = export_to_pdf(filename)
 
     # cache songbook
-    songbook.cache_file(link)
+    songbook.cache_file(filename)
     return {'link': link, 'log': log}
 
 
@@ -60,7 +66,7 @@ def generate_tex_file(filename, options):
 
     # replace data in template and save it into tex file
     filedata = filedata.replace('$filename$', filename)
-    with open('songs/temp/' + filename + '.tex', 'w') as temp_file:
+    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.tex', 'w') as temp_file:
         temp_file.write(filedata)
 
 
@@ -75,7 +81,9 @@ def export_to_pdf(filename):
         raise CompilationException(error, 500)
 
     process = subprocess.Popen(
-        ["xelatex", "-halt-on-error", filename + ".tex"], stdout=subprocess.PIPE, cwd='songs/temp')
+        ["xelatex", "-halt-on-error", filename + ".tex"],
+        stdout=subprocess.PIPE,
+        cwd=app.config['SONGBOOK_TEMP_FOLDER'])
     output = process.communicate()[0]
     exit_code = process.wait()
 
@@ -85,7 +93,7 @@ def export_to_pdf(filename):
     process = subprocess.Popen(
         ["../songidx", filename + ".sxd", filename + ".sbx"],
         stdout=subprocess.PIPE,
-        cwd='songs/temp')
+        cwd=app.config['SONGBOOK_TEMP_FOLDER'])
     output = process.communicate()[0]
     exit_code = process.wait()
 
@@ -93,7 +101,9 @@ def export_to_pdf(filename):
         error("index generation", output)
 
     process = subprocess.Popen(
-        ["xelatex", "-halt-on-error", filename + ".tex"], stdout=subprocess.PIPE, cwd='songs/temp')
+        ["xelatex", "-halt-on-error", filename + ".tex"],
+        stdout=subprocess.PIPE,
+        cwd=app.config['SONGBOOK_TEMP_FOLDER'])
     output = process.communicate()[0]
     exit_code = process.wait()
 
@@ -101,14 +111,15 @@ def export_to_pdf(filename):
         error("pdf compilation", output)
 
     # move finished pdf file to other folder and clean up temp
-    os.rename('songs/temp/' + filename + '.pdf', 'songs/done/' + filename + '.pdf')
+    os.rename(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.pdf',
+              app.config['SONGBOOK_DONE_FOLDER'] + filename + '.pdf')
 
     # remove all aux files
-    for fname in os.listdir('songs/temp'):
+    for fname in os.listdir(app.config['SONGBOOK_TEMP_FOLDER']):
         if fname.startswith(filename):
-            os.remove(os.path.join('songs/temp', fname))
+            os.remove(os.path.join(app.config['SONGBOOK_TEMP_FOLDER'], fname))
 
-    if not os.path.isfile("songs/done/" + filename + ".pdf"):
+    if not os.path.isfile(app.config['SONGBOOK_DONE_FOLDER'] + filename + ".pdf"):
         raise CompilationException('Final pdf file does not exist.', 500)
 
     return "download/{}.pdf".format(filename)

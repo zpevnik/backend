@@ -12,6 +12,9 @@ SECRET_KEY = getenv('SECRET_KEY', 'test_secret')
 MONGODB_URI = getenv('MONGODB_UNITTEST_URI',
                      getenv('MONGODB_URI', 'mongodb://localhost:27017/zpevnik'))
 
+SONGBOOK_TEMP_FOLDER = 'songs/temp/'
+SONGBOOK_DONE_FOLDER = 'songs/done/'
+
 SKAUTIS = {
     'TEST': getenv('SKAUTIS_TEST', False),
     'APPID': getenv('SKAUTIS_APPID', '3d59cc18-b2b9-46d7-b2e7-9f480f99553d')

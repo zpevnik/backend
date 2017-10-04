@@ -145,7 +145,7 @@ class ExportTest(unittest.TestCase):
         # clean the database
         self.mongo_client.drop_database(self.db_name)
 
-    def test_songbook_export(self):
+    def test_songbook_export_cache(self):
         # insert test songbook for further testing
         rv = self.app.post(
             '/api/v1/songbooks',
