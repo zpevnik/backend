@@ -66,9 +66,10 @@ def handle_TranslationException(error):
 
 @app.errorhandler(IOError)
 def handle_IOError(error):
-    response = jsonify(error.filename + ": " + error.strerror)
+    message = "{}: {}".format(error.filename, error.strerror)
+    response = jsonify(message)
     response.status_code = 500
-    log_event(EVENTS.IO_ERROR, current_user.get_id(), error.message)
+    log_event(EVENTS.IO_ERROR, current_user.get_id(), message)
     return response
 
 
