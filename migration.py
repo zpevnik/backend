@@ -1,4 +1,4 @@
-#!./venv/bin/python3.6
+#!./__venv__/bin/python3.6
 
 import time
 import random
