@@ -13,9 +13,9 @@ def export_song(song):
     filename = generate_random_filename()
 
     # get sbd song data and save them into aux sbd file
-    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'w') as file:
+    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'wb') as file:
         data, log = song.generate_sbd_output()
-        file.write(data)
+        file.write(data.encode('utf8'))
 
     # generate tex file for given export
     generate_tex_file(filename, DEFAULTS.SONGBOOK_OPTIONS)
@@ -39,14 +39,14 @@ def export_songbook(songbook):
     filename = generate_random_filename()
 
     # get sbd song data and save them into aux sbd file
-    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'a') as file:
+    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'ab') as file:
         for song_id in songbook.get_songs().keys():
             song = validators.song_existence(song_id)
             data, song_log = song.generate_sbd_output()
             if song_log:
                 log[song.get_title()] = song_log
 
-            file.write(data)
+            file.write(data.encode('utf8'))
 
     # generate tex file for given export
     generate_tex_file(filename, songbook.get_options())
@@ -61,13 +61,13 @@ def export_songbook(songbook):
 
 def generate_tex_file(filename, options):
     # read template file
-    with open('songs/misc/template.tex', 'r') as sample_file:
-        filedata = sample_file.read()
+    with open('songs/misc/template.tex', 'rb') as sample_file:
+        filedata = sample_file.read().decode('utf8')
 
     # replace data in template and save it into tex file
     filedata = filedata.replace('$filename$', filename)
-    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.tex', 'w') as temp_file:
-        temp_file.write(filedata)
+    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.tex', 'wb') as temp_file:
+        temp_file.write(filedata.encode('utf8'))
 
 
 def export_to_pdf(filename):
