@@ -59,7 +59,7 @@ def songbook_single(songbook_id):
         raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     if request.method == 'GET':
-        if request.headers['Content-Type'] == 'application/pdf':
+        if request.headers['Accept'] == 'application/pdf':
             return jsonify(export_songbook(songbook)), 200
         return jsonify(songbook.get_serialized_data()), 200
 

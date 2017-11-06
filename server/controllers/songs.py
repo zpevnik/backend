@@ -61,12 +61,13 @@ def songs():
 @api.route('/songs/<song_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def song_single(song_id):
+    print()
     song = validators.song_existence(song_id)
     if not permissions.check_perm(current_user, song, visibility=True):
         raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     if request.method == 'GET':
-        if request.headers['Content-Type'] == 'application/pdf':
+        if request.headers['Accept'] == 'application/pdf':
             return jsonify(export_song(song)), 200
         return jsonify(song.get_serialized_data()), 200
 
