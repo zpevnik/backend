@@ -64,13 +64,13 @@ def handle_TranslationException(error):
     return response
 
 
-@app.errorhandler(IOError)
-def handle_IOError(error):
-    message = "{}: {}".format(error.filename, error.strerror)
-    response = jsonify(message)
-    response.status_code = 500
-    log_event(EVENTS.IO_ERROR, current_user.get_id(), message)
-    return response
+#@app.errorhandler(IOError)
+#def handle_IOError(error):
+#    message = "{}: {}".format(error.filename, error.strerror)
+#    response = jsonify(message)
+#    response.status_code = 500
+#    log_event(EVENTS.IO_ERROR, current_user.get_id(), message)
+#    return response
 
 
 @app.route("/test")

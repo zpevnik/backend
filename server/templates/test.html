@@ -120,7 +120,9 @@
       $.ajax({
         url: url,
         type: "get",
-        contentType: "application/pdf",
+        headers: {
+          Accept: "application/pdf"
+        }
       }).done(function (result) {
         console.log(result);
         window.open('http://localhost:5010/' + result.link, 'Zpevnik');

@@ -46,7 +46,7 @@ def setup_logging():
 
     consoleFormat = ('[%(asctime)s] %(levelname)s %(name)s: %(message)s')
     consoleHandler = setup_handler(
-        logging.StreamHandler(), logging.INFO, consoleFormat, use_colors=True)
+        logging.StreamHandler(), logging.DEBUG, consoleFormat, use_colors=True)
     rootLogger.addHandler(consoleHandler)
 
 
