@@ -1,5 +1,6 @@
 songs/done
 songs/temp
+songs/songidx
+
 __venv__
 *.pyc
-.env

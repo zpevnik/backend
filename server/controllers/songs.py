@@ -61,7 +61,6 @@ def songs():
 @api.route('/songs/<song_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def song_single(song_id):
-    print()
     song = validators.song_existence(song_id)
     if not permissions.check_perm(current_user, song, visibility=True):
         raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
