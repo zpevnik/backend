@@ -215,6 +215,9 @@ class Song(object):
     def get_creation_date(self):
         return self._id.generation_time
 
+    def get_title(self):
+        return self._title
+
     def get_text(self):
         return self._text
 
