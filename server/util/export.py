@@ -4,8 +4,9 @@ import subprocess
 from server.app import app
 from server.util import validators
 from server.util.misc import generate_random_filename
-from server.util.exceptions import CompilationException
+from server.util.exceptions import AppException
 
+from server.constants import EVENTS
 from server.constants import DEFAULTS
 
 
@@ -78,7 +79,7 @@ def export_to_pdf(filename):
             if line.startswith("!"):
                 error += line + "\n"
 
-        raise CompilationException(error, 500)
+        raise AppException(EVENTS.COMPILATION_EXCEPTION, error, 500)
 
     process = subprocess.Popen(
         ["xelatex", "-halt-on-error", filename + ".tex"],
@@ -118,8 +119,5 @@ def export_to_pdf(filename):
     for fname in os.listdir(app.config['SONGBOOK_TEMP_FOLDER']):
         if fname.startswith(filename):
             os.remove(os.path.join(app.config['SONGBOOK_TEMP_FOLDER'], fname))
-
-    if not os.path.isfile(app.config['SONGBOOK_DONE_FOLDER'] + filename + ".pdf"):
-        raise CompilationException('Final pdf file does not exist.', 500)
 
     return "download/{}.pdf".format(filename)

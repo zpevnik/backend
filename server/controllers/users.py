@@ -10,7 +10,7 @@ from server.app import skautis
 from server.util import validators
 from server.util import permissions
 from server.util import log_event
-from server.util.exceptions import ClientException
+from server.util.exceptions import AppException
 
 from server.constants import STRINGS
 
@@ -40,7 +40,7 @@ def get_other_user_info(user_id):
 def user_songbook(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if not permissions.check_perm(current_user, songbook, editing=True):
-        raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+        raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     current_user.set_active_songbook(songbook_id)
     g.model.users.save(current_user)

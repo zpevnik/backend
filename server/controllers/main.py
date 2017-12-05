@@ -20,12 +20,8 @@ from flask_login import current_user
 from server.app import app
 from server.app import skautis
 
-from server.util import ClientException
-from server.util import ValidationException
-from server.util import CompilationException
-from server.util import TranslationException
-from server.util import RequestException
 from server.util import log_event
+from server.util import AppException
 
 from server.constants import STRINGS
 from server.constants import EVENTS
@@ -43,6 +39,17 @@ login_manager.login_message_category = "info"
 @login_manager.user_loader
 def load_user(userid):
     return g.model.users.find(userid)
+
+
+@app.errorhandler(AppException)
+def handle_AppException(exception):
+    # create response from exception data
+    response = jsonify(exception.get_exception())
+    response.status_code = exception.status_code
+
+    # log exception event and respond
+    log_event(exception.type, current_user.get_id(), exception.get_exception())
+    return response
 
 
 @app.route('/', defaults={'path': ''})
@@ -154,44 +161,6 @@ def cleanup():
     return 'Ok'
 
 
-@app.errorhandler(ClientException)
-def handle_ClientException(error):
-    response = jsonify(message=error.message)
-    response.status_code = error.status_code
-    log_event(EVENTS.CLIENT_EXCEPTION, current_user.get_id(), error.message)
-    return response
-
-
-@app.errorhandler(RequestException)
-def handle_RequestException(error):
-    response = jsonify(message=error.message)
-    response.status_code = error.status_code
-    log_event(EVENTS.REQUEST_EXCEPTION, current_user.get_id(), error.message)
-    return response
-
-
-@app.errorhandler(CompilationException)
-def handle_CompilationException(error):
-    response = jsonify(message=error.message)
-    response.status_code = error.status_code
-    log_event(EVENTS.COMPILATION_EXCEPTION, current_user.get_id(), error.message)
-    return response
-
-
-@app.errorhandler(ValidationException)
-def handle_ValidationException(error):
-    response = jsonify(error.get_json())
-    response.status_code = error.status_code
-    log_event(EVENTS.VALIDATION_EXCEPTION, current_user.get_id(), error.message)
-    return response
-
-
-@app.errorhandler(TranslationException)
-def handle_TranslationException(error):
-    response = jsonify(error.get_json())
-    response.status_code = error.status_code
-    log_event(EVENTS.TRANSLATION_EXCEPTION, current_user.get_id(), error.message)
-    return response
 
 
 @app.route('/test_login', methods=['GET'])

@@ -10,7 +10,7 @@ from server.util import export_songbook
 from server.util import permissions
 from server.util import validators
 from server.util import log_event
-from server.util.exceptions import ClientException
+from server.util.exceptions import AppException
 
 from server.constants import EVENTS
 from server.constants import STRINGS
@@ -56,7 +56,7 @@ def songbooks():
 def songbook_single(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if not permissions.check_perm(current_user, songbook, visibility=True):
-        raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+        raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     if request.method == 'GET':
         if request.headers['Accept'] == 'application/pdf':
@@ -65,7 +65,7 @@ def songbook_single(songbook_id):
 
     elif request.method == 'PUT':
         if not permissions.check_perm(current_user, songbook, editing=True):
-            raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+            raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
         data = request.get_json()
         validators.json_request(data)
@@ -81,7 +81,7 @@ def songbook_single(songbook_id):
 
     else:
         if not permissions.check_perm(current_user, songbook, editing=True):
-            raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+            raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
         g.model.songbooks.delete(songbook)
         log_event(EVENTS.SONGBOOK_DELETE, current_user.get_id(), songbook_id)
@@ -94,7 +94,7 @@ def songbook_single(songbook_id):
 def songbook_song_single(songbook_id, song_id):
     songbook = validators.songbook_existence(songbook_id)
     if not permissions.check_perm(current_user, songbook, visibility=True, editing=True):
-        raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+        raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     if request.method == 'PUT':
         song = validators.song_existence(song_id)
@@ -104,7 +104,7 @@ def songbook_song_single(songbook_id, song_id):
         data = validators.songbooks_song_request(data)
 
         if not permissions.check_perm(current_user, song, visibility=True):
-            raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+            raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
         songbook.set_song(song_id, data)
         g.model.songbooks.save(songbook)
@@ -129,7 +129,7 @@ def songbook_song_single(songbook_id, song_id):
 def songbook_song_bulk(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if not permissions.check_perm(current_user, songbook, visibility=True, editing=True):
-        raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+        raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     data = request.get_json()
     validators.json_request(data)
@@ -138,7 +138,7 @@ def songbook_song_bulk(songbook_id):
         entry = validators.songbooks_song_request(entry)
         song = validators.song_existence(entry['id'])
         if not permissions.check_perm(current_user, song, visibility=True):
-            raise ClientException(STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+            raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
         songbook.set_song(entry['id'], entry)
 
