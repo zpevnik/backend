@@ -1,0 +1,11 @@
+
+# nastavení zpěvníků
+
+Každý zpěvník má tyto nastavení:
+
+- Velikost stránky a její otočení (A4, A4 wide, A5, A5 wide)
+- Akordy nebo bez nich
+- Obsaghuje nebo neobsahuje obsah
+	- pokud ano, tak jestli je vpředu a nebo vzadu
+- jestli jsou stránky číslované
+- kolik je na jednu stránku sloupců (ještě musíme vymyslet přesné limity)
