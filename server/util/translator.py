@@ -50,6 +50,9 @@ def translate_to_tex(song):
         # handle tags and their correct translation
         if tag.lower() in TAGS:
 
+            # transform tag to lowercase
+            tag = tag.lower()
+
             if tag == TAGS.CHORUS:
                 _result.append(_finish_part())
                 _result.append('\\beginchorus\n')
@@ -64,7 +67,7 @@ def translate_to_tex(song):
 
             elif tag in TAGS._SPECIAL:
                 _result.append(_finish_part())
-                _result.append('\\*beginverse\n')
+                _result.append('\\beginverse*\n')
 
                 _context['verse'] = True
 
