@@ -51,10 +51,9 @@ size_dict = [OPTIONS.SIZE.A4, OPTIONS.SIZE.A5, OPTIONS.SIZE.A4_WIDE, OPTIONS.SIZ
 
 
 class Permissions(ConstantDict):
-    PRIVATE = 'private'
-    UNIT = 'unit'
-    WAITING = 'waiting'
-    PUBLIC = 'public'
+    PRIVATE = 0
+    UNIT = 1
+    PUBLIC = 2
 
 
 PERMISSION = Permissions()

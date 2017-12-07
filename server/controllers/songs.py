@@ -1,3 +1,5 @@
+import math
+
 from flask import g
 from flask import jsonify
 from flask import request
@@ -24,13 +26,24 @@ api = Blueprint('songs', __name__)
 def songs():
     if request.method == 'GET':
         data = validators.handle_GET_request(request.args)
-        data['user'] = current_user.get_id()
-        data['unit'] = current_user.get_unit()
 
-        result = g.model.songs.find_special(data)
-        response = []
+        # find all results for currect user and his unit
+        result = g.model.songs.find_filtered(data['query'], current_user.get_id(),
+                                             current_user.get_unit())
+
+        # prepare response
+        size = len(result)
+        response = {
+            'data': [],
+            'count': size,
+            'pages': int(math.ceil(size / data['per_page']))
+        } # yapf: disable
+
+        # slice results based on 'page' and 'per_page' values
+        result = result[(data['per_page'] * data['page']):(data['per_page'] * (data['page'] + 1))]
+
         for res in result:
-            response.append(res.get_serialized_data())
+            response['data'].append(res.get_serialized_data())
 
         return jsonify(response), 200
 

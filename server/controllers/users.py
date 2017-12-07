@@ -39,7 +39,7 @@ def get_other_user_info(user_id):
 @login_required
 def user_songbook(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
-    if not permissions.check_perm(current_user, songbook, editing=True):
+    if current_user.get_id() != songbook.get_owner():
         raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     current_user.set_active_songbook(songbook_id)

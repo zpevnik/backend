@@ -50,6 +50,7 @@ class Songs(object):
             'interpreters': data['interpreters'] if 'interpreters' in data else [],
             'visibility': data['visibility'],
             'edit_perm': data['edit_perm'],
+            'approved': False,
             'export_cache': None
         })
         self._collection.insert_one(song.serialize())
@@ -82,34 +83,36 @@ class Songs(object):
 
         return songs
 
-    def find_special(self, data):
-        """Find songs in the database based on query and page the result.
+    def find_filtered(self, query, user_id, unit_id):
+        """Find songs from the database based on query and permissions.
 
-        Args in dict:
+        Args:
           query (str): Query string.
-          page (int): Result page number.
-          per_page (int): Number of songbooks per search result.
-          user (str): user Id string
-          unit (str): Unit Id string
+          user_id (str): user Id string.
+          unit_id (str): Unit Id string.
 
-        If the query string is empty, whole database is returned (and paged).
+        All returned songs are accessible by this user. If the query string
+        is empty, every accessible song is returned.
 
         Returns:
-          list: List of Songs instances satisfying the query.
+          list: List of Song instances satisfying the query.
         """
-        if data['query'] is None or data['query'] == "":
-            doc = self._collection.find({}).skip(data['page'] * data['per_page']) \
-                                  .limit(data['per_page'])
+        if query is None or query == "":
+            doc = self._collection.find({'$or': [{'owner': user_id},
+                                                 {'owner_unit': unit_id, 'visibility': {"$gte": PERMISSION.UNIT}},
+                                                 {'approved': True, 'visibility': {"$gte": PERMISSION.PUBLIC}},
+                                                ]}) # yapf: disable
         else:
-            doc = self._collection.find({'$text':{'$search': data['query']}},
-                                        {'score': {'$meta': "textScore"}}) \
-                                  .sort([('score', {'$meta': 'textScore'})]) \
-                                  .skip(data['page'] * data['per_page']).limit(data['per_page'])
+            doc = self._collection.find({'$or': [{'owner': user_id},
+                                                 {'owner_unit': unit_id, 'visibility': {"$gte": PERMISSION.UNIT}},
+                                                 {'approved': True, 'visibility': {"$gte": PERMISSION.PUBLIC}},
+                                                ], '$text': {'$search': query}},
+                                        {'score': {'$meta': 'textScore'}}) \
+                                  .sort([('score', {'$meta': 'textScore'})]) # yapf: disable
 
         songs = []
         for song in doc:
             songs.append(Song(song))
-
         return songs
 
     def find_one(self, song_id=None, title=None):
@@ -165,6 +168,7 @@ class Song(object):
         self._owner_unit = song['owner_unit']
         self._visibility = song['visibility']
         self._edit_perm = song['edit_perm']
+        self._approved = song['approved']
         self._export_cache = song['export_cache']
 
     def serialize(self, update=False):
@@ -185,6 +189,7 @@ class Song(object):
             'owner_unit': self._owner_unit,
             'visibility': self._visibility,
             'edit_perm': self._edit_perm,
+            'approved': self._approved,
             'export_cache': self._export_cache
         }
 
@@ -206,6 +211,7 @@ class Song(object):
             'interpreters': self._interpreters,
             'visibility': self._visibility,
             'edit_perm': self._edit_perm,
+            'approved': self._approved,
             'export_cache': self._export_cache
         }
 

@@ -1,3 +1,5 @@
+import math
+
 from flask import g
 from flask import jsonify
 from flask import request
@@ -7,7 +9,6 @@ from flask_login import login_required
 
 from server.app import app
 from server.util import export_songbook
-from server.util import permissions
 from server.util import validators
 from server.util import log_event
 from server.util.exceptions import AppException
@@ -28,12 +29,19 @@ def songbooks():
         # find all results for currect user
         result = g.model.songbooks.find_filtered(data['query'], current_user.get_id())
 
+        # prepare response
+        size = len(result)
+        response = {
+            'data': [],
+            'count': size,
+            'pages': int(math.ceil(size / data['per_page']))
+        } # yapf: disable
+
         # slice results based on 'page' and 'per_page' values
         result = result[(data['per_page'] * data['page']):(data['per_page'] * (data['page'] + 1))]
 
-        response = []
         for res in result:
-            response.append(res.get_serialized_data())
+            response['data'].append(res.get_serialized_data())
 
         return jsonify(response), 200
 
@@ -58,7 +66,7 @@ def songbooks():
 @login_required
 def songbook_single(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
-    if not permissions.check_perm(current_user, songbook, visibility=True):
+    if current_user.get_id() != songbook.get_owner():
         raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     if request.method == 'GET':
@@ -67,9 +75,6 @@ def songbook_single(songbook_id):
         return jsonify(songbook.get_serialized_data()), 200
 
     elif request.method == 'PUT':
-        if not permissions.check_perm(current_user, songbook, editing=True):
-            raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
-
         data = request.get_json()
         validators.json_request(data)
         data = validators.songbooks_request(data)
@@ -83,9 +88,6 @@ def songbook_single(songbook_id):
         return jsonify(songbook.get_serialized_data()), 200
 
     else:
-        if not permissions.check_perm(current_user, songbook, editing=True):
-            raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
-
         g.model.songbooks.delete(songbook)
         log_event(EVENTS.SONGBOOK_DELETE, current_user.get_id(), songbook_id)
 
@@ -96,7 +98,7 @@ def songbook_single(songbook_id):
 @login_required
 def songbook_song_single(songbook_id, song_id):
     songbook = validators.songbook_existence(songbook_id)
-    if not permissions.check_perm(current_user, songbook, visibility=True, editing=True):
+    if current_user.get_id() != songbook.get_owner():
         raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     if request.method == 'PUT':
@@ -105,9 +107,6 @@ def songbook_song_single(songbook_id, song_id):
         data = request.get_json()
         validators.json_request(data)
         data = validators.songbooks_song_request(data)
-
-        if not permissions.check_perm(current_user, song, visibility=True):
-            raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
         songbook.set_song(song_id, data)
         g.model.songbooks.save(songbook)
@@ -132,7 +131,7 @@ def songbook_song_single(songbook_id, song_id):
 @login_required
 def songbook_song_bulk(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
-    if not permissions.check_perm(current_user, songbook, visibility=True, editing=True):
+    if current_user.get_id() != songbook.get_owner():
         raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
     data = request.get_json()
@@ -141,8 +140,6 @@ def songbook_song_bulk(songbook_id):
     for entry in data:
         entry = validators.songbooks_song_request(entry)
         song = validators.song_existence(entry['id'])
-        if not permissions.check_perm(current_user, song, visibility=True):
-            raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
 
         songbook.set_song(entry['id'], entry)
 

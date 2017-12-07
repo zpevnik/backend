@@ -2,6 +2,7 @@ from flask import g
 
 from server.util.exceptions import AppException
 
+from server.constants import EVENTS
 from server.constants import OPTIONS
 from server.constants import STRINGS
 from server.constants import size_dict

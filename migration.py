@@ -26,8 +26,51 @@ db = mongo_client[parsed.path[1:]]
 model = Model(db=db)
 
 
+def migration_2017_12_07_1():
+    logger.info('07.12.2017 - Migrating permission values in songs.')
+
+    collection = db['songs']
+    songs = collection.find()
+
+    for song in songs:
+        if 'approved' in song:
+            continue
+
+        if song['visibility'] == 'private':
+            song['visibility'] = int(PERMISSION.PRIVATE)
+        elif song['visibility'] == 'unit':
+            song['visibility'] = int(PERMISSION.UNIT)
+        elif song['visibility'] == 'public':
+            song['visibility'] = int(PERMISSION.PUBLIC)
+
+        if song['edit_perm'] == 'private':
+            song['edit_perm'] = int(PERMISSION.PRIVATE)
+        elif song['edit_perm'] == 'unit':
+            song['edit_perm'] = int(PERMISSION.UNIT)
+        elif song['edit_perm'] == 'public':
+            song['edit_perm'] = int(PERMISSION.PUBLIC)
+
+        song['approved'] = False
+
+        collection.update_one({'_id': song['_id']}, {'$set': song})
+
+
+def migration_2017_12_07_2():
+    logger.info('07.12.2017 - Removing unused fields in songbooks.')
+
+    collection = db['songbooks']
+    songbooks = collection.find()
+
+    for songbook in songbooks:
+        if 'visibility' not in songbook:
+            continue
+
+        collection.update_one({'_id': songbook['_id']}, {'$unset': {'visibility': ''}})
+        collection.update_one({'_id': songbook['_id']}, {'$unset': {'edit_perm': ''}})
+
+
 def migration_2017_10_04_1():
-    logger.info('12.08.2017 - Adding songbook cache.')
+    logger.info('04.10.2017 - Adding songbook cache.')
 
     collection = db['songbooks']
     songbooks = collection.find()
@@ -42,7 +85,7 @@ def migration_2017_10_04_1():
 
 
 def migration_2017_09_26_1():
-    logger.info('12.08.2017 - Adding options to songbooks.')
+    logger.info('26.09.2017 - Adding options to songbooks.')
 
     collection = db['songbooks']
     songbooks = collection.find()
@@ -63,7 +106,7 @@ def migration_2017_09_26_1():
 
 
 def migration_2017_09_12_1():
-    logger.info('12.08.2017 - Adding export cache to songs.')
+    logger.info('12.09.2017 - Adding export cache to songs.')
 
     collection = db['songs']
     songs = collection.find()
@@ -264,12 +307,11 @@ def migration_2017_08_18_4():
 #migration_2017_08_18_2()
 #migration_2017_08_18_3()
 #migration_2017_08_18_4()
-
 #migration_2017_09_05_1()
 #migration_2017_09_05_2()
-
 #migration_2017_09_12_1()
-
 #migration_2017_09_26_1()
-
 #migration_2017_10_04_1()
+
+#migration_2017_12_07_1()
+#migration_2017_12_07_2()
