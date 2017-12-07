@@ -12,21 +12,18 @@
 
 [Intro], [Outro], [Bridge], [Intermezzo], [Solo] - začátek dané části (u exporotovaného zpěvníku se reálně jedná o nečíslované sloky)
 
+[Echo] - začátek mluveného slova
+
+Za mluvené slovo se nepovažuje přímá řeč v písničce (viz. Buráky) - pro tu by se měli použít spíše uvozovky a brát jako součást sloky. Jedná se spíše o mluvený text jako ve Třech Křížích, který je i ve finálně vyexportovaném zpěvníku renderován jinak, než zbytek písně.
 
 Všechny nepárové značky jsou case-insensitive a monou tedy být psány s malým i velkým písmenem. Zobrazovat na webu se asi mohou podle toho, jak to bude vypadat lépe.
 
 Nepárové značky začí vždy začátek dané části. Část se automaticky ukončí nalezením další značky a nebo koncem vstupu.
-
-Pokud není na začátku písně žádná značka zadaná, bere se následující text jako nečáslovaná sloka (takže jako Intro). Nechtěl bych to ale nutně všem říkat ať to tam píšou :)
 
 
 ##Párové značky
 
 |: - začátek repetice
 :| - konec repetice (s optional číslem pro počet opakování)
-
-{ } - začátek a konec mluveného slova
-
-Za mluvené slovo se nepovažuje přímá řeč v písničce (viz. Buráci) - pro tu by se měli použít spíše uvozovky a brát jako součást sloky. Jedná se spíše o mluvený text jako ve Třech Křížích, který je i ve finálně vyexportovaném zpěvníku renderován jinak, než zbytek písně.
 
 Párové značky nesmějí procházet skrze nepárové značky (tj. musí být uzavřené v rámci jednoho bloku) a nesmějí se také vnořovat do sebe samotných (repetice uvnitř repetice).
