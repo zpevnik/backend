@@ -24,10 +24,13 @@ api = Blueprint('songbooks', __name__)
 def songbooks():
     if request.method == 'GET':
         data = validators.handle_GET_request(request.args)
-        data['user'] = current_user.get_id()
-        data['unit'] = current_user.get_unit()
 
-        result = g.model.songbooks.find_special(data)
+        # find all results for currect user
+        result = g.model.songbooks.find_filtered(data['query'], current_user.get_id())
+
+        # slice results based on 'page' and 'per_page' values
+        result = result[(data['per_page'] * data['page']):(data['per_page'] * (data['page'] + 1))]
+
         response = []
         for res in result:
             response.append(res.get_serialized_data())

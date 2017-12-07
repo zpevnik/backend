@@ -34,7 +34,7 @@ class Songbooks(object):
 
         Args:
           data (dict): Songbook data containing 'title', 'owner',
-            'owner_unit', 'visibility' and 'edit_perm' dictionary key.
+            'owner_unit' dictionary key.
 
         Returns:
           Songbook: Instance of the new songbook.
@@ -44,8 +44,6 @@ class Songbooks(object):
             'title': data['title'],
             'owner': data['owner'],
             'owner_unit': data['owner_unit'],
-            'visibility': data['visibility'],
-            'edit_perm': data['edit_perm'],
             'options': DEFAULTS.SONGBOOK_OPTIONS,
             'songs': {},
             'cached_file': None,
@@ -86,29 +84,26 @@ class Songbooks(object):
 
         return songbooks
 
-    def find_special(self, data):
-        """Find songbooks from the database based on query and page the result.
+    def find_filtered(self, query, user_id):
+        """Find songbooks from the database based on query and permissions.
 
-        Args in dict:
+        Args:
           query (str): Query string.
-          page (int): Result page number.
-          per_page (int): Number of songbooks per search result.
-          user (str): user Id string
-          unit (str): Unit Id string
+          user_id (str): user Id string.
 
-        If the query string is empty, whole database is returned (and paged).
+        All returned songbooks are accessible by this user. If the query string
+        is empty, every accessible songbook is returned.
 
         Returns:
           list: List of Songbook instances satisfying the query.
         """
-        if data['query'] is None or data['query'] == "":
-            doc = self._collection.find({}).skip(data['page'] * data['per_page']) \
-                                  .limit(data['per_page'])
+        if query is None or query == "":
+            doc = self._collection.find({'owner': user_id})
         else:
-            doc = self._collection.find({'$text':{'$search': data['query']}},
-                                        {'score': {'$meta': "textScore"}}) \
-                                  .sort([('score', {'$meta': 'textScore'})]) \
-                                  .skip(data['page'] * data['per_page']).limit(data['per_page'])
+            doc = self._collection.find({'owner': user_id, '$text': {'$search': query}},
+                                        {'score': {'$meta': 'textScore'}}) \
+                                  .sort([('score', {'$meta': 'textScore'})])
+
         songbooks = []
         for songbook in doc:
             songbooks.append(Songbook(songbook))
@@ -149,8 +144,6 @@ class Songbook(object):
       _songs (dict): Songs contained in this songbook.
       _owner (str): User Id
       _owner_unit (str): Unit Id
-      _visibility (str): Songbook visibility status
-      _edit_perm (str): Editing permission status
       _cached_file (str): Filename of cached songbook
       _cache_expiration (str): Timestamp of the cache expiration creation.
     """
@@ -162,8 +155,6 @@ class Songbook(object):
         self._owner = songbook['owner']
         self._options = songbook['options']
         self._owner_unit = songbook['owner_unit']
-        self._visibility = songbook['visibility']
-        self._edit_perm = songbook['edit_perm']
 
         self._cached_file = songbook['cached_file']
         self._cache_expiration = songbook['cache_expiration']
@@ -181,8 +172,6 @@ class Songbook(object):
             'owner': self._owner,
             'options': self._options,
             'owner_unit': self._owner_unit,
-            'visibility': self._visibility,
-            'edit_perm': self._edit_perm,
             'cached_file': self._cached_file,
             'cache_expiration': self._cache_expiration
         }
@@ -200,9 +189,7 @@ class Songbook(object):
             'songs': list(self._songs.values()),
             'owner': self._owner,
             'options': self._options,
-            'owner_unit': self._owner_unit,
-            'visibility': self._visibility,
-            'edit_perm': self._edit_perm
+            'owner_unit': self._owner_unit
         }
 
     def get_id(self):
@@ -219,12 +206,6 @@ class Songbook(object):
 
     def get_owner_unit(self):
         return self._owner_unit
-
-    def get_visibility(self):
-        return self._visibility
-
-    def get_edit_perm(self):
-        return self._edit_perm
 
     def get_options(self):
         return self._options
@@ -259,12 +240,6 @@ class Songbook(object):
         self.invalidate_cache()
 
         self._title = data['title'] if 'title' in data else self._title
-        if 'visibility' in data:
-            if data['visibility'] in PERMISSION:
-                self._visibility = data['visibility']
-        if 'edit_perm' in data:
-            if data['edit_perm'] in PERMISSION:
-                self._edit_perm = data['edit_perm']
         if 'options' in data:
             self._options = validators.songbook_options(data['options'])
 
