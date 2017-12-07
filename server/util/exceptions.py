@@ -15,7 +15,7 @@ class AppException(Exception):
         data = {'message': self.message}
         if self.data is not None:
             data['data'] = self.data
-        if self.extype is not None:
+        if self.exp_type is not None:
             data['exp_type'] = self.exp_type
 
         return data

@@ -2,7 +2,7 @@ from bson import ObjectId
 from flask import g
 
 from server.util import translate_to_tex
-from server.constants import permission_dict
+from server.constants import PERMISSION
 
 
 class Songs(object):
@@ -249,10 +249,10 @@ class Song(object):
         self._authors = data['authors'] if 'authors' in data else self._authors
         self._interpreters = data['interpreters'] if 'interpreters' in data else self._interpreters
         if 'visibility' in data:
-            if data['visibility'] in permission_dict:
+            if data['visibility'] in PERMISSION:
                 self._visibility = data['visibility']
         if 'edit_perm' in data:
-            if data['edit_perm'] in permission_dict:
+            if data['edit_perm'] in PERMISSION:
                 self._edit_perm = data['edit_perm']
 
         # invalidate export cache

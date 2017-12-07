@@ -48,7 +48,7 @@ def handle_AppException(exception):
     response.status_code = exception.status_code
 
     # log exception event and respond
-    log_event(exception.type, current_user.get_id(), exception.get_exception())
+    log_event(exception.exp_type, current_user.get_id(), exception.get_exception())
     return response
 
 

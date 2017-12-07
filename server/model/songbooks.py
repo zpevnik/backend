@@ -6,7 +6,7 @@ from flask import g
 from server.util import validators
 from server.constants import OPTIONS
 from server.constants import DEFAULTS
-from server.constants import permission_dict
+from server.constants import PERMISSION
 
 
 class Songbooks(object):
@@ -260,10 +260,10 @@ class Songbook(object):
 
         self._title = data['title'] if 'title' in data else self._title
         if 'visibility' in data:
-            if data['visibility'] in permission_dict:
+            if data['visibility'] in PERMISSION:
                 self._visibility = data['visibility']
         if 'edit_perm' in data:
-            if data['edit_perm'] in permission_dict:
+            if data['edit_perm'] in PERMISSION:
                 self._edit_perm = data['edit_perm']
         if 'options' in data:
             self._options = validators.songbook_options(data['options'])

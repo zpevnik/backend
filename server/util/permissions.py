@@ -1,9 +1,8 @@
 from server.constants import PERMISSION
-from server.constants import permission_dict
 
 
 def check_perm_aux(user, perm, user_id, unit_id):
-    if perm not in permission_dict:
+    if perm not in PERMISSION:
         return False
 
     if perm == PERMISSION.PUBLIC:
