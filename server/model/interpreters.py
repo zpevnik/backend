@@ -43,7 +43,9 @@ class Interpreters(object):
         self._collection.update_one(
             {
                 '_id': interpreter._id
-            }, {'$set': interpreter.serialize(update=True)})
+            }, {
+                '$set': interpreter.serialize(update=True)
+            })
 
     def delete(self, interpreter):
         """Delete interpreter from the database.

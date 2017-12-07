@@ -110,9 +110,10 @@ def songbook_song_single(songbook_id, song_id):
         g.model.songbooks.save(songbook)
 
         data['id'] = song_id
-        log_event(EVENTS.SONGBOOK_SET_SONG,
-                  current_user.get_id(), {'songbook': songbook_id,
-                                          'song': song_id})
+        log_event(EVENTS.SONGBOOK_SET_SONG, current_user.get_id(), {
+            'songbook': songbook_id,
+            'song': song_id
+        })
 
         return jsonify({'message': STRINGS.SONGBOOK_SET_SONG_SUCCESS}), 200
 
@@ -142,9 +143,10 @@ def songbook_song_bulk(songbook_id):
 
         songbook.set_song(entry['id'], entry)
 
-        log_event(EVENTS.SONGBOOK_SET_SONG,
-                  current_user.get_id(), {'songbook': songbook_id,
-                                          'song': entry['id']})
+        log_event(EVENTS.SONGBOOK_SET_SONG, current_user.get_id(), {
+            'songbook': songbook_id,
+            'song': entry['id']
+        })
 
     g.model.songbooks.save(songbook)
     return jsonify({'message': STRINGS.SONGBOOK_SET_SONG_SUCCESS}), 200

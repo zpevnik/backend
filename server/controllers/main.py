@@ -161,8 +161,6 @@ def cleanup():
     return 'Ok'
 
 
-
-
 @app.route('/test_login', methods=['GET'])
 def test_login():
     ip = request.remote_addr

@@ -8,101 +8,93 @@ from server.constants import KEYWORDS
 def translate_to_tex(song):
     _log = []
     _output = []
-    _regexp = '\[(\w+)\](\{\d+\})?'
+    _regexp = '(\[\w+\]|\|:|:\|)([0-9]+)?'
     _context = {
-        'solo': False,
         'echo': False,
         'verse': False,
         'chorus': False,
-        'repetition': False,
-        '_errstate': False
-    }
+        'repetition': False
+    } # yapf: disable
+
+    def finish_part():
+        if _context['repetition']:
+            _log.append(STRINGS.TRANSLATOR.ERROR_REPETITION_OVERLAPPING.format(_idx))
+
+        if _context['echo']:
+            _context['verse'] = False
+            return '}'
+
+        if _context['verse']:
+            _context['verse'] = False
+            return '\\endverse'
+
+        elif _context['chorus']:
+            _context['chorus'] = False
+            return '\\endchorus'
+
+        return ''
 
     def process_match(match):
+        _result = []
+
         tag = match.group(1)
         info = match.group(2)
 
-        if tag in KEYWORDS:
-            if tag == 'chorus':
-                if info:
-                    _log.append(STRINGS.TRANSLATOR.IGNORING_INFO.format(_idx, match.group()))
-                if _context['solo'] or _context['echo'] or _context['verse'] or _context['repetition']:
-                    _log.append(STRINGS.TRANSLATOR.ERROR_CHORUS_OVERLAPPING.format(_idx))
-                    _context['_errstate'] = True
-                    return ''
+        if tag.lower() in TAGS:
 
-                _context['chorus'] = not _context['chorus']
-                if _context['chorus']:
-                    return '\\beginchorus\n'
-                else:
-                    return '\\endchorus\n'
+            if tag == TAGS.CHORUS:
+                _result.append(finish_part())
+                _result.append('\\beginchorus')
 
-            elif tag == 'verse':
-                if info:
-                    _log.append(STRINGS.TRANSLATOR.IGNORING_INFO.format(_idx, match.group()))
-                if _context['solo'] or _context['echo'] or _context['chorus'] or _context['repetition']:
-                    _log.append(STRINGS.TRANSLATOR.ERROR_VERSE_OVERLAPPING.format(_idx))
-                    _context['_errstate'] = True
-                    return ''
+                _context['chorus'] = True
 
-                _context['verse'] = not _context['verse']
-                if _context['verse']:
-                    return '\\beginverse\n'
-                else:
-                    return '\\endverse\n'
+            elif tag == TAGS.VERSE:
+                _result.append(finish_part())
+                _result.append('\\beginverse')
 
-            elif tag == 'solo':
-                if info:
-                    _log.append(STRINGS.TRANSLATOR.IGNORING_INFO.format(_idx, match.group()))
-                _log.append(STRINGS.TRANSLATOR.ERROR_NOT_IMPLEMENTED.format(_idx))
-                _context['_errstate'] = True
-                return ''
+                _context['verse'] = True
 
-            elif tag == 'echo':
-                if info:
-                    _log.append(STRINGS.TRANSLATOR.IGNORING_INFO.format(_idx, match.group()))
-                if _context['solo']:
-                    _log.append(STRINGS.TRANSLATOR.ERROR_ECHO_OVERLAPPING.format(_idx))
-                    _context['_errstate'] = True
-                    return ''
+            elif tag in TAGS._SPECIAL:
+                _result.append(finish_part())
+                _result.append('\\*beginverse')
 
-                _context['echo'] = not _context['echo']
-                if _context['echo']:
-                    return '\\echo{'
-                else:
-                    return '}\n'
+                _context['verse'] = True
 
-            elif tag == 'repetition':
-                repetition_info = ''
-                if info:
-                    if not _context['repetition']:
-                        _log.append(STRINGS.TRANSLATOR.IGNORING_INFO.format(_idx, match.group()))
-                    else:
-                        repetition_info = '\\rep{{{}}}'.format(info[1:-1])
+            elif tag == TAGS.ECHO:
+                _result.append(finish_part())
+                _result.append('\\echo{')
 
-                _context['repetition'] = not _context['repetition']
+                _context['echo'] = True
+
+            elif tag == TAGS.REPETITION_START:
                 if _context['repetition']:
-                    return '\\lrep\n'
-                else:
-                    return '\\rrep{}\n'.format(repetition_info)
+                    _log.append(STRINGS.TRANSLATOR.ERROR_NESTED_REPETITION.format(_idx))
+                _result.append('\\lrep')
+
+                _context['repetition'] = True
+
+            elif tag == TAGS.REPETITION_END:
+                if not _context['repetition']:
+                    _log.append(STRINGS.TRANSLATOR.ERROR_REPETITION_END_BEFORE_START.format(_idx))
+
+                count = info if info else 1
+                _result.append('\\rrep{}'.format(count))
+
+                _context['repetition'] = False
 
         elif tag in CHORDS:
-            if info:
-                _log.append(STRINGS.TRANSLATOR.IGNORING_INFO.format(_idx, match.group()))
-            return '[{}]'.format(tag)
+            _result.append('[{}]'.format(tag))
 
-        _log.append(STRINGS.TRANSLATOR.UNKNOWN_TAG.format(_idx, match.group()))
-        return '[{}]'.format(tag)
+        else:
+            _log.append(STRINGS.TRANSLATOR.UNKNOWN_TAG.format(_idx, match.group()))
+
+        return ''.join(_result)
 
     content = [x.strip() for x in song.split('\n')]
 
     for _idx, line in enumerate(content):
         # translate into LaTeX format
         line = re.sub(_regexp, process_match, line)
-
-        # check whether error occurend during line parsing
-        if _context['_errstate']:
-            raise TranslationException('\n'.join(_log), 500)
 
         # escape chords so that they are interpered as special symbols
         line = line.replace('[', '\\[')

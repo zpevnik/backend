@@ -1,5 +1,6 @@
 from server.constants import EVENTS
 
+
 class AppException(Exception):
 
     def __init__(self, exp_type, message, status_code, data=None):
