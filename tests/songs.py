@@ -5,6 +5,7 @@ from urllib.parse import urlsplit
 from pymongo import MongoClient
 
 from server.app import app
+from server.constants import PERMISSION
 
 
 class SongTest(unittest.TestCase):
@@ -52,7 +53,7 @@ class SongTest(unittest.TestCase):
 
         # get id of one of the songs
         res = json.loads(rv.data)
-        song_id = res[0]['id']
+        song_id = res['data'][0]['id']
 
         # check get request on selected song
         rv = self.app.get('/api/v1/songs/{}'.format(song_id))
@@ -105,7 +106,7 @@ class SongTest(unittest.TestCase):
         # remember size of the database
         rv = self.app.get('/api/v1/songs')
         res = json.loads(rv.data)
-        temp = len(res)
+        temp = res['count']
 
         # delete song from the database
         rv = self.app.delete('/api/v1/songs/{}'.format(song_id))
@@ -114,7 +115,7 @@ class SongTest(unittest.TestCase):
         # check, that song is really deleted
         rv = self.app.get('/api/v1/songs')
         res = json.loads(rv.data)
-        assert len(res) == temp - 1
+        assert res['count'] == temp - 1
 
         # check that song cannot be found via its id
         rv = self.app.get('/api/v1/songs/{}'.format(song_id))
@@ -152,7 +153,7 @@ class SongTest(unittest.TestCase):
                     interpreters=[])))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "title"' in rv.data
+        assert b'"data": "title"' in rv.data
 
         # test missing text field
         rv = self.app.post(
@@ -167,7 +168,7 @@ class SongTest(unittest.TestCase):
                     interpreters=[])))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "text"' in rv.data
+        assert b'"data": "text"' in rv.data
 
         # test missing description field
         rv = self.app.post(
@@ -182,7 +183,7 @@ class SongTest(unittest.TestCase):
                     interpreters=[])))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "description"' in rv.data
+        assert b'"data": "description"' in rv.data
 
         # test missing authors field
         rv = self.app.post(
@@ -191,7 +192,7 @@ class SongTest(unittest.TestCase):
             data=json.dumps(dict(title="Madness", text="song", description="", interpreters=[])))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "authors"' in rv.data
+        assert b'"data": "authors"' in rv.data
 
         # test missing interpreters field
         rv = self.app.post(
@@ -202,11 +203,13 @@ class SongTest(unittest.TestCase):
                     title="Madness",
                     text="song",
                     description="",
-                    authors={'lyrics': [],
-                             'music': []})))
+                    authors={
+                        'lyrics': [],
+                        'music': []
+                    })))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "interpreters"' in rv.data
+        assert b'"data": "interpreters"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -263,7 +266,7 @@ class SongTest(unittest.TestCase):
                     interpreters=[])))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "title"' in rv.data
+        assert b'"data": "title"' in rv.data
 
         # test missing text field
         rv = self.app.put(
@@ -278,7 +281,7 @@ class SongTest(unittest.TestCase):
                     interpreters=[])))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "text"' in rv.data
+        assert b'"data": "text"' in rv.data
 
         # test missing description field
         rv = self.app.put(
@@ -293,7 +296,7 @@ class SongTest(unittest.TestCase):
                     interpreters=[])))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "description"' in rv.data
+        assert b'"data": "description"' in rv.data
 
         # test missing authors field
         rv = self.app.put(
@@ -302,7 +305,7 @@ class SongTest(unittest.TestCase):
             data=json.dumps(dict(title="Madness", text="song", description="", interpreters=[])))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "authors"' in rv.data
+        assert b'"data": "authors"' in rv.data
 
         # test missing interpreters field
         rv = self.app.put(
@@ -313,11 +316,13 @@ class SongTest(unittest.TestCase):
                     title="Madness",
                     text="song",
                     description="",
-                    authors={'lyrics': [],
-                             'music': []})))
+                    authors={
+                        'lyrics': [],
+                        'music': []
+                    })))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "interpreters"' in rv.data
+        assert b'"data": "interpreters"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -429,3 +434,195 @@ class SongTest(unittest.TestCase):
         rv = self.app.get('/api/v1/songs/duplicate/{}'.format('000000000000000000000000'))
         assert rv.status_code == 422
         assert b'"message": "Song was not found."' in rv.data
+
+    def test_permissions(self):
+        # insert test song for further testing
+        rv = self.app.post(
+            '/api/v1/songs',
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[])))
+        assert rv.status_code == 201
+        song = json.loads(rv.data)
+        song_id = song['link'].split('/')[1]
+
+        # test wrong view permission values
+        rv = self.app.put(
+            '/api/v1/songs/{}'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[],
+                    visibility=6,
+                )))
+        assert rv.status_code == 422
+        assert b'"code": "wrong_value"' in rv.data
+        assert b'"data": "visibility"' in rv.data
+
+        rv = self.app.put(
+            '/api/v1/songs/{}'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[],
+                    visibility='abc',
+                )))
+        assert rv.status_code == 422
+        assert b'"code": "wrong_value"' in rv.data
+        assert b'"data": "visibility"' in rv.data
+
+        # test wrong edit permission values
+        rv = self.app.put(
+            '/api/v1/songs/{}'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[],
+                    edit_perm=8,
+                )))
+        assert rv.status_code == 422
+        assert b'"code": "wrong_value"' in rv.data
+        assert b'"data": "edit_perm"' in rv.data
+
+        rv = self.app.put(
+            '/api/v1/songs/{}'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[],
+                    edit_perm='abc',
+                )))
+        assert rv.status_code == 422
+        assert b'"code": "wrong_value"' in rv.data
+        assert b'"data": "edit_perm"' in rv.data
+
+        # test edit higher than view
+        rv = self.app.put(
+            '/api/v1/songs/{}'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[],
+                    edit_perm=PERMISSION.UNIT,
+                )))
+        assert rv.status_code == 422
+        assert b'"code": "wrong_value"' in rv.data
+        assert b'"data": "edit_perm"' in rv.data
+
+        # test correct permission change
+        rv = self.app.put(
+            '/api/v1/songs/{}'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[],
+                    visibility=PERMISSION.UNIT,
+                    edit_perm=PERMISSION.UNIT,
+                )))
+        assert rv.status_code == 200
+
+        rv = self.app.put(
+            '/api/v1/songs/{}'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[],
+                    visibility=PERMISSION.PUBLIC,
+                )))
+        assert rv.status_code == 200
+
+        # test no change
+        rv = self.app.put(
+            '/api/v1/songs/{}'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[],
+                    visibility=PERMISSION.PUBLIC,
+                    edit_perm=PERMISSION.UNIT,
+                )))
+        assert rv.status_code == 200
+
+        # test wrong permission change
+        rv = self.app.put(
+            '/api/v1/songs/{}'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[],
+                    visibility=PERMISSION.UNIT,
+                )))
+        assert rv.status_code == 422
+        assert b'"code": "wrong_value"' in rv.data
+        assert b'"data": "visibility"' in rv.data
+
+        rv = self.app.put(
+            '/api/v1/songs/{}'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(
+                dict(
+                    title="Bubák",
+                    text="song",
+                    description="",
+                    authors={'lyrics': [],
+                             'music': []},
+                    interpreters=[],
+                    edit_perm=PERMISSION.PRIVATE,
+                )))
+        assert rv.status_code == 422
+        assert b'"code": "wrong_value"' in rv.data
+        assert b'"data": "edit_perm"' in rv.data
+
+        # clean the database
+        self.mongo_client.drop_database(self.db_name)

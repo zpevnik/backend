@@ -6,7 +6,6 @@ from bson import ObjectId
 from pymongo import MongoClient
 
 from server.app import app
-from server.constants import PERMISSION
 
 
 class SongbookTest(unittest.TestCase):
@@ -47,7 +46,7 @@ class SongbookTest(unittest.TestCase):
 
         # get id of one of the songs
         res = json.loads(rv.data)
-        songbook_id = res[0]['id']
+        songbook_id = res['data'][0]['id']
 
         # check get request on selected songbook
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
@@ -82,7 +81,7 @@ class SongbookTest(unittest.TestCase):
         # remember size of the database
         rv = self.app.get('/api/v1/songbooks')
         res = json.loads(rv.data)
-        temp = len(res)
+        temp = res['count']
 
         # delete songbbok from the database
         rv = self.app.delete('/api/v1/songbooks/{}'.format(songbook_id))
@@ -91,7 +90,7 @@ class SongbookTest(unittest.TestCase):
         # check, that songbook is really deleted
         rv = self.app.get('/api/v1/songbooks')
         res = json.loads(rv.data)
-        assert len(res) == temp - 1
+        assert res['count'] == temp - 1
 
         # check that songbook cannot be found via its id
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
@@ -117,7 +116,7 @@ class SongbookTest(unittest.TestCase):
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "title"' in rv.data
+        assert b'"data": "title"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -146,7 +145,7 @@ class SongbookTest(unittest.TestCase):
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "title"' in rv.data
+        assert b'"data": "title"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -178,14 +177,14 @@ class SongbookTest(unittest.TestCase):
         song_id = song['link'].split('/')[1]
 
         # test wrong songbook insert
-        rv = self.app.put(
-            '/api/v1/songbooks/{}/song/{}'.format('000000000000000000000000', song_id))
+        rv = self.app.put('/api/v1/songbooks/{}/song/{}'.format('000000000000000000000000',
+                                                                song_id))
         assert rv.status_code == 422
         assert b'"message":' in rv.data
 
         # test wrong song insert
-        rv = self.app.put(
-            '/api/v1/songbooks/{}/song/{}'.format(songbook_id, '000000000000000000000000'))
+        rv = self.app.put('/api/v1/songbooks/{}/song/{}'.format(songbook_id,
+                                                                '000000000000000000000000'))
         assert rv.status_code == 422
         assert b'"message":' in rv.data
 
@@ -298,8 +297,6 @@ class SongbookTest(unittest.TestCase):
             'title': 'My songbook',
             'owner': 0,
             'owner_unit': 0,
-            'visibility': PERMISSION.PRIVATE,
-            'edit_perm': PERMISSION.PRIVATE,
             'options': {},
             'songs': {},
             'cached_file': None,
@@ -315,8 +312,6 @@ class SongbookTest(unittest.TestCase):
             'title': 'My songbook',
             'owner': 1,
             'owner_unit': 0,
-            'visibility': PERMISSION.PRIVATE,
-            'edit_perm': PERMISSION.PRIVATE,
             'options': {},
             'songs': {},
             'cached_file': None,
@@ -324,38 +319,6 @@ class SongbookTest(unittest.TestCase):
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 404
-
-        songbook_id = ObjectId()
-        self.mongo_db['songbooks'].insert_one({
-            '_id': songbook_id,
-            'title': 'My songbook',
-            'owner': 1,
-            'owner_unit': 0,
-            'visibility': PERMISSION.UNIT,
-            'edit_perm': PERMISSION.PRIVATE,
-            'options': {},
-            'songs': {},
-            'cached_file': None,
-            'cache_expiration': None
-        })
-        rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
-        assert rv.status_code == 404
-
-        songbook_id = ObjectId()
-        self.mongo_db['songbooks'].insert_one({
-            '_id': songbook_id,
-            'title': 'My songbook',
-            'owner': 1,
-            'owner_unit': 0,
-            'visibility': PERMISSION.UNIT,
-            'edit_perm': PERMISSION.UNIT,
-            'options': {},
-            'songs': {},
-            'cached_file': None,
-            'cache_expiration': None
-        })
-        rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
-        assert rv.status_code == 200
 
         # test other songbooks
         songbook_id = ObjectId()
@@ -364,8 +327,6 @@ class SongbookTest(unittest.TestCase):
             'title': 'My songbook',
             'owner': 1,
             'owner_unit': 1,
-            'visibility': PERMISSION.PRIVATE,
-            'edit_perm': PERMISSION.PRIVATE,
             'options': {},
             'songs': {},
             'cached_file': None,
@@ -373,83 +334,3 @@ class SongbookTest(unittest.TestCase):
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
         assert rv.status_code == 404
-
-        songbook_id = ObjectId()
-        self.mongo_db['songbooks'].insert_one({
-            '_id': songbook_id,
-            'title': 'My songbook',
-            'owner': 1,
-            'owner_unit': 1,
-            'visibility': PERMISSION.UNIT,
-            'edit_perm': PERMISSION.PRIVATE,
-            'options': {},
-            'songs': {},
-            'cached_file': None,
-            'cache_expiration': None
-        })
-        rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
-        assert rv.status_code == 404
-
-        songbook_id = ObjectId()
-        self.mongo_db['songbooks'].insert_one({
-            '_id': songbook_id,
-            'title': 'My songbook',
-            'owner': 1,
-            'owner_unit': 1,
-            'visibility': PERMISSION.PUBLIC,
-            'edit_perm': PERMISSION.PRIVATE,
-            'options': {},
-            'songs': {},
-            'cached_file': None,
-            'cache_expiration': None
-        })
-        rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
-        assert rv.status_code == 404
-
-        songbook_id = ObjectId()
-        self.mongo_db['songbooks'].insert_one({
-            '_id': songbook_id,
-            'title': 'My songbook',
-            'owner': 1,
-            'owner_unit': 1,
-            'visibility': PERMISSION.UNIT,
-            'edit_perm': PERMISSION.UNIT,
-            'options': {},
-            'songs': {},
-            'cached_file': None,
-            'cache_expiration': None
-        })
-        rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
-        assert rv.status_code == 404
-
-        songbook_id = ObjectId()
-        self.mongo_db['songbooks'].insert_one({
-            '_id': songbook_id,
-            'title': 'My songbook',
-            'owner': 1,
-            'owner_unit': 1,
-            'visibility': PERMISSION.PUBLIC,
-            'edit_perm': PERMISSION.UNIT,
-            'options': {},
-            'songs': {},
-            'cached_file': None,
-            'cache_expiration': None
-        })
-        rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
-        assert rv.status_code == 404
-
-        songbook_id = ObjectId()
-        self.mongo_db['songbooks'].insert_one({
-            '_id': songbook_id,
-            'title': 'My songbook',
-            'owner': 1,
-            'owner_unit': 1,
-            'visibility': PERMISSION.PUBLIC,
-            'edit_perm': PERMISSION.PUBLIC,
-            'options': {},
-            'songs': {},
-            'cached_file': None,
-            'cache_expiration': None
-        })
-        rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
-        assert rv.status_code == 200

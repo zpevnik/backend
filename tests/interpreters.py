@@ -112,7 +112,7 @@ class InterpreterTest(unittest.TestCase):
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "name"' in rv.data
+        assert b'"data": "name"' in rv.data
 
         # test duplicate interpreters
         rv = self.app.post(
@@ -154,7 +154,7 @@ class InterpreterTest(unittest.TestCase):
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
         assert b'"code": "missing_field"' in rv.data
-        assert b'"field": "name"' in rv.data
+        assert b'"data": "name"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)

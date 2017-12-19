@@ -37,8 +37,7 @@ class ExportTest(unittest.TestCase):
                     text="[verse][Em]Nights in white [D]satin, [Em]never reaching the [D]end,\n"
                     "[C]Letters I've [G]written, [F]never meaning to [Em]send.\n"
                     "[Em]Beauty I've [D]always missed, [Em]with these eyes be[D]fore,\n"
-                    "[C]Just what the [G]truth is, [F] I can't say any[Em]more.\n"
-                    "[verse]",
+                    "[C]Just what the [G]truth is, [F] I can't say any[Em]more.\n",
                     description="This is a test song",
                     authors={'lyrics': [],
                              'music': []},
@@ -48,7 +47,7 @@ class ExportTest(unittest.TestCase):
         song_id = song['link'].split('/')[1]
 
         # export test song as pdf
-        rv = self.app.get('/api/v1/songs/{}'.format(song_id), content_type='application/pdf')
+        rv = self.app.get('/api/v1/songs/{}'.format(song_id), headers={'Accept': 'application/pdf'})
         assert rv.status_code == 200
         assert b'download/' in rv.data
 
@@ -84,8 +83,7 @@ class ExportTest(unittest.TestCase):
                     "[F#m]I don’t know what you’re ex[D]pecting of me\n"
                     "[A]Put under the pressure\n"
                     "of [E]walking in your [D]shoes\n"
-                    "[echo]Caught in the undertow, just [E]caught in the undertow[echo]\n"
-                    "[verse]",
+                    "[echo]Caught in the undertow, just caught in the undertow\n",
                     description="",
                     authors={'lyrics': [],
                              'music': []},
@@ -106,8 +104,7 @@ class ExportTest(unittest.TestCase):
                     "[Em]Stuck in my head again\n"
                     "[G]Feels like I'll never leave this [C]place\n"
                     "There's no es[D]cape\n"
-                    "I'm my [Em]own worst [G]ene[C]my\n"
-                    "[verse]",
+                    "I'm my [Em]own worst [G]ene[C]my\n",
                     description="",
                     authors={'lyrics': [],
                              'music': []},
@@ -125,7 +122,9 @@ class ExportTest(unittest.TestCase):
 
         # export test songbook as pdf
         rv = self.app.get(
-            '/api/v1/songbooks/{}'.format(songbook_id), content_type='application/pdf')
+            '/api/v1/songbooks/{}'.format(songbook_id), headers={
+                'Accept': 'application/pdf'
+            })
         assert rv.status_code == 200
         assert b'download/' in rv.data
 
@@ -149,7 +148,9 @@ class ExportTest(unittest.TestCase):
 
         # export test songbook as pdf
         rv = self.app.get(
-            '/api/v1/songbooks/{}'.format(songbook_id), content_type='application/pdf')
+            '/api/v1/songbooks/{}'.format(songbook_id), headers={
+                'Accept': 'application/pdf'
+            })
         assert rv.status_code == 200
         assert b'download/' in rv.data
 
@@ -157,7 +158,9 @@ class ExportTest(unittest.TestCase):
 
         # test export cache
         rv = self.app.get(
-            '/api/v1/songbooks/{}'.format(songbook_id), content_type='application/pdf')
+            '/api/v1/songbooks/{}'.format(songbook_id), headers={
+                'Accept': 'application/pdf'
+            })
         assert rv.status_code == 200
         assert b'download/' in rv.data
 
