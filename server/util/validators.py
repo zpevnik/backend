@@ -129,13 +129,14 @@ def songs_request(request):
     if 'title' not in request or not request['title']:
         ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TITLE_MISSING, 'title')
     if 'text' not in request or not request['text']:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TITLE_MISSING, 'text')
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TEXT_MISSING, 'text')
     if 'description' not in request:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TITLE_MISSING, 'description')
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_DESCRIPTION_MISSING, 'description')
     if 'authors' not in request:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TITLE_MISSING, 'authors')
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_AUTHORS_MISSING, 'authors')
     if 'interpreters' not in request:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TITLE_MISSING, 'interpreters')
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_INTERPRETERS_MISSING,
+                     'interpreters')
 
     if ex.errors:
         raise ex

@@ -43,6 +43,10 @@ class Strings(object):
 
     COMPILATION_ERROR = 'Error occured during latex compilation.'
 
+    PERMISSION_WRONG_VALUE = 'Permission has wrong value.'
+    PERMISSION_EDIT_HIGHER_THAN_VIEW = 'Edit permission has grater value than view permission.'
+    PERMISSION_SMALLER_VALUE = 'Permission cannot be changed to more restrictive.'
+
     TRANSLATOR = TranslatorStrings()
 
 

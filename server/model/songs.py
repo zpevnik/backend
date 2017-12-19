@@ -1,7 +1,12 @@
 from bson import ObjectId
 from flask import g
 
+from server.util import AppException
 from server.util import translate_to_tex
+
+from server.constants import EVENTS
+from server.constants import EXCODES
+from server.constants import STRINGS
 from server.constants import PERMISSION
 
 
@@ -248,18 +253,39 @@ class Song(object):
     def get_edit_perm(self):
         return self._edit_perm
 
+    def _handle_permissions(self, vPerm, ePerm):
+        ex = AppException(EVENTS.REQUEST_EXCEPTION, 422)
+
+        if vPerm not in PERMISSION:
+            ex.add_error(EXCODES.WRONG_VALUE, STRINGS.PERMISSION_WRONG_VALUE, 'visibility')
+        if ePerm not in PERMISSION:
+            ex.add_error(EXCODES.WRONG_VALUE, STRINGS.PERMISSION_WRONG_VALUE, 'edit_perm')
+
+        if ex.errors:
+            raise ex
+
+        if vPerm < ePerm:
+            ex.add_error(EXCODES.WRONG_VALUE, STRINGS.PERMISSION_EDIT_HIGHER_THAN_VIEW, 'edit_perm')
+
+        if vPerm < self._visibility:
+            ex.add_error(EXCODES.WRONG_VALUE, STRINGS.PERMISSION_SMALLER_VALUE, 'visibility')
+        if ePerm < self._edit_perm:
+            ex.add_error(EXCODES.WRONG_VALUE, STRINGS.PERMISSION_SMALLER_VALUE, 'edit_perm')
+
+        if ex.errors:
+            raise ex
+
+        self._visibility = vPerm
+        self._edit_perm = ePerm
+
     def set_data(self, data):
         self._title = data['title'] if 'title' in data else self._title
         self._text = data['text'] if 'text' in data else self._text
         self._description = data['description'] if 'description' in data else self._description
         self._authors = data['authors'] if 'authors' in data else self._authors
         self._interpreters = data['interpreters'] if 'interpreters' in data else self._interpreters
-        if 'visibility' in data:
-            if data['visibility'] in PERMISSION:
-                self._visibility = data['visibility']
-        if 'edit_perm' in data:
-            if data['edit_perm'] in PERMISSION:
-                self._edit_perm = data['edit_perm']
+        self._handle_permissions(data['visibility'] if 'visibility' in data else self._visibility,
+                                 data['edit_perm'] if 'edit_perm' in data else self._edit_perm) # yapf: disable
 
         # invalidate export cache
         self._export_cache = None
