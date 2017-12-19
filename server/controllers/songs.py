@@ -78,7 +78,7 @@ def song_single(song_id):
     song = validators.song_existence(song_id)
     if not permissions.check_perm(current_user, song, visibility=True):
         raise AppException(EVENTS.BASE_EXCEPTION, 404,
-            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     if request.method == 'GET':
         if 'Accept' in request.headers and request.headers['Accept'] == 'application/pdf':
@@ -88,7 +88,7 @@ def song_single(song_id):
     elif request.method == 'PUT':
         if not permissions.check_perm(current_user, song, editing=True):
             raise AppException(EVENTS.BASE_EXCEPTION, 404,
-                (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+                               (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
         data = request.get_json()
         validators.json_request(data)
@@ -112,7 +112,7 @@ def song_single(song_id):
     else:
         if not permissions.check_perm(current_user, song, editing=True):
             raise AppException(EVENTS.BASE_EXCEPTION, 404,
-                (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+                               (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
         g.model.songs.delete(song)
         log_event(EVENTS.SONG_DELETE, current_user.get_id(), song_id)
@@ -126,7 +126,7 @@ def song_duplicate(song_id):
     song = validators.song_existence(song_id)
     if not permissions.check_perm(current_user, song, visibility=True):
         raise AppException(EVENTS.BASE_EXCEPTION, 404,
-            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     data = song.get_serialized_data()
     data['owner'] = current_user.get_id()

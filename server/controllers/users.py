@@ -43,7 +43,7 @@ def user_songbook(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if current_user.get_id() != songbook.get_owner():
         raise AppException(EVENTS.BASE_EXCEPTION, 404,
-            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     current_user.set_active_songbook(songbook_id)
     g.model.users.save(current_user)

@@ -11,11 +11,7 @@ class AppException(Exception):
 
     # add error into error array
     def add_error(self, exp_code, message, data=None):
-        self.errors.append({
-            'code': exp_code,
-            'message': message,
-            'data': data
-        })
+        self.errors.append({'code': exp_code, 'message': message, 'data': data})
 
     # returns exception data in one dictionary
     def get_exception(self):

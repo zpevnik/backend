@@ -82,7 +82,7 @@ def export_to_pdf(filename):
                 error += line + "\n"
 
         raise AppException(EVENTS.COMPILATION_EXCEPTION, 500,
-            (EXCODES.COMPILATION_ERROR, STRINGS.COMPILATION_ERROR, error))
+                           (EXCODES.COMPILATION_ERROR, STRINGS.COMPILATION_ERROR, error))
 
     process = subprocess.Popen(
         ["xelatex", "-halt-on-error", filename + ".tex"],

@@ -69,7 +69,7 @@ def songbook_single(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if current_user.get_id() != songbook.get_owner():
         raise AppException(EVENTS.BASE_EXCEPTION, 404,
-            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     if request.method == 'GET':
         if 'Accept' in request.headers and request.headers['Accept'] == 'application/pdf':
@@ -102,7 +102,7 @@ def songbook_song_single(songbook_id, song_id):
     songbook = validators.songbook_existence(songbook_id)
     if current_user.get_id() != songbook.get_owner():
         raise AppException(EVENTS.BASE_EXCEPTION, 404,
-            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     if request.method == 'PUT':
         song = validators.song_existence(song_id)
@@ -136,7 +136,7 @@ def songbook_song_bulk(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if current_user.get_id() != songbook.get_owner():
         raise AppException(EVENTS.BASE_EXCEPTION, 404,
-            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     data = request.get_json()
     validators.json_request(data)
