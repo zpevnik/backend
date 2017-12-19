@@ -7,6 +7,8 @@ from server.util.misc import generate_random_filename
 from server.util.exceptions import AppException
 
 from server.constants import EVENTS
+from server.constants import EXCODES
+from server.constants import STRINGS
 from server.constants import DEFAULTS
 
 
@@ -79,7 +81,8 @@ def export_to_pdf(filename):
             if line.startswith("!"):
                 error += line + "\n"
 
-        raise AppException(EVENTS.COMPILATION_EXCEPTION, error, 500)
+        raise AppException(EVENTS.COMPILATION_EXCEPTION, 500,
+            (EXCODES.COMPILATION_ERROR, STRINGS.COMPILATION_ERROR, error))
 
     process = subprocess.Popen(
         ["xelatex", "-halt-on-error", filename + ".tex"],

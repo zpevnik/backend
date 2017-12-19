@@ -1,21 +1,22 @@
-from server.constants import EVENTS
-
-
 class AppException(Exception):
 
-    def __init__(self, exp_type, message, status_code, data=None):
+    def __init__(self, exp_type, status_code, error=None):
         Exception.__init__(self)
         self.status_code = status_code
         self.exp_type = exp_type
-        self.message = message
-        self.data = data
+        self.errors = []
+
+        if (error):
+            self.add_error(*error)
+
+    # add error into error array
+    def add_error(self, exp_code, message, data=None):
+        self.errors.append({
+            'code': exp_code,
+            'message': message,
+            'data': data
+        })
 
     # returns exception data in one dictionary
     def get_exception(self):
-        data = {'message': self.message}
-        if self.data is not None:
-            data['data'] = self.data
-        if self.exp_type is not None:
-            data['exp_type'] = self.exp_type
-
-        return data
+        return self.errors

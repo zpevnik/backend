@@ -28,7 +28,7 @@ def translate_to_tex(song):
 
         # finish and close previous block
         if _context['echo']:
-            _context['verse'] = False
+            _context['echo'] = False
             return '}'
 
         if _context['verse']:
@@ -95,6 +95,9 @@ def translate_to_tex(song):
 
         # handle chords
         elif _is_chord(tag):
+            if _context['echo']:
+                _log.append(STRINGS.TRANSLATOR.ERROR_CHORDS_INSIDE_ECHO.format(_idx))
+
             _result.append(tag)
 
         else:

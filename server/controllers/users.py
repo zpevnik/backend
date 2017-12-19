@@ -12,6 +12,8 @@ from server.util import permissions
 from server.util import log_event
 from server.util.exceptions import AppException
 
+from server.constants import EVENTS
+from server.constants import EXCODES
 from server.constants import STRINGS
 
 import zeep
@@ -40,7 +42,8 @@ def get_other_user_info(user_id):
 def user_songbook(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if current_user.get_id() != songbook.get_owner():
-        raise AppException(EVENTS.BASE_EXCEPTION, STRINGS.PERMISSIONS_NOT_SUFFICIENT, 404)
+        raise AppException(EVENTS.BASE_EXCEPTION, 404,
+            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     current_user.set_active_songbook(songbook_id)
     g.model.users.save(current_user)

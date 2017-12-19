@@ -76,3 +76,16 @@ class Tags(ConstantDict):
 
 
 TAGS = Tags()
+
+
+class ExceptionCodes(ConstantDict):
+    ALREADY_EXISTS = 'already_exists'
+    DOES_NOT_EXIST = 'does_not_exist'
+    MISSING_FIELD = 'missing_field'
+    INVALID_REQUEST = 'invalid_request'
+    WRONG_VALUE = 'wrong_value'
+    COMPILATION_ERROR = 'compilation_error'
+    INSUFFICIENT_PERMISSIONS = 'insufficient_permissions'
+
+
+EXCODES = ExceptionCodes()

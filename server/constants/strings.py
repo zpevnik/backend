@@ -5,10 +5,11 @@ class TranslatorStrings(object):
     ERROR_REPETITION_OVERLAPPING = '[{}] ERROR: Repetition cannot overlap to other blocks of the song.'
     ERROR_NESTED_REPETITION = '[{}] ERROR: Repetition cannot be nested in other repetition.'
     ERROR_NOT_IMPLEMENTED = '[{}] ERROR: Not yet implemented.'
+    ERROR_CHORDS_INSIDE_ECHO = '[{}] ERROR: Chord tag found inside echo block.'
 
 
 class Strings(object):
-    PERMISSIONS_NOT_SUFFICIENT = 'Na tuto akci nemáš dostatečné oprávnění.'
+    INSUFFICIENT_PERMISSIONS = 'Na tuto akci nemáš dostatečné oprávnění.'
 
     POST_REQUEST_ERROR = 'Cannot process POST request.'
     JSON_REQUEST_ERROR = 'Cannot process json request.'
@@ -39,6 +40,8 @@ class Strings(object):
 
     SONGBOOK_OPTIONS_ERROR = 'Cannot process songbook options.'
     SONGBOOK_OPTIONS_SIZE_ERROR = 'Songbook size has invalid value.'
+
+    COMPILATION_ERROR = 'Error occured during latex compilation.'
 
     TRANSLATOR = TranslatorStrings()
 
