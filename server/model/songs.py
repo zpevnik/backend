@@ -105,12 +105,12 @@ class Songs(object):
         if query is None or query == "":
             doc = self._collection.find({'$or': [{'owner': user_id},
                                                  {'owner_unit': unit_id, 'visibility': {"$gte": PERMISSION.UNIT}},
-                                                 {'approved': True, 'visibility': {"$gte": PERMISSION.PUBLIC}},
+                                                 {'visibility': {"$gte": PERMISSION.PUBLIC}},
                                                 ]}) # yapf: disable
         else:
             doc = self._collection.find({'$or': [{'owner': user_id},
                                                  {'owner_unit': unit_id, 'visibility': {"$gte": PERMISSION.UNIT}},
-                                                 {'approved': True, 'visibility': {"$gte": PERMISSION.PUBLIC}},
+                                                 {'visibility': {"$gte": PERMISSION.PUBLIC}},
                                                 ], '$text': {'$search': query}},
                                         {'score': {'$meta': 'textScore'}}) \
                                   .sort([('score', {'$meta': 'textScore'})]) # yapf: disable
