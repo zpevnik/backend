@@ -111,7 +111,7 @@ def songbook_song_single(songbook_id, song_id):
         validators.json_request(data)
         data = validators.songbooks_song_request(data)
 
-        songbook.set_song(song_id, data)
+        songbook.set_song(data)
         g.model.songbooks.save(songbook)
 
         data['id'] = song_id
@@ -145,7 +145,7 @@ def songbook_song_bulk(songbook_id):
         entry = validators.songbooks_song_request(entry)
         song = validators.song_existence(entry['id'])
 
-        songbook.set_song(entry['id'], entry)
+        songbook.set_song(entry)
 
         log_event(EVENTS.SONGBOOK_SET_SONG, current_user.get_id(), {
             'songbook': songbook_id,

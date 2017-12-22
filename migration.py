@@ -26,6 +26,21 @@ db = mongo_client[parsed.path[1:]]
 model = Model(db=db)
 
 
+def migration_2018_12_22_1():
+    logger.info('22.12.2017 - Migrating songs in songbook to new struct.')
+
+    collection = db['songbooks']
+    songbooks = collection.find()
+
+    for songbook in songbooks:
+        if isinstance(songbook['songs'], list):
+            continue
+
+        songbook['songs'] = [item for item in songbook['songs'].values()]
+
+        collection.update_one({'_id': songbook['_id']}, {'$set': songbook})
+
+
 def migration_2017_12_07_1():
     logger.info('07.12.2017 - Migrating permission values in songs.')
 
@@ -315,3 +330,4 @@ def migration_2017_08_18_4():
 
 #migration_2017_12_07_1()
 #migration_2017_12_07_2()
+#migration_2018_12_22_1()
