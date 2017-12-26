@@ -42,7 +42,7 @@ def get_other_user_info(user_id):
 def user_songbook(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if current_user.get_id() != songbook.get_owner():
-        raise AppException(EVENTS.BASE_EXCEPTION, 404,
+        raise AppException(EVENTS.BASE_EXCEPTION, 403,
                            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     current_user.set_active_songbook(songbook_id)

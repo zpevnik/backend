@@ -68,7 +68,7 @@ def songbooks():
 def songbook_single(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if current_user.get_id() != songbook.get_owner():
-        raise AppException(EVENTS.BASE_EXCEPTION, 404,
+        raise AppException(EVENTS.BASE_EXCEPTION, 403,
                            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     if request.method == 'GET':
@@ -101,7 +101,7 @@ def songbook_single(songbook_id):
 def songbook_song_single(songbook_id, song_id):
     songbook = validators.songbook_existence(songbook_id)
     if current_user.get_id() != songbook.get_owner():
-        raise AppException(EVENTS.BASE_EXCEPTION, 404,
+        raise AppException(EVENTS.BASE_EXCEPTION, 403,
                            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     if request.method == 'PUT':
@@ -135,7 +135,7 @@ def songbook_song_single(songbook_id, song_id):
 def songbook_song_bulk(songbook_id):
     songbook = validators.songbook_existence(songbook_id)
     if current_user.get_id() != songbook.get_owner():
-        raise AppException(EVENTS.BASE_EXCEPTION, 404,
+        raise AppException(EVENTS.BASE_EXCEPTION, 403,
                            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     data = request.get_json()

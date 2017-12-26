@@ -77,7 +77,7 @@ def songs():
 def song_single(song_id):
     song = validators.song_existence(song_id)
     if not permissions.check_perm(current_user, song, visibility=True):
-        raise AppException(EVENTS.BASE_EXCEPTION, 404,
+        raise AppException(EVENTS.BASE_EXCEPTION, 403,
                            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     if request.method == 'GET':
@@ -87,7 +87,7 @@ def song_single(song_id):
 
     elif request.method == 'PUT':
         if not permissions.check_perm(current_user, song, editing=True):
-            raise AppException(EVENTS.BASE_EXCEPTION, 404,
+            raise AppException(EVENTS.BASE_EXCEPTION, 403,
                                (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
         data = request.get_json()
@@ -111,7 +111,7 @@ def song_single(song_id):
 
     else:
         if not permissions.check_perm(current_user, song, editing=True):
-            raise AppException(EVENTS.BASE_EXCEPTION, 404,
+            raise AppException(EVENTS.BASE_EXCEPTION, 403,
                                (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
         g.model.songs.delete(song)

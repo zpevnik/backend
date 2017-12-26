@@ -35,7 +35,7 @@ def handle_GET_request(request):
 def user_existence(user_id):
     user = g.model.users.find(int(user_id))
     if user is None:
-        raise AppException(EVENTS.BASE_EXCEPTION, 422,
+        raise AppException(EVENTS.BASE_EXCEPTION, 404,
                            (EXCODES.DOES_NOT_EXIST, STRINGS.USER_NOT_FOUND_ERROR))
     return user
 
@@ -44,11 +44,11 @@ def song_existence(song_id):
     try:
         song = g.model.songs.find_one(song_id=song_id)
     except ValueError:
-        raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
+        raise AppException(EVENTS.REQUEST_EXCEPTION, 404,
                            (EXCODES.DOES_NOT_EXIST, STRINGS.SONG_NOT_FOUND_ERROR))
 
     if song is None:
-        raise AppException(EVENTS.BASE_EXCEPTION, 422,
+        raise AppException(EVENTS.BASE_EXCEPTION, 404,
                            (EXCODES.DOES_NOT_EXIST, STRINGS.SONG_NOT_FOUND_ERROR))
     return song
 
@@ -57,11 +57,11 @@ def songbook_existence(songbook_id):
     try:
         songbook = g.model.songbooks.find_one(songbook_id=songbook_id)
     except ValueError:
-        raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
+        raise AppException(EVENTS.REQUEST_EXCEPTION, 404,
                            (EXCODES.DOES_NOT_EXIST, STRINGS.SONGBOOK_NOT_FOUND_ERROR))
 
     if songbook is None:
-        raise AppException(EVENTS.BASE_EXCEPTION, 422,
+        raise AppException(EVENTS.BASE_EXCEPTION, 404,
                            (EXCODES.DOES_NOT_EXIST, STRINGS.SONGBOOK_NOT_FOUND_ERROR))
     return songbook
 
@@ -70,11 +70,11 @@ def author_existence(author_id):
     try:
         author = g.model.authors.find_one(author_id=author_id)
     except ValueError:
-        raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
+        raise AppException(EVENTS.REQUEST_EXCEPTION, 404,
                            (EXCODES.DOES_NOT_EXIST, STRINGS.AUTHOR_NOT_FOUND_ERROR))
 
     if author is None:
-        raise AppException(EVENTS.BASE_EXCEPTION, 422,
+        raise AppException(EVENTS.BASE_EXCEPTION, 404,
                            (EXCODES.DOES_NOT_EXIST, STRINGS.AUTHOR_NOT_FOUND_ERROR))
     return author
 
@@ -83,11 +83,11 @@ def interpreter_existence(interpreter_id):
     try:
         interpreter = g.model.interpreters.find_one(interpreter_id=interpreter_id)
     except ValueError:
-        raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
+        raise AppException(EVENTS.REQUEST_EXCEPTION, 404,
                            (EXCODES.DOES_NOT_EXIST, STRINGS.INTERPRETER_NOT_FOUND_ERROR))
 
     if interpreter is None:
-        raise AppException(EVENTS.BASE_EXCEPTION, 422,
+        raise AppException(EVENTS.BASE_EXCEPTION, 404,
                            (EXCODES.DOES_NOT_EXIST, STRINGS.INTERPRETER_NOT_FOUND_ERROR))
     return interpreter
 
@@ -95,7 +95,7 @@ def interpreter_existence(interpreter_id):
 def author_nonexistence(name):
     author = g.model.authors.find_one(name=name)
     if author is not None:
-        raise AppException(EVENTS.BASE_EXCEPTION, 422,
+        raise AppException(EVENTS.BASE_EXCEPTION, 404,
                            (EXCODES.ALREADY_EXISTS, STRINGS.AUTHOR_ALREADY_EXISTS_ERROR))
     return True
 
@@ -103,7 +103,7 @@ def author_nonexistence(name):
 def interpreter_nonexistence(name):
     interpreter = g.model.interpreters.find_one(name=name)
     if interpreter is not None:
-        raise AppException(EVENTS.BASE_EXCEPTION, 422,
+        raise AppException(EVENTS.BASE_EXCEPTION, 404,
                            (EXCODES.ALREADY_EXISTS, STRINGS.INTERPRETER_ALREADY_EXISTS_ERROR))
     return True
 
