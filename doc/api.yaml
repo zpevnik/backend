@@ -1,0 +1,888 @@
+#%RAML 1.0
+title: "Skautský zpěvník"
+version: "v0.3"
+protocols:
+- "HTTPS"
+baseUri: "https://zpevnik.skauting.cz/api/"
+annotationTypes:
+  x-restlet: "any"
+types:
+  Song:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      title:
+        type: "string"
+      owner:
+        type: "string"
+      text:
+        type: "string"
+      description:
+        type: "string"
+      authors:
+        type: "object"
+        properties:
+          music:
+            type: "array"
+            items:
+              type: "Author"
+          lyrics:
+            type: "array"
+            items:
+              type: "Author"
+        example:
+          value: "{'music': [], 'lyrics': []}"
+          strict: false
+      interpreters:
+        type: "array"
+        items:
+          type: "Author"
+      owner_unit:
+        type: "string"
+      visibility:
+        type: "number"
+      edit_perm:
+        type: "number"
+      created:
+        type: "datetime"
+      approved:
+        type: "boolean"
+    (x-restlet):
+      section: "Objects"
+  Author:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      name:
+        type: "string"
+      created:
+        type: "datetime"
+        required: false
+    (x-restlet):
+      section: "Objects"
+  Interpreter:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      name:
+        type: "string"
+      created:
+        type: "datetime"
+        required: false
+    (x-restlet):
+      section: "Objects"
+  Songbook:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      title:
+        type: "string"
+      songs:
+        type: "array"
+        items:
+          type: "Songbook_item"
+      owner:
+        type: "string"
+      owner_unit:
+        type: "string"
+      visibility:
+        type: "string"
+      edit_perm:
+        type: "string"
+      created:
+        type: "datetime"
+        required: false
+    (x-restlet):
+      section: "Objects"
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      name:
+        type: "string"
+      active:
+        type: "boolean"
+      unit:
+        type: "string"
+      active_songbook:
+        type: "Songbook"
+      created:
+        type: "datetime"
+        required: false
+      last_login:
+        type: "datetime"
+        required: false
+      logout_link:
+        type: "string"
+    (x-restlet):
+      section: "Objects"
+  Song_request:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+      text:
+        type: "string"
+      description:
+        type: "string"
+      authors:
+        type: "object"
+        properties:
+          music:
+            type: "array"
+            description: "Array of music authors"
+            items:
+              type: "Author"
+          lyrics:
+            type: "array"
+            description: "Array of lyrics authors"
+            items:
+              type: "Author"
+        example:
+          value: "{'music': [], 'lyrics': []}"
+          strict: false
+      interpreters:
+        type: "array"
+        items:
+          type: "Interpreter"
+      visibility:
+        type: "string"
+        required: false
+      edit_perm:
+        type: "string"
+        required: false
+    (x-restlet):
+      section: "Objects"
+  Author_request:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+    (x-restlet):
+      section: "Objects"
+  Interpreter_request:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+    (x-restlet):
+      section: "Objects"
+  Songbook_request:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+    (x-restlet):
+      section: "Objects"
+  Songbook_item:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      order:
+        type: "number"
+        required: false
+    (x-restlet):
+      section: "Objects"
+  Response:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+    (x-restlet):
+      section: "Misc"
+  Redirect:
+    type: "object"
+    properties:
+      link:
+        type: "string"
+    (x-restlet):
+      section: "Misc"
+  Error:
+    type: "array"
+    description: "Structure of any server related application error."
+    items:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          description: "Error code"
+        message:
+          type: "string"
+          description: "Human readable message about error"
+        data:
+          type: "string"
+          description: "Additional information about error"
+          required: false
+    example:
+      value: "[\n  {\"code\": \"missing_field\", \"message\": \"Song id is missing.\
+        \ \", \"data\": \"id\"},\n  ...\n]"
+      strict: false
+    (x-restlet):
+      section: "Misc"
+securitySchemes:
+  skautIS Auth:
+    type: "x-custom"
+/songs:
+  get:
+    displayName: "Get list of songs"
+    description: "Get list of songs with my permissions."
+    queryParameters:
+      query:
+        type: "string"
+        description: "Query string (song name)."
+        required: false
+      page:
+        type: "integer"
+        format: "int32"
+        description: "Page of paged result."
+        default: 0
+        minimum: 0
+        required: false
+      per_page:
+        type: "integer"
+        format: "int32"
+        description: "Number of songs on one page."
+        default: 30
+        minimum: 1
+        maximum: 200
+        required: false
+      order:
+        type: "string"
+        description: "Result sorting."
+        enum:
+        - "songs"
+        - "songsr"
+        - "interpreters"
+        - "interpretersr"
+        required: false
+    responses:
+      200:
+        description: "Successful server search (0+ songs)."
+        body:
+          application/json:
+            type: "object"
+            properties:
+              count:
+                type: "integer"
+                description: "Number of found songs."
+              pages:
+                type: "string"
+                description: "Number of pages for current *per_page* value."
+              data:
+                type: "array"
+                description: "Array of songs itself."
+                items:
+                  type: "Song"
+            example:
+              value: "{\n  \"count\": 103,\n  \"data\": [...],\n  \"pages\": 52\n}"
+              strict: false
+      400:
+        description: "Request contains invalid parameters."
+        body:
+          application/json:
+            type: "Error"
+  post:
+    displayName: "Create new song"
+    body:
+      application/json:
+        type: "Song_request"
+    responses:
+      201:
+        description: "Song was successfully created"
+        headers:
+          Location:
+            type: "string"
+            example: "/songs/1/"
+        body:
+          application/json:
+            type: "Redirect"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure or with sing syntax."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/songs/{song_id}:
+  uriParameters:
+    song_id:
+      type: "string"
+  get:
+    displayName: "Get song"
+    headers:
+      Accept:
+        type: "string"
+        description: "If Accept header is explicitly set as `application/pdf`, json\
+          \ with endpoint pointing at generated file is returned. In the other case\
+          \ detail of the song in standard `json` is returned."
+        default: "application/json"
+        enum:
+        - "application/json"
+        - "application/pdf"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Song"
+          application/pdf:
+            type: "object"
+            description: "Response for generated pdf."
+            example:
+              value: "{\"link\": \"/download/2b573863-71b1-4463-96a7-e7fae9ba3865.pdf\"\
+                }"
+              strict: false
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Song was not found."
+        body:
+          application/json:
+            type: "Error"
+      500:
+        description: "Compilation ended with errors. Error structure contains additional\
+          \ data about the problem."
+        body:
+          application/json:
+            type: "Error"
+  put:
+    displayName: "Edit song"
+    body:
+      application/json:
+        type: "Song_request"
+    responses:
+      200:
+        description: "Song was successfully saved."
+        body:
+          application/json:
+            type: "Song"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Song was not found."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure or with sing syntax."
+        body:
+          application/json:
+            type: "Error"
+  delete:
+    displayName: "Delete song"
+    responses:
+      204:
+        description: "Song was successfully deleted."
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Song was not found."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/authors:
+  get:
+    displayName: "Get list of authors"
+    responses:
+      200:
+        description: "Successful server search (0+ authors)."
+        body:
+          application/json:
+            type: "array"
+            items:
+              type: "Author"
+  post:
+    displayName: "Create new authors"
+    body:
+      application/json:
+        type: "Author_request"
+    responses:
+      201:
+        description: "Author was successfully created."
+        headers:
+          Location:
+            type: "string"
+            example: "/authors/1/"
+        body:
+          application/json:
+            type: "Redirect"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/authors/{author_id}:
+  uriParameters:
+    author_id:
+      type: "string"
+  get:
+    displayName: "Get author"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Author"
+      404:
+        description: "Author was not found."
+        body:
+          application/json:
+            type: "Error"
+  put:
+    displayName: "Edit author"
+    body:
+      application/json:
+        type: "Author_request"
+    responses:
+      200:
+        description: "Author was successfully saved."
+        body:
+          application/json:
+            type: "Author"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Author was not found."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  delete:
+    displayName: "Delete author"
+    responses:
+      204:
+        description: "Author was successfully deleted."
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Author was not found."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/interpreters:
+  get:
+    displayName: "Get list of interpreters"
+    responses:
+      200:
+        description: "Successful server search (0+ interpreters)."
+        body:
+          application/json:
+            type: "array"
+            items:
+              type: "Interpreter"
+  post:
+    displayName: "Create new interpreter"
+    body:
+      application/json:
+        type: "Interpreter_request"
+    responses:
+      201:
+        description: "Interpreter was successfully created."
+        headers:
+          Location:
+            type: "string"
+            example: "/authors/1/"
+        body:
+          application/json:
+            type: "Redirect"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/interpreters/{interpreter_id}:
+  uriParameters:
+    interpreter_id:
+      type: "string"
+  get:
+    displayName: "Get interpreter"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Interpreter"
+      404:
+        description: "Interpreter was not found."
+        body:
+          application/json:
+            type: "Error"
+  put:
+    displayName: "Edit interpreter"
+    body:
+      application/json:
+        type: "Interpreter_request"
+    responses:
+      200:
+        description: "Interpreter was successfully saved."
+        body:
+          application/json:
+            type: "Interpreter"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Interpreter was not found."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  delete:
+    displayName: "Delete interpreter"
+    responses:
+      204:
+        description: "Interpreter was successfully deleted."
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Interpreter was not found."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/songbooks:
+  get:
+    displayName: "Get list of songbooks"
+    queryParameters:
+      query:
+        type: "string"
+        description: "Query string (songbook name)."
+        required: false
+      page:
+        type: "integer"
+        format: "int32"
+        description: "Page of paged result."
+        default: 0
+        minimum: 0
+        required: false
+      per_page:
+        type: "integer"
+        format: "int32"
+        description: "Number of songbooks per one page."
+        default: 30
+        minimum: 1
+        maximum: 200
+        required: false
+    responses:
+      200:
+        description: "Successful server search (0+ songbooks)."
+        body:
+          application/json:
+            type: "object"
+            properties:
+              count:
+                type: "integer"
+                description: "Number of found songbooks."
+              pages:
+                type: "string"
+                description: "Number of pages for current *per_page* value."
+              data:
+                type: "array"
+                description: "Array of songbooks itself."
+                items:
+                  type: "Songbook"
+            example:
+              value: "{\n  \"count\": 103,\n  \"data\": [...],\n  \"pages\": 52\n}"
+              strict: false
+      400:
+        description: "Request contains invalid parameters."
+        body:
+          application/json:
+            type: "Error"
+  post:
+    displayName: "Create new songbook"
+    body:
+      application/json:
+        type: "Songbook_request"
+    responses:
+      201:
+        description: "Songbook was successfully created"
+        headers:
+          Location:
+            type: "string"
+            example: "/songs/1/"
+        body:
+          application/json:
+            type: "Redirect"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/songbooks/{songbook_id}:
+  uriParameters:
+    songbook_id:
+      type: "string"
+  get:
+    displayName: "Get songbook"
+    headers:
+      Accept:
+        type: "string"
+        description: "If Accept header is explicitly set as `application/pdf`, json\
+          \ with endpoint pointing at generated file is returned. In the other case\
+          \ detail of the songbook in standard `json` is returned."
+        default: "application/json"
+        enum:
+        - "application/json"
+        - "application/pdf"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Songbook"
+          application/pdf:
+            type: "object"
+            description: "Response for generated pdf."
+            example:
+              value: "{\"link\": \"/download/2b573863-71b1-4463-96a7-e7fae9ba3865.pdf\"\
+                }"
+              strict: false
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Songbook was not found."
+        body:
+          application/json:
+            type: "Error"
+      500:
+        description: "Compilation ended with errors. Error structure contains additional\
+          \ data about the problem."
+        body:
+          application/json:
+            type: "Error"
+  put:
+    displayName: "Edit songbook"
+    body:
+      application/json:
+        type: "Songbook_request"
+    responses:
+      200:
+        description: "Songbook was successfully saved."
+        body:
+          application/json:
+            type: "Songbook"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Response in case that songbook was not found."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  delete:
+    displayName: "Delete songbook"
+    responses:
+      204:
+        description: "Songbook was successfully deleted."
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Songbook was not found."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/songbooks/{songbook_id}/songs:
+  uriParameters:
+    songbook_id:
+      type: "string"
+  put:
+    displayName: "Edit songs in songbook"
+    description: "Songs in `delete` array are not checked in any way and `200` is\
+      \ returned even if all ids were wrong (nothing happens then). `404` cannot be\
+      \ therefore returned for songs.\n\nSongs in `set` array are checked as expected."
+    body:
+      application/json:
+        type: "object"
+        properties:
+          set:
+            type: "Songbook_item"
+            description: "List of song objects which should be added/changed."
+            required: false
+          delete:
+            type: "array"
+            description: "List of song ids which should be deleted."
+            required: false
+            items:
+              type: "string"
+    responses:
+      200:
+        description: "Request was successfully processed."
+        body:
+          application/json:
+            type: "Response"
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Songbook or songs were not found."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/user:
+  get:
+    displayName: "Get info about current user"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "User"
+  (x-restlet):
+    section: "API endpoints"
+/users/{user_id}:
+  uriParameters:
+    user_id:
+      type: "string"
+  get:
+    displayName: "Get info about user"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Response"
+            description: "Returns name only."
+            example:
+              value: "{\"name\": \"John Bonham\"}"
+              strict: false
+      404:
+        description: "User was not found."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/users/songbook/{songbook_id}:
+  uriParameters:
+    songbook_id:
+      type: "string"
+  put:
+    displayName: "Set primary songbook"
+    description: "Set primary songbook of current user."
+    responses:
+      200:
+        description: "Primary songbook was successfully set."
+        body:
+          application/json:
+            type: "Response"
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Songbook was not found."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+(x-restlet):
+  sections:
+    Objects: {}
+    API endpoints: {}
+    Misc: {}
