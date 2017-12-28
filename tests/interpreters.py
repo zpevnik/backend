@@ -90,12 +90,12 @@ class InterpreterTest(unittest.TestCase):
 
         # check that interpreter cannot be found via its id
         rv = self.app.get('/api/v1/interpreters/{}'.format(interpreter_id))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
         assert b'Interpreter was not found' in rv.data
 
         # try to delete nonexistent interpreter from the database
         rv = self.app.delete('/api/v1/interpreters/{}'.format(interpreter_id))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -145,7 +145,7 @@ class InterpreterTest(unittest.TestCase):
             '/api/v1/interpreters/{}'.format('000000000000000000000000'),
             content_type='application/json',
             data=json.dumps(dict(field="field")))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
 
         # test missing field
         rv = self.app.put(

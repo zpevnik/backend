@@ -90,12 +90,12 @@ class AuthorTest(unittest.TestCase):
 
         # check that author cannot be found via its id
         rv = self.app.get('/api/v1/authors/{}'.format(author_id))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
         assert b'Author was not found' in rv.data
 
         # try to delete nonexistent author from the database
         rv = self.app.delete('/api/v1/authors/{}'.format(author_id))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -141,7 +141,7 @@ class AuthorTest(unittest.TestCase):
             '/api/v1/authors/{}'.format('000000000000000000000000'),
             content_type='application/json',
             data=json.dumps(dict(field="field")))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
 
         # test missing field
         rv = self.app.put(

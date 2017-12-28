@@ -438,7 +438,7 @@ securitySchemes:
           application/json:
             type: "Error"
       422:
-        description: "Problem with sent structure."
+        description: "Problem with sent structure or author already exists."
         body:
           application/json:
             type: "Error"
@@ -540,7 +540,7 @@ securitySchemes:
           application/json:
             type: "Error"
       422:
-        description: "Problem with sent structure."
+        description: "Problem with sent structure or interpreter already exists."
         body:
           application/json:
             type: "Error"

@@ -29,8 +29,8 @@ def songs():
         data = validators.handle_GET_request(request.args)
 
         # find all results for currect user and his unit
-        result = g.model.songs.find_filtered(data['query'], current_user.get_id(),
-                                             current_user.get_unit())
+        result = g.model.songs.find_filtered(data['query'], data['order'],
+                                             current_user.get_id(), current_user.get_unit())
 
         # prepare response
         size = len(result)
@@ -57,6 +57,8 @@ def songs():
         data['owner_unit'] = current_user.get_unit()
         data['visibility'] = PERMISSION.PRIVATE
         data['edit_perm'] = PERMISSION.PRIVATE
+
+        validators.song_format(data)
 
         for author in data['authors']['music']:
             validators.author_existence(author)
@@ -101,6 +103,7 @@ def song_single(song_id):
         for interpreter in data['interpreters']:
             validators.interpreter_existence(interpreter)
 
+        validators.song_format(data)
         song.set_data(data)
 
         data['song_id'] = song_id
@@ -125,7 +128,7 @@ def song_single(song_id):
 def song_duplicate(song_id):
     song = validators.song_existence(song_id)
     if not permissions.check_perm(current_user, song, visibility=True):
-        raise AppException(EVENTS.BASE_EXCEPTION, 404,
+        raise AppException(EVENTS.BASE_EXCEPTION, 403,
                            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     data = song.get_serialized_data()

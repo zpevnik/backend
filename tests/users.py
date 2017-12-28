@@ -63,4 +63,4 @@ class UserTest(unittest.TestCase):
 
         # check nonexisting user
         rv = self.app.get('/api/v1/users/{}'.format(1002))
-        assert rv.status_code == 422
+        assert rv.status_code == 404

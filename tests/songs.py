@@ -1,5 +1,6 @@
 import json
 import unittest
+import tests.utils as utils
 
 from urllib.parse import urlsplit
 from pymongo import MongoClient
@@ -33,17 +34,7 @@ class SongTest(unittest.TestCase):
         assert b'[]' in rv.data
 
         # add song into the database
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Back in Black",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
+        rv = utils._post_song(self.app, title='Back in Black')
         assert rv.status_code == 201
         assert b'"link": "songs/' in rv.data
 
@@ -63,45 +54,15 @@ class SongTest(unittest.TestCase):
         assert song['id'] == song_id
 
         # test put (edit) request
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Back in White",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
+        rv = utils._put_song(self.app, song_id, title='Back in White')
         assert rv.status_code == 200
         song = json.loads(rv.data)
         assert song['title'] == 'Back in White'
         assert song['id'] == song_id
 
         # add more songs into the database
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Map of Problematique",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bliss",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
+        rv = utils._post_song(self.app, title='Map of Problematique')
+        rv = utils._post_song(self.app, title='Bliss')
 
         # remember size of the database
         rv = self.app.get('/api/v1/songs')
@@ -119,12 +80,12 @@ class SongTest(unittest.TestCase):
 
         # check that song cannot be found via its id
         rv = self.app.get('/api/v1/songs/{}'.format(song_id))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
         assert b'Song was not found' in rv.data
 
         # try to delete nonexistent song from the database
         rv = self.app.delete('/api/v1/songs/{}'.format(song_id))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -214,36 +175,65 @@ class SongTest(unittest.TestCase):
         # clean the database
         self.mongo_client.drop_database(self.db_name)
 
+    def test_song_ordering(self):
+        song_ids = []
+
+        rv = utils._post_song(self.app, title='Live and Let Die')
+        assert rv.status_code == 201
+        assert b'"link": "songs/' in rv.data
+
+        data = json.loads(rv.data)
+        song_ids.append(data['link'].split('/')[1])
+
+        rv = utils._post_song(self.app, title='Kashmir')
+        assert rv.status_code == 201
+        assert b'"link": "songs/' in rv.data
+
+        data = json.loads(rv.data)
+        song_ids.append(data['link'].split('/')[1])
+
+        rv = utils._post_song(self.app, title='Pažitka')
+        assert rv.status_code == 201
+        assert b'"link": "songs/' in rv.data
+
+        data = json.loads(rv.data)
+        song_ids.append(data['link'].split('/')[1])
+
+        # get sorted songs with get request
+        rv = self.app.get('/api/v1/songs?order=title')
+        assert rv.status_code == 200
+
+        res = json.loads(rv.data)
+        res_ids = [x['id'] for x in res['data']]
+
+        assert res_ids[0] == song_ids[1] and res_ids[1] == song_ids[0] and res_ids[2] == song_ids[2]
+
+        # get sorted songs with get request
+        rv = self.app.get('/api/v1/songs?order=titler')
+        assert rv.status_code == 200
+
+        res = json.loads(rv.data)
+        res_ids = [x['id'] for x in res['data']]
+
+        assert res_ids[0] == song_ids[2] and res_ids[1] == song_ids[0] and res_ids[2] == song_ids[1]
+
+        # clean the database
+        self.mongo_client.drop_database(self.db_name)
+
     def test_put_request(self):
         # insert test song for further testing
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Panic Station",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
+        rv = utils._post_song(self.app, title='Panic Station')
         assert rv.status_code == 201
         song = json.loads(rv.data)
         song_id = song['link'].split('/')[1]
 
         # test wrong song id
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format('000000000000000000000000'),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Panic Station",
-                    text="song",
-                    description="this song is pretty awesome",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
-        assert rv.status_code == 422
+        rv = utils._put_song(
+            self.app,
+            '000000000000000000000000',
+            title='Panic Station',
+            description='this song is pretty awesome')
+        assert rv.status_code == 404
 
         # test missing fields
         rv = self.app.put(
@@ -329,79 +319,43 @@ class SongTest(unittest.TestCase):
 
     def test_authors_and_interpreters(self):
         # insert test author for further testing
-        rv = self.app.post(
-            '/api/v1/authors',
-            content_type='application/json',
-            data=json.dumps(dict(name='Axl Rose')))
+        rv = utils._post_author(self.app, name='Axl Rose')
         assert rv.status_code == 201
-        author = json.loads(rv.data)
-        author_id = author['link'].split('/')[1]
+
+        data = json.loads(rv.data)
+        author_id = data['link'].split('/')[1]
 
         # insert test interpreter for further testing
-        rv = self.app.post(
-            '/api/v1/interpreters',
-            content_type='application/json',
-            data=json.dumps(dict(name='Axl Rose')))
+        rv = utils._post_interpreter(self.app, name='Guns n Roses')
         assert rv.status_code == 201
-        interpreter = json.loads(rv.data)
-        interpreter_id = interpreter['link'].split('/')[1]
+
+        data = json.loads(rv.data)
+        interpreter_id = data['link'].split('/')[1]
 
         # test wrong author insert
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Welcome to the Jungle",
-                    text="song",
-                    description="",
-                    authors={'lyrics': ['000000000000000000000000'],
-                             'music': []},
-                    interpreters=[])))
-        assert rv.status_code == 422
-        assert b'"message": "Author was not found."' in rv.data
+        rv = utils._post_song(
+            self.app, title='Welcome to the Jungle', lauthors=['000000000000000000000000'])
+        assert rv.status_code == 404
+        assert b'"code": "does_not_exist"' in rv.data
 
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Welcome to the Jungle",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': ['000000000000000000000000']},
-                    interpreters=[])))
-        assert rv.status_code == 422
-        assert b'"message": "Author was not found."' in rv.data
+        rv = utils._post_song(
+            self.app, title='Welcome to the Jungle', mauthors=['000000000000000000000000'])
+        assert rv.status_code == 404
+        assert b'"code": "does_not_exist"' in rv.data
 
         # test wrong interpreter insert
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Welcome to the Jungle",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=['000000000000000000000000'])))
-        assert rv.status_code == 422
-        assert b'"message": "Interpreter was not found."' in rv.data
+        rv = utils._post_song(
+            self.app, title='Welcome to the Jungle', interpreters=['000000000000000000000000'])
+        assert rv.status_code == 404
+        assert b'"code": "does_not_exist"' in rv.data
 
         # test correct insert
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Welcome to the Jungle",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [author_id],
-                             'music': [author_id]},
-                    interpreters=[interpreter_id])))
+        rv = utils._post_song(
+            self.app,
+            title='Welcome to the Jungle',
+            lauthors=[author_id],
+            mauthors=[author_id],
+            interpreters=[interpreter_id])
         assert rv.status_code == 201
         assert b'"link": "songs/' in rv.data
 
@@ -410,17 +364,7 @@ class SongTest(unittest.TestCase):
 
     def test_duplication(self):
         # insert test song for further testing
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Invincible",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
+        rv = utils._post_song(self.app, title="Invincible")
         assert rv.status_code == 201
         song = json.loads(rv.data)
         song_id = song['link'].split('/')[1]
@@ -432,197 +376,97 @@ class SongTest(unittest.TestCase):
 
         # try to duplicate wrong song
         rv = self.app.get('/api/v1/songs/duplicate/{}'.format('000000000000000000000000'))
-        assert rv.status_code == 422
-        assert b'"message": "Song was not found."' in rv.data
+        assert rv.status_code == 404
+        assert b'"code": "does_not_exist"' in rv.data
+
+        # clean the database
+        self.mongo_client.drop_database(self.db_name)
 
     def test_permissions(self):
         # insert test song for further testing
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
+        rv = utils._post_song(self.app, title='Bubák')
         assert rv.status_code == 201
-        song = json.loads(rv.data)
-        song_id = song['link'].split('/')[1]
+        assert b'"link": "songs/' in rv.data
+
+        data = json.loads(rv.data)
+        song_id = data['link'].split('/')[1]
 
         # test wrong view permission values
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[],
-                    visibility=6,
-                )))
+        rv = utils._put_song(self.app, song_id, title="Bubák", visibility=6)
         assert rv.status_code == 422
         assert b'"code": "wrong_value"' in rv.data
         assert b'"data": "visibility"' in rv.data
 
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[],
-                    visibility='abc',
-                )))
+        rv = utils._put_song(self.app, song_id, title="Bubák", visibility='abc')
         assert rv.status_code == 422
         assert b'"code": "wrong_value"' in rv.data
         assert b'"data": "visibility"' in rv.data
 
         # test wrong edit permission values
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[],
-                    edit_perm=8,
-                )))
+        rv = utils._put_song(self.app, song_id, title="Bubák", edit_perm=5)
         assert rv.status_code == 422
         assert b'"code": "wrong_value"' in rv.data
         assert b'"data": "edit_perm"' in rv.data
 
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[],
-                    edit_perm='abc',
-                )))
+        rv = utils._put_song(self.app, song_id, title="Bubák", edit_perm='def')
         assert rv.status_code == 422
         assert b'"code": "wrong_value"' in rv.data
         assert b'"data": "edit_perm"' in rv.data
 
         # test edit higher than view
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[],
-                    edit_perm=PERMISSION.UNIT,
-                )))
+        rv = utils._put_song(self.app, song_id, title="Bubák", edit_perm=PERMISSION.UNIT)
         assert rv.status_code == 422
         assert b'"code": "wrong_value"' in rv.data
         assert b'"data": "edit_perm"' in rv.data
 
         # test correct permission change
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[],
-                    visibility=PERMISSION.UNIT,
-                    edit_perm=PERMISSION.UNIT,
-                )))
+        rv = utils._put_song(
+            self.app, song_id, title="Bubák", visibility=PERMISSION.UNIT, edit_perm=PERMISSION.UNIT)
         assert rv.status_code == 200
 
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[],
-                    visibility=PERMISSION.PUBLIC,
-                )))
+        rv = utils._put_song(self.app, song_id, title="Bubák", visibility=PERMISSION.PUBLIC)
         assert rv.status_code == 200
 
         # test no change
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[],
-                    visibility=PERMISSION.PUBLIC,
-                    edit_perm=PERMISSION.UNIT,
-                )))
+        rv = utils._put_song(
+            self.app,
+            song_id,
+            title="Bubák",
+            visibility=PERMISSION.PUBLIC,
+            edit_perm=PERMISSION.UNIT)
         assert rv.status_code == 200
 
         # test wrong permission change
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[],
-                    visibility=PERMISSION.UNIT,
-                )))
+        rv = utils._put_song(self.app, song_id, title="Bubák", visibility=PERMISSION.UNIT)
         assert rv.status_code == 422
         assert b'"code": "wrong_value"' in rv.data
         assert b'"data": "visibility"' in rv.data
 
-        rv = self.app.put(
-            '/api/v1/songs/{}'.format(song_id),
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Bubák",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[],
-                    edit_perm=PERMISSION.PRIVATE,
-                )))
+        rv = utils._put_song(self.app, song_id, title="Bubák", edit_perm=PERMISSION.PRIVATE)
         assert rv.status_code == 422
         assert b'"code": "wrong_value"' in rv.data
         assert b'"data": "edit_perm"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
+
+    def test_song_validation(self):
+        # test nested repetition
+        rv = utils._post_song(self.app, title='Kokos', text='[verse] |: |: Kulda :| :|')
+        assert rv.status_code == 422
+        assert b'"code": "compilation_error"' in rv.data
+
+        # test nested repetition end before start
+        rv = utils._post_song(self.app, title='Kokos', text='[verse] |: Kulda :| :|')
+        assert rv.status_code == 422
+        assert b'"code": "compilation_error"' in rv.data
+
+        # test chords inside echo
+        rv = utils._post_song(self.app, title='Kokos', text='[echo] Kulda [A]')
+        assert rv.status_code == 422
+        assert b'"code": "compilation_error"' in rv.data
+
+        # test unknown tag
+        rv = utils._post_song(self.app, title='Kokos', text='[versex]')
+        assert rv.status_code == 422
+        assert b'"code": "compilation_error"' in rv.data

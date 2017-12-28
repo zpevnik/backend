@@ -86,9 +86,11 @@ class QueryTest(unittest.TestCase):
         invalidIds.append(self._insert_song(1, 1, PERMISSION.PRIVATE, PERMISSION.PRIVATE))
         invalidIds.append(self._insert_song(1, 1, PERMISSION.UNIT, PERMISSION.PRIVATE))
         invalidIds.append(self._insert_song(1, 1, PERMISSION.UNIT, PERMISSION.UNIT))
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.PRIVATE))
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.UNIT))
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.PUBLIC))
+
+        # this is a temporal change as approved var should affect visibility
+        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.PRIVATE))
+        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.UNIT))
+        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.PUBLIC))
 
         invalidIds.append(self._insert_song(1, 1, PERMISSION.PRIVATE, PERMISSION.PRIVATE, True))
         invalidIds.append(self._insert_song(1, 1, PERMISSION.UNIT, PERMISSION.PRIVATE, True))

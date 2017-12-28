@@ -24,6 +24,8 @@ class Events(ConstantDict):
     SONGBOOK_SET_SONG = 'SONGBOOK SET SONG'
     SONGBOOK_REMOVE_SONG = 'SONGBOOK REMOVE SONG'
 
+    SONGBOOK_SONG = 'SONGBOOK SONG'
+
     CLEANUP = 'CLEANUP'
 
     BASE_EXCEPTION = 'BASE EXCEPTION'
@@ -48,6 +50,13 @@ class Options(object):
 
 OPTIONS = Options()
 size_dict = [OPTIONS.SIZE.A4, OPTIONS.SIZE.A5, OPTIONS.SIZE.A4_WIDE, OPTIONS.SIZE.A5_WIDE]
+
+
+class Ordering(ConstantDict):
+    TITLE = 'title'
+    TITLE_DESC = 'titler'
+
+ORDERING = Ordering()
 
 
 class Permissions(ConstantDict):

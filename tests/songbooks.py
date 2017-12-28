@@ -94,12 +94,12 @@ class SongbookTest(unittest.TestCase):
 
         # check that songbook cannot be found via its id
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
         assert b'Songbook was not found' in rv.data
 
         # try to delete nonexistent songbook from the database
         rv = self.app.delete('/api/v1/songbooks/{}'.format(songbook_id))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -136,7 +136,7 @@ class SongbookTest(unittest.TestCase):
             '/api/v1/songbooks/{}'.format('000000000000000000000000'),
             content_type='application/json',
             data=json.dumps(dict(title="Other songbook")))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
 
         # test missing fields
         rv = self.app.put(
@@ -179,13 +179,15 @@ class SongbookTest(unittest.TestCase):
         # test wrong songbook insert
         rv = self.app.put('/api/v1/songbooks/{}/song/{}'.format('000000000000000000000000',
                                                                 song_id))
-        assert rv.status_code == 422
+        
+        print(rv.status_code)
+        assert rv.status_code == 404
         assert b'"message":' in rv.data
 
         # test wrong song insert
         rv = self.app.put('/api/v1/songbooks/{}/song/{}'.format(songbook_id,
                                                                 '000000000000000000000000'))
-        assert rv.status_code == 422
+        assert rv.status_code == 404
         assert b'"message":' in rv.data
 
         # insert song into the songbook
@@ -318,7 +320,7 @@ class SongbookTest(unittest.TestCase):
             'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
-        assert rv.status_code == 404
+        assert rv.status_code == 403
 
         # test other songbooks
         songbook_id = ObjectId()
@@ -333,4 +335,4 @@ class SongbookTest(unittest.TestCase):
             'cache_expiration': None
         })
         rv = self.app.put('/api/v1/users/songbook/{}'.format(songbook_id))
-        assert rv.status_code == 404
+        assert rv.status_code == 403

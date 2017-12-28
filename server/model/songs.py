@@ -1,3 +1,5 @@
+import pymongo
+
 from bson import ObjectId
 from flask import g
 
@@ -7,6 +9,7 @@ from server.util import translate_to_tex
 from server.constants import EVENTS
 from server.constants import EXCODES
 from server.constants import STRINGS
+from server.constants import ORDERING
 from server.constants import PERMISSION
 
 
@@ -88,7 +91,7 @@ class Songs(object):
 
         return songs
 
-    def find_filtered(self, query, user_id, unit_id):
+    def find_filtered(self, query, order, user_id, unit_id):
         """Find songs from the database based on query and permissions.
 
         Args:
@@ -114,6 +117,13 @@ class Songs(object):
                                                 ], '$text': {'$search': query}},
                                         {'score': {'$meta': 'textScore'}}) \
                                   .sort([('score', {'$meta': 'textScore'})]) # yapf: disable
+
+        # sort result based on order by value
+        if order is not None:
+            if order == ORDERING.TITLE:
+                doc.sort("title", pymongo.ASCENDING)
+            elif order == ORDERING.TITLE_DESC:
+                doc.sort("title", pymongo.DESCENDING)
 
         songs = []
         for song in doc:

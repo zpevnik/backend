@@ -1,11 +1,13 @@
 from flask import g
 
 from server.util.exceptions import AppException
+from server.util.translator import translate_to_tex
 
 from server.constants import EVENTS
 from server.constants import EXCODES
 from server.constants import OPTIONS
 from server.constants import STRINGS
+from server.constants import ORDERING
 from server.constants import size_dict
 
 
@@ -13,7 +15,8 @@ def handle_GET_request(request):
     data = {
         'query': request['query'] if 'query' in request and request['query'] is not None else "",
         'page': 0,
-        'per_page': 30
+        'per_page': 30,
+        'order': None
     }
 
     if 'page' in request and request['page'] is not None:
@@ -28,6 +31,12 @@ def handle_GET_request(request):
                 EVENTS.REQUEST_EXCEPTION, 400,
                 (EXCODES.WRONG_VALUE, STRINGS.REQUEST_PER_PAGE_OOR_ERROR, 'per_page'))
         data['per_page'] = int(request['per_page'])
+
+    if 'order' in request and request['order'] is not None:
+        if request['order'] not in ORDERING:
+            raise AppException(EVENTS.REQUEST_EXCEPTION, 400,
+                               (EXCODES.WRONG_VALUE, STRINGS.REQUEST_PAGE_OOR_ERROR, 'order'))
+        data['order'] = request['order']
 
     return data
 
@@ -95,7 +104,7 @@ def interpreter_existence(interpreter_id):
 def author_nonexistence(name):
     author = g.model.authors.find_one(name=name)
     if author is not None:
-        raise AppException(EVENTS.BASE_EXCEPTION, 404,
+        raise AppException(EVENTS.BASE_EXCEPTION, 422,
                            (EXCODES.ALREADY_EXISTS, STRINGS.AUTHOR_ALREADY_EXISTS_ERROR))
     return True
 
@@ -103,7 +112,7 @@ def author_nonexistence(name):
 def interpreter_nonexistence(name):
     interpreter = g.model.interpreters.find_one(name=name)
     if interpreter is not None:
-        raise AppException(EVENTS.BASE_EXCEPTION, 404,
+        raise AppException(EVENTS.BASE_EXCEPTION, 422,
                            (EXCODES.ALREADY_EXISTS, STRINGS.INTERPRETER_ALREADY_EXISTS_ERROR))
     return True
 
@@ -170,24 +179,33 @@ def songbooks_request(request):
     return data
 
 
-def songbooks_song_request(request):  # FIXME
-    if 'id' not in request or not request['id']:
-        raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
-                           (EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_ADD_SONG_MISSING, 'id'))
+def songbook_songs_request(request):
+    data = {'set': [], 'delete': []}
+    if 'set' in request:
+        if not isinstance(request['set'], list):
+            raise AppException(
+                EVENTS.REQUEST_EXCEPTION, 422,
+                (EXCODES.WRONG_VALUE, STRINGS.REQUEST_SONGBOOK_SONGS_INVALID, 'delete'))
 
+        for entry in request['set']:
+            if 'id' not in entry or not entry['id']:
+                raise AppException(
+                    EVENTS.REQUEST_EXCEPTION, 422,
+                    (EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_ADD_SONG_MISSING, 'id'))
 
-#        err = [{
-#            'field': 'id',
-#            'code': 'missing_field'
-#            #'message': STRINGS.REQUEST_SONGBOOK_ADD_SONG_MISSING
-#        }]
-#        raise AppException(EVENTS.REQUEST_EXCEPTION, STRINGS.POST_REQUEST_ERROR, 422, data=err)
+            obj = {'id': entry['id']}
+            if 'order' in entry:
+                obj['order'] = entry['order']
 
-    data = {'id': request['id']}
-    if 'order' in request:
-        data['order'] = request['order']
-    if 'options' in request:
-        data['options'] = request['options']
+            data['set'].append(obj)
+
+    if 'delete' in request:
+        if not isinstance(request['delete'], list):
+            raise AppException(
+                EVENTS.REQUEST_EXCEPTION, 422,
+                (EXCODES.WRONG_VALUE, STRINGS.REQUEST_SONGBOOK_SONGS_INVALID, 'delete'))
+
+        data['delete'] = request['delete']
 
     return data
 
@@ -218,4 +236,11 @@ def json_request(request):
     if not request:
         raise AppException(EVENTS.REQUEST_EXCEPTION, 400,
                            (EXCODES.INVALID_REQUEST, STRINGS.JSON_REQUEST_ERROR))
+    return True
+
+def song_format(request):
+    _, log = translate_to_tex(request['text'])
+    if log:
+        raise AppException(EVENTS.COMPILATION_EXCEPTION, 422,
+                           (EXCODES.COMPILATION_ERROR, STRINGS.COMPILATION_ERROR, log))
     return True

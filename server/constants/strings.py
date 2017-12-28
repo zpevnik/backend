@@ -26,6 +26,7 @@ class Strings(object):
     REQUEST_PER_PAGE_OOR_ERROR = 'Per page number is out of range.'
 
     REQUEST_SONGBOOK_ADD_SONG_MISSING = 'Song id is missing.'
+    REQUEST_SONGBOOK_SONGS_INVALID = 'Songbook song addition request is wrong.'
 
     AUTHOR_ALREADY_EXISTS_ERROR = 'Author already exists.'
     AUTHOR_NOT_FOUND_ERROR = 'Author was not found.'
@@ -35,7 +36,7 @@ class Strings(object):
     SONGBOOK_NOT_FOUND_ERROR = 'Songbook was not found.'
     USER_NOT_FOUND_ERROR = 'User was not found.'
 
-    SONGBOOK_SET_SONG_SUCCESS = 'Píseň byla úspěšně upravená do zpěvníku.'
+    SONGBOOK_SONG_SUCCESS = 'Písňe ve zpěvníku byly úspěšně upraveny.'
     USER_SET_ACTIVE_SONGBOOK = 'Aktivní zpěvník byl změněn.'
 
     SONGBOOK_OPTIONS_ERROR = 'Cannot process songbook options.'
