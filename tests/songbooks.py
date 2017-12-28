@@ -1,5 +1,6 @@
 import json
 import unittest
+import tests.utils as utils
 
 from urllib.parse import urlsplit
 from bson import ObjectId
@@ -33,10 +34,7 @@ class SongbookTest(unittest.TestCase):
         assert b'[]' in rv.data
 
         # add songbook into the database
-        rv = self.app.post(
-            '/api/v1/songbooks',
-            content_type='application/json',
-            data=json.dumps(dict(title="My songbook")))
+        rv = utils._post_songbook(self.app, title='My songbook')
         assert rv.status_code == 201
         assert b'"link": "songbooks/' in rv.data
 
@@ -56,27 +54,21 @@ class SongbookTest(unittest.TestCase):
         assert songbook['id'] == songbook_id
 
         # test put (edit) request
-        rv = self.app.put(
-            '/api/v1/songbooks/{}'.format(songbook_id),
-            content_type='application/json',
-            data=json.dumps(dict(title="Other Songbook")))
+        rv = utils._put_songbook(self.app, songbook_id, title='Other songbook')
         assert rv.status_code == 200
         songbook = json.loads(rv.data)
-        assert songbook['title'] == 'Other Songbook'
+        assert songbook['title'] == 'Other songbook'
         assert songbook['id'] == songbook_id
 
         # test get request on edited songbook
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
         assert rv.status_code == 200
         songbook = json.loads(rv.data)
-        assert songbook['title'] == 'Other Songbook'
+        assert songbook['title'] == 'Other songbook'
         assert songbook['id'] == songbook_id
 
         # add more songbooks into the database
-        rv = self.app.post(
-            '/api/v1/songbooks',
-            content_type='application/json',
-            data=json.dumps(dict(title="Good songbook")))
+        rv = utils._post_songbook(self.app, title='Good songbook')
 
         # remember size of the database
         rv = self.app.get('/api/v1/songbooks')
@@ -123,19 +115,13 @@ class SongbookTest(unittest.TestCase):
 
     def test_put_request(self):
         # insert test songbook for further testing
-        rv = self.app.post(
-            '/api/v1/songbooks',
-            content_type='application/json',
-            data=json.dumps(dict(title="My songbook")))
+        rv = utils._post_songbook(self.app, title='My songbook')
         assert rv.status_code == 201
         songbook = json.loads(rv.data)
         songbook_id = songbook['link'].split('/')[1]
 
         # test wrong songbook id
-        rv = self.app.put(
-            '/api/v1/songbooks/{}'.format('000000000000000000000000'),
-            content_type='application/json',
-            data=json.dumps(dict(title="Other songbook")))
+        rv = utils._put_songbook(self.app, '000000000000000000000000', title='Other songbook')
         assert rv.status_code == 404
 
         # test missing fields
@@ -152,49 +138,42 @@ class SongbookTest(unittest.TestCase):
 
     def test_song_operations(self):
         # insert test songbook for further testing
-        rv = self.app.post(
-            '/api/v1/songbooks',
-            content_type='application/json',
-            data=json.dumps(dict(title="ELO songbook")))
+        rv = utils._post_songbook(self.app, title='ELO songbook')
         assert rv.status_code == 201
         songbook = json.loads(rv.data)
         songbook_id = songbook['link'].split('/')[1]
 
         # insert test songs for further testing
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Don't Bring Me Down",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
+        rv = utils._post_song(self.app, title='Don\'t Bring Me Down')
         assert rv.status_code == 201
         song = json.loads(rv.data)
         song_id = song['link'].split('/')[1]
 
         # test wrong songbook insert
-        rv = self.app.put('/api/v1/songbooks/{}/song/{}'.format('000000000000000000000000',
-                                                                song_id))
-        
-        print(rv.status_code)
+        rv = self.app.put(
+            '/api/v1/songbooks/{}/songs'.format('000000000000000000000000'),
+            content_type='application/json',
+            data=json.dumps(dict()))
         assert rv.status_code == 404
-        assert b'"message":' in rv.data
+        assert b'"code": "does_not_exist"' in rv.data
 
         # test wrong song insert
-        rv = self.app.put('/api/v1/songbooks/{}/song/{}'.format(songbook_id,
-                                                                '000000000000000000000000'))
+        rv = self.app.put(
+            '/api/v1/songbooks/{}/songs'.format(songbook_id),
+            content_type='application/json',
+            data=json.dumps(dict(set=[{
+                'id': '000000000000000000000000'
+            }])))
         assert rv.status_code == 404
-        assert b'"message":' in rv.data
+        assert b'"code": "does_not_exist"' in rv.data
 
         # insert song into the songbook
         rv = self.app.put(
-            '/api/v1/songbooks/{}/song/{}'.format(songbook_id, song_id),
+            '/api/v1/songbooks/{}/songs'.format(songbook_id),
             content_type='application/json',
-            data=json.dumps(dict(id=song_id)))
+            data=json.dumps(dict(set=[{
+                'id': song_id
+            }])))
         assert rv.status_code == 200
 
         # test correct insertion
@@ -206,9 +185,12 @@ class SongbookTest(unittest.TestCase):
 
         # edit song in the songbook
         rv = self.app.put(
-            '/api/v1/songbooks/{}/song/{}'.format(songbook_id, song_id),
+            '/api/v1/songbooks/{}/songs'.format(songbook_id),
             content_type='application/json',
-            data=json.dumps(dict(id=song_id, order=3)))
+            data=json.dumps(dict(set=[{
+                'id': song_id,
+                'order': 3
+            }])))
         assert rv.status_code == 200
 
         # check correct changes
@@ -219,9 +201,25 @@ class SongbookTest(unittest.TestCase):
         assert 'order' in songbook['songs'][0]
         assert songbook['songs'][0]['order'] == 3
 
+        # delete wrong song from songbook
+        rv = self.app.put(
+            '/api/v1/songbooks/{}/songs'.format(songbook_id),
+            content_type='application/json',
+            data=json.dumps(dict(delete=['000000000000000000000000'])))
+        assert rv.status_code == 200
+
+        # check correct number of songs in the songbook
+        rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
+        songbook = json.loads(rv.data)
+        assert rv.status_code == 200
+        assert len(songbook['songs']) == 1
+
         # delete song from songbook
-        rv = self.app.delete('/api/v1/songbooks/{}/song/{}'.format(songbook_id, song_id))
-        assert rv.status_code == 204
+        rv = self.app.put(
+            '/api/v1/songbooks/{}/songs'.format(songbook_id),
+            content_type='application/json',
+            data=json.dumps(dict(delete=[song_id])))
+        assert rv.status_code == 200
 
         # check correct number of songs in the songbook
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
@@ -232,60 +230,82 @@ class SongbookTest(unittest.TestCase):
         # clean the database
         self.mongo_client.drop_database(self.db_name)
 
-    def test_bulk_operations(self):
+    def test_bulk_song_operations(self):
         # insert test songbook for further testing
-        rv = self.app.post(
-            '/api/v1/songbooks',
-            content_type='application/json',
-            data=json.dumps(dict(title="Heart songbook")))
+        rv = utils._post_songbook(self.app, title='ELO songbook')
         assert rv.status_code == 201
         songbook = json.loads(rv.data)
         songbook_id = songbook['link'].split('/')[1]
 
-        # insert test songs for further testing
         song_ids = []
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Baracuda",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
+        # insert test songs for further testing
+        rv = utils._post_song(self.app, title='Don\'t Bring Me Down')
         assert rv.status_code == 201
         song = json.loads(rv.data)
         song_ids.append(song['link'].split('/')[1])
 
-        rv = self.app.post(
-            '/api/v1/songs',
-            content_type='application/json',
-            data=json.dumps(
-                dict(
-                    title="Crazy on You",
-                    text="song",
-                    description="",
-                    authors={'lyrics': [],
-                             'music': []},
-                    interpreters=[])))
+        rv = utils._post_song(self.app, title='Livin\' Thing')
         assert rv.status_code == 201
         song = json.loads(rv.data)
         song_ids.append(song['link'].split('/')[1])
 
-        # test bulk insertion
+        rv = utils._post_song(self.app, title='Hold On Tight')
+        assert rv.status_code == 201
+        song = json.loads(rv.data)
+        song_ids.append(song['link'].split('/')[1])
+
+        # insert multiple songs into the songbook
         rv = self.app.put(
             '/api/v1/songbooks/{}/songs'.format(songbook_id),
             content_type='application/json',
-            data=json.dumps([dict(id=song_ids[0]), dict(id=song_ids[1])]))
+            data=json.dumps(dict(set=[{
+                'id': song_ids[0]
+            }, {
+                'id': song_ids[1]
+            }])))
         assert rv.status_code == 200
 
-        # check correct option changes
+        # test correct insertion
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
         songbook = json.loads(rv.data)
         assert rv.status_code == 200
         assert len(songbook['songs']) == 2
+
+        in_ids = [x['id'] for x in songbook['songs']]
+        assert song_ids[0] in in_ids
+        assert song_ids[1] in in_ids
+
+        # delete and insert songs in one request
+        rv = self.app.put(
+            '/api/v1/songbooks/{}/songs'.format(songbook_id),
+            content_type='application/json',
+            data=json.dumps(dict(set=[{
+                'id': song_ids[2]
+            }], delete=[song_ids[0]])))
+        assert rv.status_code == 200
+
+        # test correct insertion and deletion
+        rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
+        songbook = json.loads(rv.data)
+        assert rv.status_code == 200
+        assert len(songbook['songs']) == 2
+
+        in_ids = [x['id'] for x in songbook['songs']]
+        assert song_ids[1] in in_ids
+        assert song_ids[2] in in_ids
+
+        # delete everything
+        rv = self.app.put(
+            '/api/v1/songbooks/{}/songs'.format(songbook_id),
+            content_type='application/json',
+            data=json.dumps(dict(delete=[song_ids[0], song_ids[1], song_ids[2]])))
+        assert rv.status_code == 200
+
+        # test correct insertion and deletion
+        rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
+        songbook = json.loads(rv.data)
+        assert rv.status_code == 200
+        assert len(songbook['songs']) == 0
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)

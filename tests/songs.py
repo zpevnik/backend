@@ -209,7 +209,7 @@ class SongTest(unittest.TestCase):
         assert res_ids[0] == song_ids[1] and res_ids[1] == song_ids[0] and res_ids[2] == song_ids[2]
 
         # get sorted songs with get request
-        rv = self.app.get('/api/v1/songs?order=titler')
+        rv = self.app.get('/api/v1/songs?order=title_desc')
         assert rv.status_code == 200
 
         res = json.loads(rv.data)

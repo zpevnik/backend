@@ -43,8 +43,8 @@ def export_songbook(songbook):
 
     # get sbd song data and save them into aux sbd file
     with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'ab') as file:
-        for song_id in songbook.get_songs().keys():
-            song = validators.song_existence(song_id)
+        for song_obj in songbook.get_songs():
+            song = validators.song_existence(song_obj['id'])
             data, song_log = song.generate_sbd_output()
             if song_log:
                 log[song.get_title()] = song_log

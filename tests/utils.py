@@ -7,13 +7,29 @@ def _post_interpreter(app, name='name'):
         '/api/v1/interpreters', content_type='application/json', data=json.dumps(dict(name=name)))
 
 
+# put interpreter into the database
+def _put_interpreter(app, interpreter_id, name='name'):
+    return app.put(
+        '/api/v1/interpreters/{}'.format(interpreter_id),
+        content_type='application/json',
+        data=json.dumps(dict(name=name)))
+
+
 # post author into the database
 def _post_author(app, name='name'):
     return app.post(
         '/api/v1/authors', content_type='application/json', data=json.dumps(dict(name=name)))
 
 
-# post author into the database
+# put author into the database
+def _put_author(app, author_id, name='name'):
+    return app.put(
+        '/api/v1/authors/{}'.format(author_id),
+        content_type='application/json',
+        data=json.dumps(dict(name=name)))
+
+
+# post song into the database
 def _post_song(app,
                title='title',
                text='[verse]',
@@ -34,7 +50,7 @@ def _post_song(app,
                 interpreters=interpreters)))
 
 
-# put author into the database
+# put song into the database
 def _put_song(app,
               song_id,
               title='title',
@@ -62,3 +78,17 @@ def _put_song(app,
 
     return app.put(
         '/api/v1/songs/{}'.format(song_id), content_type='application/json', data=json.dumps(data))
+
+
+# post songbook into the database
+def _post_songbook(app, title='title'):
+    return app.post(
+        '/api/v1/songbooks', content_type='application/json', data=json.dumps(dict(title=title)))
+
+
+# put songbook into the database
+def _put_songbook(app, songbook_id, title='title'):
+    return app.put(
+        '/api/v1/songbooks/{}'.format(songbook_id),
+        content_type='application/json',
+        data=json.dumps(dict(title=title)))

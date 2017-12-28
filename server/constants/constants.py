@@ -54,7 +54,8 @@ size_dict = [OPTIONS.SIZE.A4, OPTIONS.SIZE.A5, OPTIONS.SIZE.A4_WIDE, OPTIONS.SIZ
 
 class Ordering(ConstantDict):
     TITLE = 'title'
-    TITLE_DESC = 'titler'
+    TITLE_DESC = 'title_desc'
+
 
 ORDERING = Ordering()
 

@@ -1,5 +1,6 @@
 import json
 import unittest
+import tests.utils as utils
 
 from urllib.parse import urlsplit
 from pymongo import MongoClient
@@ -32,10 +33,7 @@ class InterpreterTest(unittest.TestCase):
         assert b'[]' in rv.data
 
         # add interpreter into the database
-        rv = self.app.post(
-            '/api/v1/interpreters',
-            content_type='application/json',
-            data=json.dumps(dict(name='Jimmy Page')))
+        rv = utils._post_interpreter(self.app, name='Jimmy Page')
         assert rv.status_code == 201
         assert b'"link": "interpreters/' in rv.data
 
@@ -55,24 +53,15 @@ class InterpreterTest(unittest.TestCase):
         assert interpreter['id'] == interpreter_id
 
         # test put (edit) request
-        rv = self.app.put(
-            '/api/v1/interpreters/{}'.format(interpreter_id),
-            content_type='application/json',
-            data=json.dumps(dict(name='Jimmy Pager')))
+        rv = utils._put_interpreter(self.app, interpreter_id, name='Jimmy Pager')
         assert rv.status_code == 200
         interpreter = json.loads(rv.data)
         assert interpreter['name'] == 'Jimmy Pager'
         assert interpreter['id'] == interpreter_id
 
         # add more interpreters into the database
-        rv = self.app.post(
-            '/api/v1/interpreters',
-            content_type='application/json',
-            data=json.dumps(dict(name='Jimmy Hendrix')))
-        rv = self.app.post(
-            '/api/v1/interpreters',
-            content_type='application/json',
-            data=json.dumps(dict(name='Eric Clapton')))
+        rv = utils._post_interpreter(self.app, name='Jimmy Hendrix')
+        rv = utils._post_interpreter(self.app, name='Eric Clapton')
 
         # remember size of the database
         rv = self.app.get('/api/v1/interpreters')
@@ -115,15 +104,9 @@ class InterpreterTest(unittest.TestCase):
         assert b'"data": "name"' in rv.data
 
         # test duplicate interpreters
-        rv = self.app.post(
-            '/api/v1/interpreters',
-            content_type='application/json',
-            data=json.dumps(dict(name='Slash')))
+        rv = utils._post_interpreter(self.app, name='Slash')
         assert rv.status_code == 201
-        rv = self.app.post(
-            '/api/v1/interpreters',
-            content_type='application/json',
-            data=json.dumps(dict(name='Slash')))
+        rv = utils._post_interpreter(self.app, name='Slash')
         assert rv.status_code == 422
         assert b'"code": "already_exists"' in rv.data
 
@@ -132,19 +115,13 @@ class InterpreterTest(unittest.TestCase):
 
     def test_put_request(self):
         # insert test interpreter for further testing
-        rv = self.app.post(
-            '/api/v1/interpreters',
-            content_type='application/json',
-            data=json.dumps(dict(name='Jack Black')))
+        rv = utils._post_interpreter(self.app, name='Jack Black')
         assert rv.status_code == 201
         interpreter = json.loads(rv.data)
         interpreter_id = interpreter['link'].split('/')[1]
 
         # test wrong interpreter
-        rv = self.app.put(
-            '/api/v1/interpreters/{}'.format('000000000000000000000000'),
-            content_type='application/json',
-            data=json.dumps(dict(field="field")))
+        rv = utils._put_interpreter(self.app, '000000000000000000000000')
         assert rv.status_code == 404
 
         # test missing field

@@ -256,10 +256,8 @@ securitySchemes:
         type: "string"
         description: "Result sorting."
         enum:
-        - "songs"
-        - "songsr"
-        - "interpreters"
-        - "interpretersr"
+        - "title"
+        - "title_desc"
         required: false
     responses:
       200:
@@ -394,6 +392,36 @@ securitySchemes:
     responses:
       204:
         description: "Song was successfully deleted."
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Song was not found."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/songs/duplicate/{song_id}:
+  uriParameters:
+    song_id:
+      type: "string"
+  get:
+    displayName: "Duplicate song"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Song"
+          application/pdf:
+            type: "object"
+            description: "Response for generated pdf."
+            example:
+              value: "{\"link\": \"/download/2b573863-71b1-4463-96a7-e7fae9ba3865.pdf\"\
+                }"
+              strict: false
       403:
         description: "Insufficient permissions."
         body:

@@ -8,6 +8,8 @@ from pymongo import MongoClient
 from server.app import app
 from server.constants import PERMISSION
 
+#FIXME
+
 
 class QueryTest(unittest.TestCase):
 

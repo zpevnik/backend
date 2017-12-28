@@ -238,6 +238,7 @@ def json_request(request):
                            (EXCODES.INVALID_REQUEST, STRINGS.JSON_REQUEST_ERROR))
     return True
 
+
 def song_format(request):
     _, log = translate_to_tex(request['text'])
     if log:

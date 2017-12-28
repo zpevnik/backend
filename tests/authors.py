@@ -1,5 +1,6 @@
 import json
 import unittest
+import tests.utils as utils
 
 from urllib.parse import urlsplit
 from pymongo import MongoClient
@@ -32,10 +33,7 @@ class AuthorTest(unittest.TestCase):
         assert b'[]' in rv.data
 
         # add author into the database
-        rv = self.app.post(
-            '/api/v1/authors',
-            content_type='application/json',
-            data=json.dumps(dict(name='Jimmy Page')))
+        rv = utils._post_author(self.app, name='Jimmy Page')
         assert rv.status_code == 201
         assert b'"link": "authors/' in rv.data
 
@@ -55,24 +53,15 @@ class AuthorTest(unittest.TestCase):
         assert author['id'] == author_id
 
         # test put (edit) request
-        rv = self.app.put(
-            '/api/v1/authors/{}'.format(author_id),
-            content_type='application/json',
-            data=json.dumps(dict(name='Jimmy Pager')))
+        rv = utils._put_author(self.app, author_id, name='Jimmy Pager')
         assert rv.status_code == 200
         author = json.loads(rv.data)
         assert author['name'] == 'Jimmy Pager'
         assert author['id'] == author_id
 
         # add more authors into the database
-        rv = self.app.post(
-            '/api/v1/authors',
-            content_type='application/json',
-            data=json.dumps(dict(name='Jimmy Hendrix')))
-        rv = self.app.post(
-            '/api/v1/authors',
-            content_type='application/json',
-            data=json.dumps(dict(name='Eric Clapton')))
+        rv = utils._post_author(self.app, name='Jimmy Hendrix')
+        rv = utils._post_author(self.app, name='Eric Clapton')
 
         # remember size of the database
         rv = self.app.get('/api/v1/authors')
@@ -115,11 +104,9 @@ class AuthorTest(unittest.TestCase):
         assert b'"data": "name"' in rv.data
 
         # test duplicate authors
-        rv = self.app.post(
-            '/api/v1/authors', content_type='application/json', data=json.dumps(dict(name='Slash')))
+        rv = utils._post_author(self.app, name='Slash')
         assert rv.status_code == 201
-        rv = self.app.post(
-            '/api/v1/authors', content_type='application/json', data=json.dumps(dict(name='Slash')))
+        rv = utils._post_author(self.app, name='Slash')
         assert rv.status_code == 422
         assert b'"code": "already_exists"' in rv.data
 
@@ -128,19 +115,13 @@ class AuthorTest(unittest.TestCase):
 
     def test_put_request(self):
         # insert test author for further testing
-        rv = self.app.post(
-            '/api/v1/authors',
-            content_type='application/json',
-            data=json.dumps(dict(name='Jack Black')))
+        rv = utils._post_author(self.app, name='Jack Black')
         assert rv.status_code == 201
         author = json.loads(rv.data)
         author_id = author['link'].split('/')[1]
 
         # test wrong author
-        rv = self.app.put(
-            '/api/v1/authors/{}'.format('000000000000000000000000'),
-            content_type='application/json',
-            data=json.dumps(dict(field="field")))
+        rv = utils._put_author(self.app, '000000000000000000000000')
         assert rv.status_code == 404
 
         # test missing field
