@@ -310,14 +310,14 @@ class Song(object):
         # translate song lyrics and chords to tex output
         text, log = translate_to_tex(self._text)
 
-        authors = []
-        for author_id in self._interpreters:
-            author = g.model.authors.find_one(author_id=author_id)
-            authors.append(author.get_name())
+        interpreters = []
+        for interpreter_id in self._interpreters:
+            interpreter = g.model.interpreters.find_one(interpreter_id=interpreter_id)
+            interpreters.append(interpreter.get_name())
 
         # create sbd export data
         filedata = '''\\beginsong{{{}}}[by={{{}}}] {}\endsong'''.format(
-            self._title, ", ".join(authors), text)
+            self._title, ", ".join(interpreters), text)
 
         # save song to export cache if no log information is present
         if not log:
@@ -328,6 +328,5 @@ class Song(object):
         return filedata, log
 
     def __repr__(self):
-        return '<{!r} id={!r} title={!r} authors={!r} interpreters={!r}' \
-            .format(self.__class__.__name__, self._id, self._title,
-                    self._authors, self._interpreters)
+        return '<{!r} id={!r} title={!r} interpreters={!r}' \
+            .format(self.__class__.__name__, self._id, self._title, self._interpreters)
