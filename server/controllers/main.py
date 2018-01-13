@@ -126,9 +126,9 @@ def download(filename):
     directory = os.path.join(os.getcwd(), app.config['SONGBOOK_DONE_FOLDER'])
     return send_from_directory(
         directory=directory,
-        filename=filename,
-        as_attachment=True,
-        attachment_filename="Zpevnik.pdf")
+        filename=filename)
+#        as_attachment=True,
+#        attachment_filename="Zpevnik.pdf")
 
 
 @app.route("/cleanup")  # NOT TESTED! TODO
