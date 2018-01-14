@@ -82,7 +82,7 @@ class Songs(object):
         self._collection.delete_one({'_id': song._id})
 
     def find(self):
-        """Find all authors in the database."""
+        """Find all songs in the database."""
         doc = self._collection.find({})
 
         songs = []

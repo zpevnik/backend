@@ -55,8 +55,8 @@ def songs():
         data = validators.songs_request(data)
         data['owner'] = current_user.get_id()
         data['owner_unit'] = current_user.get_unit()
-        data['visibility'] = PERMISSION.PRIVATE
-        data['edit_perm'] = PERMISSION.PRIVATE
+        data['visibility'] = data['visibility'] if 'visibility' in data else PERMISSION.PRIVATE
+        data['edit_perm'] = data['edit_perm'] if 'edit_perm' in data else PERMISSION.PRIVATE
 
         validators.song_format(data)
 
