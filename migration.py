@@ -26,6 +26,18 @@ db = mongo_client[parsed.path[1:]]
 model = Model(db=db)
 
 
+def reset_song_cache():
+    collection = db['songs']
+    songs = collection.find()
+
+    for song in songs:
+        if not song['export_cache']:
+            continue
+
+        song['export_cache'] = None
+        collection.update_one({'_id': song['_id']}, {'$set': song})
+
+
 def migration_2018_12_22_1():
     logger.info('22.12.2017 - Migrating songs in songbook to new struct.')
 
