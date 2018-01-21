@@ -6,6 +6,7 @@ class TranslatorStrings(object):
     ERROR_NESTED_REPETITION = '[{}] ERROR: Repetition cannot be nested in other repetition.'
     ERROR_NOT_IMPLEMENTED = '[{}] ERROR: Not yet implemented.'
     ERROR_CHORDS_INSIDE_ECHO = '[{}] ERROR: Chord tag found inside echo block.'
+    ERROR_NO_STARTING_BLOCK = '[0] ERROR: Song must start with [verse] or [chorus] tag.'
 
 
 class Strings(object):

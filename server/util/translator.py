@@ -107,6 +107,17 @@ def translate_to_tex(song):
 
     content = [x.strip() for x in song.split('\n')]
 
+    # check for verse or chorus tag at the beginning of the song
+    for line in content:
+        if not line:
+            continue
+
+        xline = line.lower()
+        if xline.startswith("[chorus]") or xline.startswith("[verse]"):
+            break
+        else:
+            _log.append(STRINGS.TRANSLATOR.ERROR_NO_STARTING_BLOCK)
+
     for _idx, line in enumerate(content):
         # translate into LaTeX format
         line = re.sub(_regexp, _process_match, line)
