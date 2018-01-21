@@ -249,6 +249,8 @@ class Songbook(object):
         return max((item['order'] if 'order' in item else 0) for item in self._songs) + 1
 
     def set_song(self, song):
+        self.invalidate_cache()
+
         local = next((item for item in self._songs if item['id'] == song['id']), None)
         if local is not None:
             local['order'] = song['order'] if 'order' in song else local['order']
