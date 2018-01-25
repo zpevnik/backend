@@ -124,9 +124,9 @@ def logout():
 def download(filename):
     # send rendered out pdf with nices name
     directory = os.path.join(os.getcwd(), app.config['SONGBOOK_DONE_FOLDER'])
-    return send_from_directory(
-        directory=directory,
-        filename=filename)
+    return send_from_directory(directory=directory, filename=filename)
+
+
 #        as_attachment=True,
 #        attachment_filename="Zpevnik.pdf")
 

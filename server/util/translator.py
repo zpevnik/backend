@@ -113,7 +113,8 @@ def translate_to_tex(song):
             continue
 
         xline = line.lower()
-        if xline.startswith("[chorus]") or xline.startswith("[verse]"):
+        if xline.startswith("[chorus]") or xline.startswith("[verse]") or xline.startswith(
+                "[intro]") or xline.startswith("[echo]"):
             break
         else:
             _log.append(STRINGS.TRANSLATOR.ERROR_NO_STARTING_BLOCK)
