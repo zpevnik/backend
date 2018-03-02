@@ -29,8 +29,8 @@ def songs():
         data = validators.handle_GET_request(request.args)
 
         # find all results for currect user and his unit
-        result = g.model.songs.find_filtered(data['query'], data['order'], current_user.get_id(),
-                                             current_user.get_unit())
+        result = g.model.songs.find_filtered(data['query'], data['order'],
+                                             current_user.get_id(), current_user.get_unit())
 
         # prepare response
         size = len(result)

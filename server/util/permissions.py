@@ -20,10 +20,10 @@ def check_perm_aux(user, perm, user_id, unit_id):
 
 
 def check_perm(user, obj, visibility=False, editing=False):
-    if visibility and not check_perm_aux(user, obj.get_visibility(), obj.get_owner(),
-                                         obj.get_owner_unit()):
+    if visibility and not check_perm_aux(
+            user, obj.get_visibility(), obj.get_owner(), obj.get_owner_unit()):
         return False
-    if editing and not check_perm_aux(user, obj.get_edit_perm(), obj.get_owner(),
-                                      obj.get_owner_unit()):
+    if editing and not check_perm_aux(user,
+                                      obj.get_edit_perm(), obj.get_owner(), obj.get_owner_unit()):
         return False
     return True

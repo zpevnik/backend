@@ -38,7 +38,6 @@ class Strings(object):
     USER_NOT_FOUND_ERROR = 'User was not found.'
 
     SONGBOOK_SONG_SUCCESS = 'Písňe ve zpěvníku byly úspěšně upraveny.'
-    USER_SET_ACTIVE_SONGBOOK = 'Aktivní zpěvník byl změněn.'
 
     SONGBOOK_OPTIONS_ERROR = 'Cannot process songbook options.'
     SONGBOOK_OPTIONS_SIZE_ERROR = 'Songbook size has invalid value.'

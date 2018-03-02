@@ -37,7 +37,6 @@ class Users(object):
             'unit': unit,
             'created': datetime.utcnow(),
             'last_login': datetime.utcnow(),
-            'active_songbook': None,
             'token': None
         })
         self._collection.insert_one(user.serialize())
@@ -75,7 +74,6 @@ class User(object):
         self._id = user['_id']
         self._created = user['created']
         self._last_login = user['last_login']
-        self._active_songbook = user['active_songbook']
         self._name = user['name']
         self._active = user['active']
         self._token = user['token']
@@ -86,7 +84,6 @@ class User(object):
             'name': self._name,
             'active': self._active,
             'last_login': self._last_login,
-            'active_songbook': self._active_songbook,
             'token': self._token,
             'unit': self._unit
         }
@@ -103,7 +100,6 @@ class User(object):
             'name': self._name,
             'created': self._created.isoformat(),
             'last_login': self._last_login.isoformat(),
-            'active_songbook': self._active_songbook,
             'active': self._active,
             'unit': self._unit
         }
@@ -134,12 +130,6 @@ class User(object):
 
     def get_unit(self):
         return self._unit
-
-    def get_active_songbook(self):
-        return self._active_songbook
-
-    def set_active_songbook(self, songbook):
-        self._active_songbook = songbook
 
     def set_token(self, token):
         self._token = token

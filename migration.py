@@ -38,6 +38,19 @@ def reset_song_cache():
         collection.update_one({'_id': song['_id']}, {'$set': song})
 
 
+def migration_2018_03_02_1():
+    logger.info('02.03.2018 - Removing active songbook entry from user.')
+
+    collection = db['users']
+    users = collection.find()
+
+    for user in users:
+        if 'active_songbook' not in user:
+            continue
+
+        collection.update_one({'_id': user['_id']}, {'$unset': {'active_songbook': ''}})
+
+
 def migration_2018_12_22_1():
     logger.info('22.12.2017 - Migrating songs in songbook to new struct.')
 
@@ -343,3 +356,5 @@ def migration_2017_08_18_4():
 #migration_2017_12_07_1()
 #migration_2017_12_07_2()
 #migration_2018_12_22_1()
+
+migration_2018_03_02_1()

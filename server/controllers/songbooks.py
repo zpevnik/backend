@@ -117,11 +117,12 @@ def songbook_songs(songbook_id):
 
     g.model.songbooks.save(songbook)
 
-    log_event(EVENTS.SONGBOOK_SONG, current_user.get_id(), {
-        'songbook': songbook_id,
-        'set': data['set'],
-        'delete': data['delete']
-    })
+    log_event(EVENTS.SONGBOOK_SONG,
+              current_user.get_id(), {
+                  'songbook': songbook_id,
+                  'set': data['set'],
+                  'delete': data['delete']
+              })
 
     return jsonify({'message': STRINGS.SONGBOOK_SONG_SUCCESS}), 200
 
