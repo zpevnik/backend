@@ -239,30 +239,9 @@ class Songbook(object):
     def set_data(self, data):
         self.invalidate_cache()
 
-        self._title = data['title'] if 'title' in data else self._title
-        if 'options' in data:
-            self._options = validators.songbook_options(data['options'])
-
-    def _get_position(self):
-        if not self._songs:
-            return 0
-        return max((item['order'] if 'order' in item else 0) for item in self._songs) + 1
-
-    def set_song(self, song):
-        self.invalidate_cache()
-
-        local = next((item for item in self._songs if item['id'] == song['id']), None)
-        if local is not None:
-            local['order'] = song['order'] if 'order' in song else local['order']
-        else:
-            self._songs.append({
-                'id': song['id'],
-                'order': song['order'] if 'order' in song else self._get_position()
-            })
-
-    def remove_song(self, song_id):
-        self.invalidate_cache()
-        self._songs = [item for item in self._songs if item['id'] != song_id]
+        self._title = data['title']
+        self._options = data['options']
+        self._songs = data['songs']
 
     def __repr__(self):
         return '<{!r} id={!r} title={!r}>' \

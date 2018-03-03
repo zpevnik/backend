@@ -170,11 +170,11 @@ def songbooks_request(request):
         raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
                            (EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_TITLE_MISSING, 'title'))
 
-    data = {'title': request['title']}
-    if 'visibility' in request:
-        data['visibility'] = request['visibility']
-    if 'edit_perm' in request:
-        data['edit_perm'] = request['edit_perm']
+    data = {
+        'title': request['title'],
+        'options': request['options'] if 'options' in request else {},
+        'songs': request['songs'] if 'songs' in request else []
+    }
 
     return data
 
@@ -230,6 +230,22 @@ def songbook_options(data):
         options['page_numbering'] = bool(data['page_numbering'])
 
     return options
+
+
+def songbook_songs(data):
+
+    def _get_position(self):
+        if not songs:
+            return 0
+        return max((item['order'] if 'order' in item else 0) for item in songs) + 1
+
+    songs = []
+    for song in data:
+        validators.song_existence(song['id'])
+        if 'order' not in song:
+            song['order'] = _get_position()
+        songs.append({'id': song['id'],'order': song['order']})
+    return songs
 
 
 def json_request(request):
