@@ -234,14 +234,14 @@ def songbook_options(data):
 
 def songbook_songs(data):
 
-    def _get_position(self):
+    def _get_position():
         if not songs:
             return 0
         return max((item['order'] if 'order' in item else 0) for item in songs) + 1
 
     songs = []
     for song in data:
-        validators.song_existence(song['id'])
+        song_existence(song['id'])
         if 'order' not in song:
             song['order'] = _get_position()
         songs.append({'id': song['id'],'order': song['order']})
