@@ -8,7 +8,8 @@ def translate_to_tex(song):
     _log = []
     _notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     _output = []
-    _regexp = '(\[\w+\]|\|:|:\|)([0-9]+)?'
+    _regexp_allowed = r'[^\w\ \n.,?!&#"()[\]\'\-]'
+    _regexp_tags = '(\[\w+\]|\|:|:\|)([0-9]+)?'
     _context = {
         'echo': False,
         'verse': False,
@@ -97,7 +98,6 @@ def translate_to_tex(song):
         elif _is_chord(tag):
             if _context['echo']:
                 _log.append(STRINGS.TRANSLATOR.ERROR_CHORDS_INSIDE_ECHO.format(_idx))
-
             _result.append(tag)
 
         else:
@@ -105,23 +105,27 @@ def translate_to_tex(song):
 
         return ''.join(_result)
 
+    # check that song contains only
+    reg = re.compile(_regexp_allowed, re.UNICODE)
+    if bool(reg.search(song)):
+        _log.append(STRINGS.TRANSLATOR.ERROR_STRING_CONTAINS_FORBIDDEN_CHARACTERS)
+
+    # remove whitespaces from beginning and end of the song
+    song = song.strip()
+
+    # split song into individual lines
     content = [x.strip() for x in song.split('\n')]
 
-    # check for verse or chorus tag at the beginning of the song
-    for line in content:
-        if not line:
-            continue
-
-        xline = line.lower()
-        if xline.startswith("[chorus]") or xline.startswith("[verse]") or xline.startswith(
-                "[intro]") or xline.startswith("[echo]"):
-            break
-        else:
-            _log.append(STRINGS.TRANSLATOR.ERROR_NO_STARTING_BLOCK)
+    # check for allowed tags at the beginning of the song
+    first_line = content[0].lower()
+    if not (first_line.startswith("[chorus]") or first_line.startswith("[verse]") or
+            first_line.startswith("[intro]") or first_line.startswith("[echo]") or
+            first_line.startswith("[solo]")):
+        _log.append(STRINGS.TRANSLATOR.ERROR_NO_STARTING_BLOCK)
 
     for _idx, line in enumerate(content):
-        # translate into LaTeX format
-        line = re.sub(_regexp, _process_match, line)
+        # translate each tag into LaTeX format
+        line = re.sub(_regexp_tags, _process_match, line)
 
         # escape chords so that they are interpered as special symbols
         line = line.replace('[', '\\[')

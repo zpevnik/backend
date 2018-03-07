@@ -244,7 +244,7 @@ def songbook_songs(data):
         song_existence(song['id'])
         if 'order' not in song:
             song['order'] = _get_position()
-        songs.append({'id': song['id'],'order': song['order']})
+        songs.append({'id': song['id'], 'order': song['order']})
     return songs
 
 

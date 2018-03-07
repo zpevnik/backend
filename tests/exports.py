@@ -66,10 +66,10 @@ class ExportTest(unittest.TestCase):
         rv = utils._post_song(
             self.app,
             title="Numb",
-            text="[verse][F#m]I’m tired of being what you [D]want me to be\n"
+            text="[verse][F#m]I'm tired of being what you [D]want me to be\n"
             "[A]Feeling so faithless\n"
             "Lost [E]under the surface\n"
-            "[F#m]I don’t know what you’re ex[D]pecting of me\n"
+            "[F#m]I don't know what you're ex[D]pecting of me\n"
             "[A]Put under the pressure\n"
             "of [E]walking in your [D]shoes\n"
             "[echo]Caught in the undertow, just caught in the undertow\n")
@@ -91,15 +91,16 @@ class ExportTest(unittest.TestCase):
         song = json.loads(rv.data)
         song_ids.append(song['link'].split('/')[1])
 
+        # get current songbook
+        rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
+        songbook = json.loads(rv.data)
+
         # insert songs into the songbook
+        songbook['songs'] = [{'id': song_ids[0]}, {'id': song_ids[1]}]
         rv = self.app.put(
-            '/api/v1/songbooks/{}/songs'.format(songbook_id),
+            '/api/v1/songbooks/{}'.format(songbook_id),
             content_type='application/json',
-            data=json.dumps(dict(set=[{
-                'id': song_ids[0]
-            }, {
-                'id': song_ids[1]
-            }])))
+            data=json.dumps(songbook))
         assert rv.status_code == 200
 
         # export test songbook as pdf

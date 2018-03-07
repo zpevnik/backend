@@ -97,35 +97,4 @@ def songbook_single(songbook_id):
         return jsonify(), 204
 
 
-#@api.route('/songbooks/<songbook_id>/songs', methods=['PUT'])
-#@login_required
-#def songbook_songs(songbook_id):
-#    songbook = validators.songbook_existence(songbook_id)
-#    if current_user.get_id() != songbook.get_owner():
-#        raise AppException(EVENTS.BASE_EXCEPTION, 403,
-#                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
-#
-#    data = request.get_json()
-#    validators.json_request(data)
-#    data = validators.songbook_songs_request(data)
-#
-#    for entry in data['set']:
-#        validators.song_existence(entry['id'])
-#        songbook.set_song(entry)
-#
-#    for entry in data['delete']:
-#        songbook.remove_song(entry)
-#
-#    g.model.songbooks.save(songbook)
-#
-#    log_event(EVENTS.SONGBOOK_SONG,
-#              current_user.get_id(), {
-#                  'songbook': songbook_id,
-#                  'set': data['set'],
-#                  'delete': data['delete']
-#              })
-#
-#    return jsonify({'message': STRINGS.SONGBOOK_SONG_SUCCESS}), 200
-
-
 app.register_blueprint(api, url_prefix='/api/v1')
