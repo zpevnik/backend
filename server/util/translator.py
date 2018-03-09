@@ -8,7 +8,7 @@ def translate_to_tex(song):
     _log = []
     _notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     _output = []
-    _regexp_allowed = r'[^\w\ \n.,?!&#"()[\]\'\-]'
+    _regexp_allowed = r'[^\w\ \n.,:|?!&#"()[\]\'\-]'
     _regexp_tags = '(\[\w+\]|\|:|:\|)([0-9]+)?'
     _context = {
         'echo': False,
