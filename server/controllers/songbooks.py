@@ -50,7 +50,7 @@ def songbooks():
         data = request.get_json()
         validators.json_request(data)
 
-        data = validators.songbooks_request(data)
+        data = validators.songbooks_title_request(data)
         data['owner'] = current_user.get_id()
         data['owner_unit'] = current_user.get_unit()
 
@@ -115,7 +115,7 @@ def songbook_title(songbook_id):
     data['songbook_id'] = songbook_id
     log_event(EVENTS.SONGBOOK_EDIT, current_user.get_id(), data)
 
-    return jsonify({'title': songbook.get_title()}), 200
+    return jsonify(songbook.get_serialized_data()), 200
 
 
 @api.route('/songbooks/<songbook_id>/songs', methods=['PUT'])
@@ -137,7 +137,7 @@ def songbook_songs(songbook_id):
     data['songbook_id'] = songbook_id
     log_event(EVENTS.SONGBOOK_EDIT, current_user.get_id(), data)
 
-    return jsonify({'songs': songbook.get_songs()}), 200
+    return jsonify(songbook.get_serialized_data()), 200
 
 
 @api.route('/songbooks/<songbook_id>/options', methods=['PUT'])
@@ -159,7 +159,7 @@ def songbook_options(songbook_id):
     data['songbook_id'] = songbook_id
     log_event(EVENTS.SONGBOOK_EDIT, current_user.get_id(), data)
 
-    return jsonify({'options': songbook.get_options()}), 200
+    return jsonify(songbook.get_serialized_data()), 200
 
 
 app.register_blueprint(api, url_prefix='/api/v1')

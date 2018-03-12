@@ -167,17 +167,23 @@ def songs_request(request):
 
 
 def songbooks_request(request):
+    ex = AppException(EVENTS.REQUEST_EXCEPTION, 422)
+
     if 'title' not in request or not request['title']:
-        raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
-                           (EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_TITLE_MISSING, 'title'))
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_TITLE_MISSING, 'title')
+    if 'options' not in request:
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_TITLE_MISSING, 'options')
+    if 'songs' not in request:
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_TITLE_MISSING, 'songs')
 
-    data = {
+    if ex.errors:
+        raise ex
+
+    return {
         'title': request['title'],
-        'options': request['options'] if 'options' in request else {},
-        'songs': request['songs'] if 'songs' in request else []
+        'options': request['options'],
+        'songs': request['songs']
     }
-
-    return data
 
 
 def songbooks_title_request(request):
@@ -251,6 +257,8 @@ def songbook_options(data):
         data['front_index']) if 'front_index' in data else DEFAULTS.SONGBOOK_OPTIONS['front_index']
     options['page_numbering'] = bool(
         data['page_numbering']) if 'page_numbering' in data else DEFAULTS.SONGBOOK_OPTIONS['page_numbering']
+    options['song_numbering'] = bool(
+        data['song_numbering']) if 'song_numbering' in data else DEFAULTS.SONGBOOK_OPTIONS['song_numbering']
 
     return options
 

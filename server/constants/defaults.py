@@ -8,7 +8,8 @@ class Defaults(object):
         'index': True,
         'chorded': True,
         'front_index': False,
-        'page_numbering': True
+        'page_numbering': True,
+        'song_numbering': False
     }
 
 
