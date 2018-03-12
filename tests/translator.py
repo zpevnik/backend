@@ -24,6 +24,7 @@ class TranslatorTest(unittest.TestCase):
             "[solo]\n[C] [Em] [Bb] [A]\n[G] [Gb] The [F]sky is a neighborhood",
             "[verse]\nStíny [E]dnů a snů se k obratníku [A]stáčí\nRuce [E]snů černejch se snaží zakrýt [A]oči\nSvětlo [F#mi]tvý prozradí proč já [E]vím\nS novým [F#mi]dnem že se [A]zas navrá[H]tí",
             "[Chorus]\n[E]Jenže tenhle zlej mě [A]strejda vyčítá,\n[G]že se mu to taky blbě [B]počítá.\n|:Ale já [Emi]výlevy a provokace\nzavostalý generace [A]nevydejchám, [Ami]nevydejchám.:|",
+            "[verse]\n.,:?!+#\"()[]|'-"
         ]
 
         for song in wrong_format:
