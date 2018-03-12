@@ -87,8 +87,32 @@ def _post_songbook(app, title='title'):
 
 
 # put songbook into the database
-def _put_songbook(app, songbook_id, title='title'):
+def _put_songbook(app, songbook_id, title='title', songs=[], options={}):
     return app.put(
         '/api/v1/songbooks/{}'.format(songbook_id),
         content_type='application/json',
+        data=json.dumps(dict(title=title,songs=songs,options=options)))
+
+
+# put songbook title into the database
+def _put_songbook_title(app, songbook_id, title='title'):
+    return app.put(
+        '/api/v1/songbooks/{}/title'.format(songbook_id),
+        content_type='application/json',
         data=json.dumps(dict(title=title)))
+
+
+# put songbook song list into the database
+def _put_songbook_songs(app, songbook_id, songs=[]):
+    return app.put(
+        '/api/v1/songbooks/{}/songs'.format(songbook_id),
+        content_type='application/json',
+        data=json.dumps(dict(songs=songs)))
+
+
+# put songbook options into the database
+def _put_songbook_options(app, songbook_id, options={}):
+    return app.put(
+        '/api/v1/songbooks/{}/options'.format(songbook_id),
+        content_type='application/json',
+        data=json.dumps(dict(options=options)))

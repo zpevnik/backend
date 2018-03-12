@@ -51,6 +51,21 @@ def migration_2018_03_02_1():
         collection.update_one({'_id': user['_id']}, {'$unset': {'active_songbook': ''}})
 
 
+def migration_2018_03_12_1():
+    logger.info('12.03.2018 - Adding song_numbering option to songbooks.')
+
+    collection = db['songbooks']
+    songbooks = collection.find()
+
+    for songbook in songbooks:
+        if 'song_numbering' in songbook['options']:
+            continue
+
+        songbook['options']['song_numbering'] = False
+
+        collection.update_one({'_id': songbook['_id']}, {'$set': songbook})
+
+
 def migration_2018_12_22_1():
     logger.info('22.12.2017 - Migrating songs in songbook to new struct.')
 
