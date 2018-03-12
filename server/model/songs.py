@@ -152,6 +152,26 @@ class Songs(object):
 
         return Song(doc)
 
+    def find_multiple(self, song_ids=[]):
+        """Find multiple songs based on given arguments.
+
+        Args:
+          song_ids (list, required): Array of Song ObjectId strings.
+
+        Returns:
+          Author: Multiple Songs or None if non of them does not exist.
+        """
+        songs = []
+        query_array = []
+
+        for song_id in song_ids:
+            query_array.append(ObjectId(song_id['id']))
+
+        doc = self._collection.find({'_id': {"$in": query_array}})
+        for song in doc:
+            songs.append(Song(song))
+        return songs
+
 
 class Song(object):
     """Class for song abstraction.
@@ -213,7 +233,18 @@ class Song(object):
 
         return song
 
-    def get_serialized_data(self):
+    def get_serialized_data(self, simple=False):
+        if simple:
+            return {
+                'id': str(self._id),
+                'title': self._title,
+                'owner': self._owner,
+                'owner_unit': self._owner_unit,
+                'interpreters': self._interpreters,
+                'visibility': self._visibility,
+                'edit_perm': self._edit_perm
+            }
+
         return {
             'id': str(self._id),
             'created': self._id.generation_time,
@@ -226,8 +257,7 @@ class Song(object):
             'interpreters': self._interpreters,
             'visibility': self._visibility,
             'edit_perm': self._edit_perm,
-            'approved': self._approved,
-            'export_cache': self._export_cache
+            'approved': self._approved
         }
 
     def get_id(self):

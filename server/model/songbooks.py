@@ -4,6 +4,7 @@ from bson import ObjectId
 from flask import g
 
 from server.util import validators
+from server.util import merge_lists
 from server.constants import OPTIONS
 from server.constants import DEFAULTS
 from server.constants import PERMISSION
@@ -182,11 +183,17 @@ class Songbook(object):
         return songbook
 
     def get_serialized_data(self):
+        # map extended songs representations on songs list
+        songs = g.model.songs.find_multiple(self._songs)
+        extended_data = []
+        for song in songs:
+            extended_data.append(song.get_serialized_data(simple=True))
+
         return {
             'id': str(self._id),
             'created': self._id.generation_time,
             'title': self._title,
-            'songs': self._songs,
+            'songs': merge_lists(self._songs, extended_data, 'id'),
             'owner': self._owner,
             'options': self._options,
             'owner_unit': self._owner_unit
