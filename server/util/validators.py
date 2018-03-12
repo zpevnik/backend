@@ -7,6 +7,7 @@ from server.constants import EVENTS
 from server.constants import EXCODES
 from server.constants import OPTIONS
 from server.constants import STRINGS
+from server.constants import DEFAULTS
 from server.constants import ORDERING
 from server.constants import size_dict
 
@@ -179,6 +180,28 @@ def songbooks_request(request):
     return data
 
 
+def songbooks_title_request(request):
+    if 'title' not in request or not request['title']:
+        raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
+                           (EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_TITLE_MISSING, 'title'))
+    return {'title': request['title']}
+
+
+def songbooks_songs_request(request):
+    if 'songs' not in request:
+        raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
+                           (EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_SONGS_MISSING, 'songs'))
+    return {'songs': request['songs']}
+
+
+def songbooks_options_request(request):
+    if 'options' not in request:
+        raise AppException(
+            EVENTS.REQUEST_EXCEPTION, 422,
+            (EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_OPTIONS_MISSING, 'options'))
+    return {'options': request['options']}
+
+
 def songbook_songs_request(request):
     data = {'set': [], 'delete': []}
     if 'set' in request:
@@ -217,17 +240,17 @@ def songbook_options(data):
             raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
                                (EXCODES.WRONG_VALUE, STRINGS.JSON_REQUEST_ERROR, 'size'))
 
-        options['size'] = data['size']
-    if 'columns' in data:
-        options['columns'] = int(data['columns'])
-    if 'index' in data:
-        options['index'] = bool(data['index'])
-    if 'chorded' in data:
-        options['chorded'] = bool(data['chorded'])
-    if 'front_index' in data:
-        options['front_index'] = bool(data['front_index'])
-    if 'page_numbering' in data:
-        options['page_numbering'] = bool(data['page_numbering'])
+    options['size'] = data['size'] if 'size' in data else DEFAULTS.SONGBOOK_OPTIONS['size']
+    options['columns'] = int(
+        data['columns']) if 'columns' in data else DEFAULTS.SONGBOOK_OPTIONS['columns']
+    options['index'] = bool(
+        data['index']) if 'index' in data else DEFAULTS.SONGBOOK_OPTIONS['index']
+    options['chorded'] = bool(
+        data['chorded']) if 'chorded' in data else DEFAULTS.SONGBOOK_OPTIONS['chorded']
+    options['front_index'] = bool(
+        data['front_index']) if 'front_index' in data else DEFAULTS.SONGBOOK_OPTIONS['front_index']
+    options['page_numbering'] = bool(
+        data['page_numbering']) if 'page_numbering' in data else DEFAULTS.SONGBOOK_OPTIONS['page_numbering']
 
     return options
 

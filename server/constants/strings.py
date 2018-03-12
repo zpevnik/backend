@@ -17,6 +17,9 @@ class Strings(object):
     JSON_REQUEST_ERROR = 'Cannot process json request.'
 
     REQUEST_SONGBOOK_TITLE_MISSING = 'Songbook title is missing.'
+    REQUEST_SONGBOOK_SONGS_MISSING = 'Songbook song list is missing.'
+    REQUEST_SONGBOOK_OPTIONS_MISSING = 'Songbook options field is missing.'
+
     REQUEST_SONG_TITLE_MISSING = 'Song title is missing.'
     REQUEST_SONG_TEXT_MISSING = 'Song text is missing.'
     REQUEST_SONG_DESCRIPTION_MISSING = 'Song description is missing.'

@@ -75,7 +75,7 @@ class Songbooks(object):
         self._collection.delete_one({'_id': songbook._id})
 
     def find(self):
-        """Find all authors in the database."""
+        """Find all songbooks in the database."""
         doc = self._collection.find({})
 
         songbooks = []
@@ -198,6 +198,9 @@ class Songbook(object):
     def get_creation_date(self):
         return self._id.generation_time
 
+    def get_title(self):
+        return self._title
+
     def get_songs(self):
         return self._songs
 
@@ -235,6 +238,18 @@ class Songbook(object):
     def invalidate_cache(self):
         self._cached_file = None
         self._cache_expiration = None
+
+    def set_title(self, title):
+        self.invalidate_cache()
+        self._title = title
+
+    def set_songs(self, songs):
+        self.invalidate_cache()
+        self._songs = songs
+
+    def set_options(self, options):
+        self.invalidate_cache()
+        self._options = options
 
     def set_data(self, data):
         self.invalidate_cache()

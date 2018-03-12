@@ -97,4 +97,69 @@ def songbook_single(songbook_id):
         return jsonify(), 204
 
 
+@api.route('/songbooks/<songbook_id>/title', methods=['PUT'])
+@login_required
+def songbook_title(songbook_id):
+    songbook = validators.songbook_existence(songbook_id)
+    if current_user.get_id() != songbook.get_owner():
+        raise AppException(EVENTS.BASE_EXCEPTION, 403,
+                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+
+    data = request.get_json()
+    validators.json_request(data)
+    data = validators.songbooks_title_request(data)
+
+    songbook.set_title(data['title'])
+    g.model.songbooks.save(songbook)
+
+    data['songbook_id'] = songbook_id
+    log_event(EVENTS.SONGBOOK_EDIT, current_user.get_id(), data)
+
+    return jsonify({'title': songbook.get_title()}), 200
+
+
+@api.route('/songbooks/<songbook_id>/songs', methods=['PUT'])
+@login_required
+def songbook_songs(songbook_id):
+    songbook = validators.songbook_existence(songbook_id)
+    if current_user.get_id() != songbook.get_owner():
+        raise AppException(EVENTS.BASE_EXCEPTION, 403,
+                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+
+    data = request.get_json()
+    validators.json_request(data)
+    data = validators.songbooks_songs_request(data)
+    data['songs'] = validators.songbook_songs(data['songs'])
+
+    songbook.set_songs(data['songs'])
+    g.model.songbooks.save(songbook)
+
+    data['songbook_id'] = songbook_id
+    log_event(EVENTS.SONGBOOK_EDIT, current_user.get_id(), data)
+
+    return jsonify({'songs': songbook.get_songs()}), 200
+
+
+@api.route('/songbooks/<songbook_id>/options', methods=['PUT'])
+@login_required
+def songbook_options(songbook_id):
+    songbook = validators.songbook_existence(songbook_id)
+    if current_user.get_id() != songbook.get_owner():
+        raise AppException(EVENTS.BASE_EXCEPTION, 403,
+                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+
+    data = request.get_json()
+    validators.json_request(data)
+    data = validators.songbooks_options_request(data)
+    data['options'] = validators.songbook_options(data['options'])
+
+    songbook.set_options(data['options'])
+    g.model.songbooks.save(songbook)
+
+    data['songbook_id'] = songbook_id
+    log_event(EVENTS.SONGBOOK_EDIT, current_user.get_id(), data)
+
+    return jsonify({'options': songbook.get_options()}), 200
+
+
 app.register_blueprint(api, url_prefix='/api/v1')
