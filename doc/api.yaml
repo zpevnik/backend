@@ -25,19 +25,22 @@ types:
         properties:
           music:
             type: "array"
+            description: "Identifiers of Authors"
             items:
-              type: "Author"
+              type: "string"
           lyrics:
             type: "array"
+            description: "Identifiers of Authors"
             items:
-              type: "Author"
+              type: "string"
         example:
           value: "{'music': [], 'lyrics': []}"
           strict: false
       interpreters:
         type: "array"
+        description: "Identifiers of Interpreters"
         items:
-          type: "Author"
+          type: "string"
       owner_unit:
         type: "string"
       visibility:
@@ -84,7 +87,7 @@ types:
       songs:
         type: "array"
         items:
-          type: "Songbook_item"
+          type: "Songbook_extended_item"
       owner:
         type: "string"
       owner_unit:
@@ -109,8 +112,6 @@ types:
         type: "boolean"
       unit:
         type: "string"
-      active_songbook:
-        type: "Songbook"
       created:
         type: "datetime"
         required: false
@@ -135,21 +136,22 @@ types:
         properties:
           music:
             type: "array"
-            description: "Array of music authors"
+            description: "Array of music author ids"
             items:
-              type: "Author"
+              type: "string"
           lyrics:
             type: "array"
-            description: "Array of lyrics authors"
+            description: "Array of lyrics author ids"
             items:
-              type: "Author"
+              type: "string"
         example:
           value: "{'music': [], 'lyrics': []}"
           strict: false
       interpreters:
         type: "array"
+        description: "Identifiers of Interpreters"
         items:
-          type: "Interpreter"
+          type: "string"
       visibility:
         type: "string"
         required: false
@@ -177,6 +179,35 @@ types:
     properties:
       title:
         type: "string"
+      songs:
+        type: "array"
+        items:
+          type: "Songbook_item"
+      options:
+        type: "Songbook_options"
+    (x-restlet):
+      section: "Objects"
+  Songbook_title_request:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+    (x-restlet):
+      section: "Objects"
+  Songbook_songs_request:
+    type: "object"
+    properties:
+      songs:
+        type: "array"
+        items:
+          type: "Songbook_item"
+    (x-restlet):
+      section: "Objects"
+  Songbook_options_request:
+    type: "object"
+    properties:
+      options:
+        type: "Songbook_options"
     (x-restlet):
       section: "Objects"
   Songbook_item:
@@ -186,6 +217,78 @@ types:
         type: "string"
       order:
         type: "number"
+        required: false
+    (x-restlet):
+      section: "Objects"
+  Songbook_extended_item:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      order:
+        type: "number"
+        required: false
+      title:
+        type: "string"
+        required: false
+      interpreters:
+        type: "array"
+        description: "Identifiers of Interpreters"
+        required: false
+        items:
+          type: "string"
+      owner:
+        type: "string"
+        required: false
+      owner_unit:
+        type: "string"
+        required: false
+      visibility:
+        type: "number"
+        required: false
+      edit_perm:
+        type: "number"
+        required: false
+    (x-restlet):
+      section: "Objects"
+  Songbook_options:
+    type: "object"
+    description: "This object represents options for each songbook. If some of them\
+      \ is not set with request, default values are used (no error is raised!)"
+    properties:
+      size:
+        type: "string"
+        description: "One of predefined page sizes"
+        enum:
+        - "A4"
+        - "A5"
+        - "A4 WIDE"
+        - "A5 WIDE"
+        required: false
+      columns:
+        type: "number"
+        description: "Number of columns in exported songbook"
+        required: false
+      index:
+        type: "boolean"
+        description: "Songbook will have song index"
+        required: false
+      chorded:
+        type: "boolean"
+        description: "Songbook will have chords above all songs"
+        required: false
+      front_index:
+        type: "boolean"
+        description: "Songbook index is in front of the songbook (has no effect if\
+          \ index is set to False)"
+        required: false
+      page_numbering:
+        type: "boolean"
+        description: "Songbook pages are numbered"
+        required: false
+      song_numbering:
+        type: "boolean"
+        description: "Individual songs are numbered"
         required: false
     (x-restlet):
       section: "Objects"
@@ -691,7 +794,7 @@ securitySchemes:
     displayName: "Create new songbook"
     body:
       application/json:
-        type: "Songbook_request"
+        type: "Songbook_title_request"
     responses:
       201:
         description: "Songbook was successfully created"
@@ -806,42 +909,107 @@ securitySchemes:
             type: "Error"
   (x-restlet):
     section: "API endpoints"
-/songbooks/{songbook_id}/songs:
+/songbooks/{songbook_id}/title:
   uriParameters:
     songbook_id:
       type: "string"
   put:
-    displayName: "Edit songs in songbook"
-    description: "Songs in `delete` array are not checked in any way and `200` is\
-      \ returned even if all ids were wrong (nothing happens then). `404` cannot be\
-      \ therefore returned for songs.\n\nSongs in `set` array are checked as expected."
+    displayName: "Edit songbook title"
     body:
       application/json:
-        type: "object"
-        properties:
-          set:
-            type: "Songbook_item"
-            description: "List of song objects which should be added/changed."
-            required: false
-          delete:
-            type: "array"
-            description: "List of song ids which should be deleted."
-            required: false
-            items:
-              type: "string"
+        type: "Songbook_title_request"
     responses:
       200:
-        description: "Request was successfully processed."
+        description: "Songbook title was successfully saved."
         body:
           application/json:
-            type: "Response"
+            type: "Songbook"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
       403:
         description: "Insufficient permissions."
         body:
           application/json:
             type: "Error"
       404:
-        description: "Songbook or songs were not found."
+        description: "Response in case that songbook was not found."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/songbooks/{songbook_id}/songs:
+  uriParameters:
+    songbook_id:
+      type: "string"
+  put:
+    displayName: "Edit songbook list of songs"
+    body:
+      application/json:
+        type: "Songbook_songs_request"
+    responses:
+      200:
+        description: "Songbook list of songs was successfully saved."
+        body:
+          application/json:
+            type: "Songbook"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Response in case that songbook was not found."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/songbooks/{songbook_id}/options:
+  uriParameters:
+    songbook_id:
+      type: "string"
+  put:
+    displayName: "Edit songbook options"
+    body:
+      application/json:
+        type: "Songbook_options_request"
+    responses:
+      200:
+        description: "Songbook options were successfully saved."
+        body:
+          application/json:
+            type: "Songbook"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Response in case that songbook was not found."
         body:
           application/json:
             type: "Error"
@@ -879,31 +1047,6 @@ securitySchemes:
               strict: false
       404:
         description: "User was not found."
-        body:
-          application/json:
-            type: "Error"
-  (x-restlet):
-    section: "API endpoints"
-/users/songbook/{songbook_id}:
-  uriParameters:
-    songbook_id:
-      type: "string"
-  put:
-    displayName: "Set primary songbook"
-    description: "Set primary songbook of current user."
-    responses:
-      200:
-        description: "Primary songbook was successfully set."
-        body:
-          application/json:
-            type: "Response"
-      403:
-        description: "Insufficient permissions."
-        body:
-          application/json:
-            type: "Error"
-      404:
-        description: "Songbook was not found."
         body:
           application/json:
             type: "Error"
