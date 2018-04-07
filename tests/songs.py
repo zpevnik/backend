@@ -370,12 +370,12 @@ class SongTest(unittest.TestCase):
         song_id = song['link'].split('/')[1]
 
         # duplicate song
-        rv = self.app.get('/api/v1/songs/duplicate/{}'.format(song_id))
+        rv = self.app.get('/api/v1/songs/{}/duplicate'.format(song_id))
         assert rv.status_code == 201
         assert b'"link": "songs/' in rv.data
 
         # try to duplicate wrong song
-        rv = self.app.get('/api/v1/songs/duplicate/{}'.format('000000000000000000000000'))
+        rv = self.app.get('/api/v1/songs/{}/duplicate'.format('000000000000000000000000'))
         assert rv.status_code == 404
         assert b'"code": "does_not_exist"' in rv.data
 

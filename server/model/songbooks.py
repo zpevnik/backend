@@ -43,8 +43,8 @@ class Songbooks(object):
             '_id': ObjectId(),
             'title': data['title'],
             'owner': data['owner'],
-            'options': DEFAULTS.SONGBOOK_OPTIONS,
-            'songs': [],
+            'options': data['options'] if 'options' in data else DEFAULTS.SONGBOOK_OPTIONS,
+            'songs': data['songs'] if 'songs' in data else [],
             'cached_file': None,
             'cache_expiration': None,
         })

@@ -29,8 +29,7 @@ def songs():
         data = validators.handle_GET_request(request.args)
 
         # find all results for currect user and his unit
-        result = g.model.songs.find_filtered(data['query'], data['order'],
-                                             current_user.get_id(), current_user.get_unit())
+        result = g.model.songs.find_filtered(data['query'], data['order'], current_user.get_id())
 
         # prepare response
         size = len(result)
@@ -122,7 +121,7 @@ def song_single(song_id):
         return jsonify(), 204
 
 
-@api.route('/songs/duplicate/<song_id>', methods=['GET'])
+@api.route('/songs/<song_id>/duplicate', methods=['GET'])
 @login_required
 def song_duplicate(song_id):
     song = validators.song_existence(song_id)
@@ -132,7 +131,6 @@ def song_duplicate(song_id):
 
     data = song.get_serialized_data()
     data['owner'] = current_user.get_id()
-    data['owner_unit'] = current_user.get_unit()
     data['visibility'] = PERMISSION.PRIVATE
 
     song = g.model.songs.create_song(data)

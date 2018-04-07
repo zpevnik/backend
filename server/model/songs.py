@@ -89,13 +89,12 @@ class Songs(object):
 
         return songs
 
-    def find_filtered(self, query, order, user_id, unit_id):
+    def find_filtered(self, query, order, user_id):
         """Find songs from the database based on query and permissions.
 
         Args:
           query (str): Query string.
           user_id (str): user Id string.
-          unit_id (str): Unit Id string.
 
         All returned songs are accessible by this user. If the query string
         is empty, every accessible song is returned.

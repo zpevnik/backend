@@ -52,7 +52,6 @@ def songbooks():
 
         data = validators.songbooks_title_request(data)
         data['owner'] = current_user.get_id()
-        data['owner_unit'] = current_user.get_unit()
 
         songbook = g.model.songbooks.create_songbook(data)
         log_event(EVENTS.SONGBOOK_NEW, current_user.get_id(), data)
@@ -160,6 +159,24 @@ def songbook_options(songbook_id):
     log_event(EVENTS.SONGBOOK_EDIT, current_user.get_id(), data)
 
     return jsonify(songbook.get_serialized_data()), 200
+
+
+@api.route('/songbooks/<songbook_id>/duplicate', methods=['GET'])
+@login_required
+def songbook_duplicate(songbook_id):
+    songbook = validators.songbook_existence(songbook_id)
+    if not permissions.check_perm(current_user, songbook, visibility=True):
+        raise AppException(EVENTS.BASE_EXCEPTION, 403,
+                           (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
+
+    data = songbook.get_serialized_data()
+    data['owner'] = current_user.get_id()
+
+    song = g.model.songbooks.create_songbook(data)
+    log_event(EVENTS.SONGBOOK_NEW, current_user.get_id(), data)
+
+    return jsonify(link='songbooks/{}'.format(songbook.get_id())), 201, \
+          {'location': '/songbooks/{}'.format(songbook.get_id())}
 
 
 app.register_blueprint(api, url_prefix='/api/v1')
