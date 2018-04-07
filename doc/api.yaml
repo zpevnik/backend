@@ -41,11 +41,7 @@ types:
         description: "Identifiers of Interpreters"
         items:
           type: "string"
-      owner_unit:
-        type: "string"
       visibility:
-        type: "number"
-      edit_perm:
         type: "number"
       created:
         type: "datetime"
@@ -88,13 +84,9 @@ types:
         type: "array"
         items:
           type: "Songbook_extended_item"
+      songbook_options:
+        type: "Songbook_options"
       owner:
-        type: "string"
-      owner_unit:
-        type: "string"
-      visibility:
-        type: "string"
-      edit_perm:
         type: "string"
       created:
         type: "datetime"
@@ -153,9 +145,6 @@ types:
         items:
           type: "string"
       visibility:
-        type: "string"
-        required: false
-      edit_perm:
         type: "string"
         required: false
     (x-restlet):
@@ -240,13 +229,7 @@ types:
       owner:
         type: "string"
         required: false
-      owner_unit:
-        type: "string"
-        required: false
       visibility:
-        type: "number"
-        required: false
-      edit_perm:
         type: "number"
         required: false
     (x-restlet):
@@ -507,7 +490,7 @@ securitySchemes:
             type: "Error"
   (x-restlet):
     section: "API endpoints"
-/songs/duplicate/{song_id}:
+/songs/{song_id}/duplicate:
   uriParameters:
     song_id:
       type: "string"
@@ -518,13 +501,6 @@ securitySchemes:
         body:
           application/json:
             type: "Song"
-          application/pdf:
-            type: "object"
-            description: "Response for generated pdf."
-            example:
-              value: "{\"link\": \"/download/2b573863-71b1-4463-96a7-e7fae9ba3865.pdf\"\
-                }"
-              strict: false
       403:
         description: "Insufficient permissions."
         body:
@@ -1015,6 +991,29 @@ securitySchemes:
             type: "Error"
       422:
         description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/songbooks/{sonbookg_id}/duplicate:
+  uriParameters:
+    sonbookg_id:
+      type: "string"
+  get:
+    displayName: "Duplicate songbook"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Songbook"
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Songbook was not found."
         body:
           application/json:
             type: "Error"

@@ -12,7 +12,7 @@
 
 [Intro], [Outro], [Bridge], [Intermezzo], [Solo] - začátek dané části (u exporotovaného zpěvníku se reálně jedná o nečíslované sloky)
 
-[Echo] - začátek mluveného slova
+[Rec] - začátek mluveného slova
 
 Za mluvené slovo se nepovažuje přímá řeč v písničce (viz. Buráky) - pro tu by se měli použít spíše uvozovky a brát jako součást sloky. Jedná se spíše o mluvený text jako ve Třech Křížích, který je i ve finálně vyexportovaném zpěvníku renderován jinak, než zbytek písně.
 

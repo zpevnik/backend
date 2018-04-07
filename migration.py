@@ -39,7 +39,7 @@ def reset_song_cache():
 
 
 def migration_2018_07_04_1():
-    logger.info('02.03.2018 - Removing unused keys for permissions from songbooks.')
+    logger.info('07.04.2018 - Removing unused keys for permissions from songbooks.')
 
     collection = db['songbooks']
     songbooks = collection.find()
@@ -52,7 +52,7 @@ def migration_2018_07_04_1():
 
 
 def migration_2018_07_04_2():
-    logger.info('02.03.2018 - Removing unused keys for permissions from songs.')
+    logger.info('07.04.2018 - Removing unused keys for permissions from songs.')
 
     collection = db['songs']
     songs = collection.find()
@@ -64,8 +64,9 @@ def migration_2018_07_04_2():
         if 'edit_perm' in song:
             collection.update_one({'_id': song['_id']}, {'$unset': {'edit_perm': ''}})
 
+
 def migration_2018_07_04_3():
-    logger.info('02.03.2018 - Migrate echo tags to rec.')
+    logger.info('07.04.2018 - Migrate echo tags to rec.')
 
     collection = db['songs']
     songs = collection.find()
@@ -74,6 +75,20 @@ def migration_2018_07_04_3():
         song['text'] = song['text'].replace('[echo]', '[rec]')
 
         collection.update_one({'_id': song['_id']}, {'$set': song})
+
+
+def migration_2018_07_04_4():
+    logger.info('07.04.2018 - Changed old public permissions to new ones.')
+
+    collection = db['songs']
+    songs = collection.find()
+
+    for song in songs:
+        if song['visibility'] == 2:
+
+            song['visibility'] = 1
+            collection.update_one({'_id': song['_id']}, {'$set': song})
+
 
 def migration_2018_03_02_1():
     logger.info('02.03.2018 - Removing active songbook entry from user.')
@@ -413,3 +428,4 @@ def migration_2017_08_18_4():
 migration_2018_07_04_1()
 migration_2018_07_04_2()
 migration_2018_07_04_3()
+migration_2018_07_04_4()

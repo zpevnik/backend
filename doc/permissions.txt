@@ -3,8 +3,10 @@
 
 práva mají vždy hodnotu:
 0 - private
-1 - unit (viditelné ve středisku)
-2 - public
+1 - public
 
-Práva nemohou být nastavená tak, aby editing bylo větší než visibility a také nejdou vrátit na nižší hodnotu.
+Práva nejdou vrátit na nižší hodnotu.
 Tzn. v případě, že udělám svoji píseň veřejnou, nemohu ji již udělat privátní.
+
+Editovat může vždy pouze vlastník (ten, kdo píseň vytvořil)
+
