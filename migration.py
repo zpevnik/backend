@@ -38,6 +38,33 @@ def reset_song_cache():
         collection.update_one({'_id': song['_id']}, {'$set': song})
 
 
+def migration_2018_07_04_1():
+    logger.info('02.03.2018 - Removing unused keys for permissions from songbooks.')
+
+    collection = db['songbooks']
+    songbooks = collection.find()
+
+    for songbook in songbooks:
+        if 'owner_unit' not in songbook:
+            continue
+
+        collection.update_one({'_id': songbook['_id']}, {'$unset': {'owner_unit': ''}})
+
+
+def migration_2018_07_04_2():
+    logger.info('02.03.2018 - Removing unused keys for permissions from songs.')
+
+    collection = db['songs']
+    songs = collection.find()
+
+    for song in songs:
+        if 'owner_unit' in song:
+            collection.update_one({'_id': song['_id']}, {'$unset': {'owner_unit': ''}})
+
+        if 'edit_perm' in song:
+            collection.update_one({'_id': song['_id']}, {'$unset': {'edit_perm': ''}})
+
+
 def migration_2018_03_02_1():
     logger.info('02.03.2018 - Removing active songbook entry from user.')
 
@@ -93,15 +120,15 @@ def migration_2017_12_07_1():
 
         if song['visibility'] == 'private':
             song['visibility'] = int(PERMISSION.PRIVATE)
-        elif song['visibility'] == 'unit':
-            song['visibility'] = int(PERMISSION.UNIT)
+        #elif song['visibility'] == 'unit':
+        #    song['visibility'] = int(PERMISSION.UNIT)
         elif song['visibility'] == 'public':
             song['visibility'] = int(PERMISSION.PUBLIC)
 
         if song['edit_perm'] == 'private':
             song['edit_perm'] = int(PERMISSION.PRIVATE)
-        elif song['edit_perm'] == 'unit':
-            song['edit_perm'] = int(PERMISSION.UNIT)
+        #elif song['edit_perm'] == 'unit':
+        #    song['edit_perm'] = int(PERMISSION.UNIT)
         elif song['edit_perm'] == 'public':
             song['edit_perm'] = int(PERMISSION.PUBLIC)
 
@@ -371,5 +398,7 @@ def migration_2017_08_18_4():
 #migration_2017_12_07_1()
 #migration_2017_12_07_2()
 #migration_2018_12_22_1()
+#migration_2018_03_02_1()
 
-migration_2018_03_02_1()
+migration_2018_07_04_1()
+migration_2018_07_04_2()

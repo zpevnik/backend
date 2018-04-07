@@ -34,8 +34,7 @@ class Songbooks(object):
         """Create new songbook and insert it into database.
 
         Args:
-          data (dict): Songbook data containing 'title', 'owner',
-            'owner_unit' dictionary key.
+          data (dict): Songbook data containing 'title', 'owner' dictionary key.
 
         Returns:
           Songbook: Instance of the new songbook.
@@ -44,7 +43,6 @@ class Songbooks(object):
             '_id': ObjectId(),
             'title': data['title'],
             'owner': data['owner'],
-            'owner_unit': data['owner_unit'],
             'options': DEFAULTS.SONGBOOK_OPTIONS,
             'songs': [],
             'cached_file': None,
@@ -144,7 +142,6 @@ class Songbook(object):
       _title (str): Songbook title.
       _songs (dict): Songs contained in this songbook.
       _owner (str): User Id
-      _owner_unit (str): Unit Id
       _cached_file (str): Filename of cached songbook
       _cache_expiration (str): Timestamp of the cache expiration creation.
     """
@@ -155,7 +152,6 @@ class Songbook(object):
         self._songs = songbook['songs']
         self._owner = songbook['owner']
         self._options = songbook['options']
-        self._owner_unit = songbook['owner_unit']
 
         self._cached_file = songbook['cached_file']
         self._cache_expiration = songbook['cache_expiration']
@@ -172,7 +168,6 @@ class Songbook(object):
             'songs': self._songs,
             'owner': self._owner,
             'options': self._options,
-            'owner_unit': self._owner_unit,
             'cached_file': self._cached_file,
             'cache_expiration': self._cache_expiration
         }
@@ -195,8 +190,7 @@ class Songbook(object):
             'title': self._title,
             'songs': merge_lists(self._songs, extended_data, 'id'),
             'owner': self._owner,
-            'options': self._options,
-            'owner_unit': self._owner_unit
+            'options': self._options
         }
 
     def get_id(self):
@@ -213,9 +207,6 @@ class Songbook(object):
 
     def get_owner(self):
         return self._owner
-
-    def get_owner_unit(self):
-        return self._owner_unit
 
     def get_options(self):
         return self._options

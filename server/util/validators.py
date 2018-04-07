@@ -160,8 +160,6 @@ def songs_request(request):
     }
     if 'visibility' in request:
         data['visibility'] = request['visibility']
-    if 'edit_perm' in request:
-        data['edit_perm'] = request['edit_perm']
 
     return data
 

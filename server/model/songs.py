@@ -38,8 +38,8 @@ class Songs(object):
 
         Args:
           data (dict): Song data dictionary containing 'owner', 'title', 'text',
-            'description', 'authors', 'variants', 'interpreters', 'owner_unit',
-            'visibility' and 'edit_perm' dictionary key.
+            'description', 'authors', 'variants', 'interpreters' and
+            'visibility' dictionary key.
 
         Returns:
           Song: Instance of the new song.
@@ -48,7 +48,6 @@ class Songs(object):
             '_id': ObjectId(),
             'title': data['title'],
             'owner': data['owner'],
-            'owner_unit': data['owner_unit'],
             'text': data['text'] if 'text' in data else '',
             'description': data['description'] if 'description' in data else '',
             'authors': data['authors'] if 'authors' in data else {
@@ -57,7 +56,6 @@ class Songs(object):
             },
             'interpreters': data['interpreters'] if 'interpreters' in data else [],
             'visibility': data['visibility'],
-            'edit_perm': data['edit_perm'],
             'approved': False,
             'export_cache': None
         })
@@ -107,12 +105,10 @@ class Songs(object):
         """
         if query is None or query == "":
             doc = self._collection.find({'$or': [{'owner': user_id},
-                                                 {'owner_unit': unit_id, 'visibility': {"$gte": PERMISSION.UNIT}},
                                                  {'visibility': {"$gte": PERMISSION.PUBLIC}},
                                                 ]}) # yapf: disable
         else:
             doc = self._collection.find({'$or': [{'owner': user_id},
-                                                 {'owner_unit': unit_id, 'visibility': {"$gte": PERMISSION.UNIT}},
                                                  {'visibility': {"$gte": PERMISSION.PUBLIC}},
                                                 ], '$text': {'$search': query}},
                                         {'score': {'$meta': 'textScore'}}) \
@@ -187,9 +183,7 @@ class Song(object):
       _description (str): Song description.
       _authors (list): Dict of lists of Author ObjectId strings.
       _interpreters (list): List of Interpreter ObjectId strings.
-      _owner_unit (str): Unit Id
       _visibility (str): Song visibility status
-      _edit_perm (str): Editing permission status
     """
 
     def __init__(self, song):
@@ -200,9 +194,7 @@ class Song(object):
         self._authors = song['authors']
         self._description = song['description']
         self._interpreters = song['interpreters']
-        self._owner_unit = song['owner_unit']
         self._visibility = song['visibility']
-        self._edit_perm = song['edit_perm']
         self._approved = song['approved']
         self._export_cache = song['export_cache']
 
@@ -221,9 +213,7 @@ class Song(object):
             'authors': self._authors,
             'description': self._description,
             'interpreters': self._interpreters,
-            'owner_unit': self._owner_unit,
             'visibility': self._visibility,
-            'edit_perm': self._edit_perm,
             'approved': self._approved,
             'export_cache': self._export_cache
         }
@@ -239,10 +229,8 @@ class Song(object):
                 'id': str(self._id),
                 'title': self._title,
                 'owner': self._owner,
-                'owner_unit': self._owner_unit,
                 'interpreters': self._interpreters,
-                'visibility': self._visibility,
-                'edit_perm': self._edit_perm
+                'visibility': self._visibility
             }
 
         return {
@@ -250,13 +238,11 @@ class Song(object):
             'created': self._id.generation_time,
             'title': self._title,
             'owner': self._owner,
-            'owner_unit': self._owner_unit,
             'text': self._text,
             'description': self._description,
             'authors': self._authors,
             'interpreters': self._interpreters,
             'visibility': self._visibility,
-            'edit_perm': self._edit_perm,
             'approved': self._approved
         }
 
@@ -284,39 +270,20 @@ class Song(object):
     def get_owner(self):
         return self._owner
 
-    def get_owner_unit(self):
-        return self._owner_unit
-
     def get_visibility(self):
         return self._visibility
 
-    def get_edit_perm(self):
-        return self._edit_perm
+    def _handle_permissions(self, visibility):
+        if visibility not in PERMISSION:
+            raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
+                               (EXCODES.WRONG_VALUE, STRINGS.PERMISSION_WRONG_VALUE, 'visibility'))
 
-    def _handle_permissions(self, vPerm, ePerm):
-        ex = AppException(EVENTS.REQUEST_EXCEPTION, 422)
+        if visibility < self._visibility:
+            raise AppException(
+                EVENTS.REQUEST_EXCEPTION, 422,
+                (EXCODES.WRONG_VALUE, STRINGS.PERMISSION_SMALLER_VALUE, 'visibility'))
 
-        if vPerm not in PERMISSION:
-            ex.add_error(EXCODES.WRONG_VALUE, STRINGS.PERMISSION_WRONG_VALUE, 'visibility')
-        if ePerm not in PERMISSION:
-            ex.add_error(EXCODES.WRONG_VALUE, STRINGS.PERMISSION_WRONG_VALUE, 'edit_perm')
-
-        if ex.errors:
-            raise ex
-
-        if vPerm < ePerm:
-            ex.add_error(EXCODES.WRONG_VALUE, STRINGS.PERMISSION_EDIT_HIGHER_THAN_VIEW, 'edit_perm')
-
-        if vPerm < self._visibility:
-            ex.add_error(EXCODES.WRONG_VALUE, STRINGS.PERMISSION_SMALLER_VALUE, 'visibility')
-        if ePerm < self._edit_perm:
-            ex.add_error(EXCODES.WRONG_VALUE, STRINGS.PERMISSION_SMALLER_VALUE, 'edit_perm')
-
-        if ex.errors:
-            raise ex
-
-        self._visibility = vPerm
-        self._edit_perm = ePerm
+        self._visibility = visibility
 
     def set_data(self, data):
         self._title = data['title'] if 'title' in data else self._title
@@ -324,8 +291,7 @@ class Song(object):
         self._description = data['description'] if 'description' in data else self._description
         self._authors = data['authors'] if 'authors' in data else self._authors
         self._interpreters = data['interpreters'] if 'interpreters' in data else self._interpreters
-        self._handle_permissions(data['visibility'] if 'visibility' in data else self._visibility,
-                                 data['edit_perm'] if 'edit_perm' in data else self._edit_perm) # yapf: disable
+        self._handle_permissions(data['visibility'] if 'visibility' in data else self._visibility)
 
         # invalidate export cache
         self._export_cache = None

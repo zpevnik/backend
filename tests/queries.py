@@ -29,7 +29,7 @@ class QueryTest(unittest.TestCase):
         # delete all test database entries
         self.mongo_client.drop_database(self.db_name)
 
-    def _insert_song(self, owner, owner_unit, vPerm, ePerm, approved=False):
+    def _insert_song(self, owner, owner_unit, vPerm, approved=False):
         # insert new song directly into database
         song_id = ObjectId()
         self.mongo_db['songs'].insert_one({
@@ -45,7 +45,6 @@ class QueryTest(unittest.TestCase):
             },
             'interpreters': [],
             'visibility': vPerm,
-            'edit_perm': ePerm,
             'approved': approved,
             'export_cache': None
         })
@@ -57,49 +56,24 @@ class QueryTest(unittest.TestCase):
         invalidIds = []
 
         #insert valid (findable) and invalid test songs into the database
-        validIds.append(self._insert_song(0, 0, PERMISSION.PRIVATE, PERMISSION.PRIVATE))
-        validIds.append(self._insert_song(0, 0, PERMISSION.UNIT, PERMISSION.PRIVATE))
-        validIds.append(self._insert_song(0, 0, PERMISSION.UNIT, PERMISSION.UNIT))
-        validIds.append(self._insert_song(0, 0, PERMISSION.PUBLIC, PERMISSION.PRIVATE))
-        validIds.append(self._insert_song(0, 0, PERMISSION.PUBLIC, PERMISSION.UNIT))
-        validIds.append(self._insert_song(0, 0, PERMISSION.PUBLIC, PERMISSION.PUBLIC))
+        validIds.append(self._insert_song(0, 0, PERMISSION.PRIVATE))
+        validIds.append(self._insert_song(0, 0, PERMISSION.PUBLIC))
 
-        validIds.append(self._insert_song(0, 0, PERMISSION.PRIVATE, PERMISSION.PRIVATE, True))
-        validIds.append(self._insert_song(0, 0, PERMISSION.UNIT, PERMISSION.PRIVATE, True))
-        validIds.append(self._insert_song(0, 0, PERMISSION.UNIT, PERMISSION.UNIT, True))
-        validIds.append(self._insert_song(0, 0, PERMISSION.PUBLIC, PERMISSION.PRIVATE, True))
-        validIds.append(self._insert_song(0, 0, PERMISSION.PUBLIC, PERMISSION.UNIT, True))
-        validIds.append(self._insert_song(0, 0, PERMISSION.PUBLIC, PERMISSION.PUBLIC, True))
+        validIds.append(self._insert_song(0, 0, PERMISSION.PRIVATE, True))
+        validIds.append(self._insert_song(0, 0, PERMISSION.PUBLIC, True))
 
-        invalidIds.append(self._insert_song(1, 0, PERMISSION.PRIVATE, PERMISSION.PRIVATE))
-        validIds.append(self._insert_song(1, 0, PERMISSION.UNIT, PERMISSION.PRIVATE))
-        validIds.append(self._insert_song(1, 0, PERMISSION.UNIT, PERMISSION.UNIT))
-        validIds.append(self._insert_song(1, 0, PERMISSION.PUBLIC, PERMISSION.PRIVATE))
-        validIds.append(self._insert_song(1, 0, PERMISSION.PUBLIC, PERMISSION.UNIT))
-        validIds.append(self._insert_song(1, 0, PERMISSION.PUBLIC, PERMISSION.PUBLIC))
+        invalidIds.append(self._insert_song(1, 0, PERMISSION.PRIVATE))
+        validIds.append(self._insert_song(1, 0, PERMISSION.PUBLIC))
 
-        invalidIds.append(self._insert_song(1, 0, PERMISSION.PRIVATE, PERMISSION.PRIVATE, True))
-        validIds.append(self._insert_song(1, 0, PERMISSION.UNIT, PERMISSION.PRIVATE, True))
-        validIds.append(self._insert_song(1, 0, PERMISSION.UNIT, PERMISSION.UNIT, True))
-        validIds.append(self._insert_song(1, 0, PERMISSION.PUBLIC, PERMISSION.PRIVATE, True))
-        validIds.append(self._insert_song(1, 0, PERMISSION.PUBLIC, PERMISSION.UNIT, True))
-        validIds.append(self._insert_song(1, 0, PERMISSION.PUBLIC, PERMISSION.PUBLIC, True))
+        invalidIds.append(self._insert_song(1, 0, PERMISSION.PRIVATE, True))
+        validIds.append(self._insert_song(1, 0, PERMISSION.PUBLIC, True))
 
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.PRIVATE, PERMISSION.PRIVATE))
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.UNIT, PERMISSION.PRIVATE))
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.UNIT, PERMISSION.UNIT))
-
+        invalidIds.append(self._insert_song(1, 1, PERMISSION.PRIVATE))
         # this is a temporal change as approved var should affect visibility
-        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.PRIVATE))
-        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.UNIT))
-        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.PUBLIC))
+        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC))
 
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.PRIVATE, PERMISSION.PRIVATE, True))
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.UNIT, PERMISSION.PRIVATE, True))
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.UNIT, PERMISSION.UNIT, True))
-        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.PRIVATE, True))
-        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.UNIT, True))
-        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, PERMISSION.PUBLIC, True))
+        invalidIds.append(self._insert_song(1, 1, PERMISSION.PRIVATE, True))
+        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, True))
 
         #query server for all inserted songs
         rv = self.app.get('/api/v1/songs?per_page=100')

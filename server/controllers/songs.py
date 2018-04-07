@@ -56,7 +56,6 @@ def songs():
         data['owner'] = current_user.get_id()
         data['owner_unit'] = current_user.get_unit()
         data['visibility'] = data['visibility'] if 'visibility' in data else PERMISSION.PRIVATE
-        data['edit_perm'] = data['edit_perm'] if 'edit_perm' in data else PERMISSION.PRIVATE
 
         validators.song_format(data)
 
@@ -135,7 +134,6 @@ def song_duplicate(song_id):
     data['owner'] = current_user.get_id()
     data['owner_unit'] = current_user.get_unit()
     data['visibility'] = PERMISSION.PRIVATE
-    data['edit_perm'] = PERMISSION.PRIVATE
 
     song = g.model.songs.create_song(data)
     log_event(EVENTS.SONG_NEW, current_user.get_id(), data)

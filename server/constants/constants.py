@@ -62,8 +62,7 @@ ORDERING = Ordering()
 
 class Permissions(ConstantDict):
     PRIVATE = 0
-    UNIT = 1
-    PUBLIC = 2
+    PUBLIC = 1
 
 
 PERMISSION = Permissions()

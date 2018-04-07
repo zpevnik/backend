@@ -168,7 +168,6 @@ class SongbookTest(unittest.TestCase):
         assert songbook['title'] == 'Other songbook'
         assert songbook['id'] == songbook_id
 
-
         # test songbook songs endpoint (missing songs array)
         rv = self.app.put(
             '/api/v1/songbooks/{}/songs'.format(songbook_id),
@@ -179,7 +178,10 @@ class SongbookTest(unittest.TestCase):
         assert b'"data": "songs"' in rv.data
 
         # test songbook songs endpoint (wrong songs)
-        rv = utils._put_songbook_songs(self.app, songbook_id, songs=[{'id': '000000000000000000000000'}])
+        rv = utils._put_songbook_songs(
+            self.app, songbook_id, songs=[{
+                'id': '000000000000000000000000'
+            }])
         assert rv.status_code == 404
         assert b'"code": "does_not_exist"' in rv.data
 
@@ -195,11 +197,16 @@ class SongbookTest(unittest.TestCase):
         song_ids.append(data['link'].split('/')[1])
 
         # test songbook songs endpoint (correct insertion)
-        rv = utils._put_songbook_songs(self.app, songbook_id, songs=[{'id': song_ids[0]},{'id': song_ids[1]}])
+        rv = utils._put_songbook_songs(
+            self.app, songbook_id, songs=[{
+                'id': song_ids[0]
+            }, {
+                'id': song_ids[1]
+            }])
         assert rv.status_code == 200
         assert song_ids[0].encode() in rv.data
         assert song_ids[1].encode() in rv.data
-        
+
         rv = utils._put_songbook_songs(self.app, songbook_id, songs=[{'id': song_ids[0]}])
         assert rv.status_code == 200
         assert song_ids[0].encode() in rv.data
@@ -209,7 +216,6 @@ class SongbookTest(unittest.TestCase):
         assert rv.status_code == 200
         assert song_ids[0].encode() not in rv.data
         assert song_ids[1].encode() in rv.data
-
 
         # test songbook options endpoint (missing options)
         rv = self.app.put(
@@ -227,7 +233,11 @@ class SongbookTest(unittest.TestCase):
         assert b'"data": "size"' in rv.data
 
         # test songbook options endpoint (correct change)
-        rv = utils._put_songbook_options(self.app, songbook_id, options={'size': OPTIONS.SIZE.A5, 'chorded': False})
+        rv = utils._put_songbook_options(
+            self.app, songbook_id, options={
+                'size': OPTIONS.SIZE.A5,
+                'chorded': False
+            })
         res = json.loads(rv.data)
         assert rv.status_code == 200
         assert res['options']['size'] == OPTIONS.SIZE.A5

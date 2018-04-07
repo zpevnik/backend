@@ -59,8 +59,7 @@ def _put_song(app,
               lauthors=[],
               mauthors=[],
               interpreters=[],
-              visibility=None,
-              edit_perm=None):
+              visibility=None):
     data = {
         'title': title,
         'text': text,
@@ -73,8 +72,6 @@ def _put_song(app,
     }
     if visibility is not None:
         data['visibility'] = visibility
-    if edit_perm is not None:
-        data['edit_perm'] = edit_perm
 
     return app.put(
         '/api/v1/songs/{}'.format(song_id), content_type='application/json', data=json.dumps(data))
@@ -91,7 +88,7 @@ def _put_songbook(app, songbook_id, title='title', songs=[], options={}):
     return app.put(
         '/api/v1/songbooks/{}'.format(songbook_id),
         content_type='application/json',
-        data=json.dumps(dict(title=title,songs=songs,options=options)))
+        data=json.dumps(dict(title=title, songs=songs, options=options)))
 
 
 # put songbook title into the database

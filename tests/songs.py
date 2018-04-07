@@ -402,50 +402,19 @@ class SongTest(unittest.TestCase):
         assert b'"code": "wrong_value"' in rv.data
         assert b'"data": "visibility"' in rv.data
 
-        # test wrong edit permission values
-        rv = utils._put_song(self.app, song_id, title="Bubák", edit_perm=5)
-        assert rv.status_code == 422
-        assert b'"code": "wrong_value"' in rv.data
-        assert b'"data": "edit_perm"' in rv.data
-
-        rv = utils._put_song(self.app, song_id, title="Bubák", edit_perm='def')
-        assert rv.status_code == 422
-        assert b'"code": "wrong_value"' in rv.data
-        assert b'"data": "edit_perm"' in rv.data
-
-        # test edit higher than view
-        rv = utils._put_song(self.app, song_id, title="Bubák", edit_perm=PERMISSION.UNIT)
-        assert rv.status_code == 422
-        assert b'"code": "wrong_value"' in rv.data
-        assert b'"data": "edit_perm"' in rv.data
-
         # test correct permission change
-        rv = utils._put_song(
-            self.app, song_id, title="Bubák", visibility=PERMISSION.UNIT, edit_perm=PERMISSION.UNIT)
-        assert rv.status_code == 200
-
         rv = utils._put_song(self.app, song_id, title="Bubák", visibility=PERMISSION.PUBLIC)
         assert rv.status_code == 200
 
         # test no change
-        rv = utils._put_song(
-            self.app,
-            song_id,
-            title="Bubák",
-            visibility=PERMISSION.PUBLIC,
-            edit_perm=PERMISSION.UNIT)
+        rv = utils._put_song(self.app, song_id, title="Bubák", visibility=PERMISSION.PUBLIC)
         assert rv.status_code == 200
 
         # test wrong permission change
-        rv = utils._put_song(self.app, song_id, title="Bubák", visibility=PERMISSION.UNIT)
+        rv = utils._put_song(self.app, song_id, title="Bubák", visibility=PERMISSION.PRIVATE)
         assert rv.status_code == 422
         assert b'"code": "wrong_value"' in rv.data
         assert b'"data": "visibility"' in rv.data
-
-        rv = utils._put_song(self.app, song_id, title="Bubák", edit_perm=PERMISSION.PRIVATE)
-        assert rv.status_code == 422
-        assert b'"code": "wrong_value"' in rv.data
-        assert b'"data": "edit_perm"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
