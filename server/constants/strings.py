@@ -5,7 +5,7 @@ class TranslatorStrings(object):
     ERROR_REPETITION_OVERLAPPING = '[{}] ERROR: Repetition cannot overlap to other blocks of the song.'
     ERROR_NESTED_REPETITION = '[{}] ERROR: Repetition cannot be nested in other repetition.'
     ERROR_NOT_IMPLEMENTED = '[{}] ERROR: Not yet implemented.'
-    ERROR_CHORDS_INSIDE_ECHO = '[{}] ERROR: Chord tag found inside echo block.'
+    ERROR_CHORDS_INSIDE_REC = '[{}] ERROR: Chord tag found inside rec block.'
     ERROR_NO_STARTING_BLOCK = '[0] ERROR: Song must start with some block tag.'
     ERROR_STRING_CONTAINS_FORBIDDEN_CHARACTERS = '[0] ERROR: String contaions forbidden characters.'
 

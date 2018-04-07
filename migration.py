@@ -64,6 +64,16 @@ def migration_2018_07_04_2():
         if 'edit_perm' in song:
             collection.update_one({'_id': song['_id']}, {'$unset': {'edit_perm': ''}})
 
+def migration_2018_07_04_3():
+    logger.info('02.03.2018 - Migrate echo tags to rec.')
+
+    collection = db['songs']
+    songs = collection.find()
+
+    for song in songs:
+        song['text'] = song['text'].replace('[echo]', '[rec]')
+
+        collection.update_one({'_id': song['_id']}, {'$set': song})
 
 def migration_2018_03_02_1():
     logger.info('02.03.2018 - Removing active songbook entry from user.')
@@ -402,3 +412,4 @@ def migration_2017_08_18_4():
 
 migration_2018_07_04_1()
 migration_2018_07_04_2()
+migration_2018_07_04_3()

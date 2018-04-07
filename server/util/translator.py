@@ -11,7 +11,7 @@ def translate_to_tex(song):
     _regexp_allowed = r'[^\w\ \n.,:|?!+#"()[\]\'\-]'
     _regexp_tags = '(\[\w+\]|\|:|:\|)([0-9]+)?'
     _context = {
-        'echo': False,
+        'rec': False,
         'verse': False,
         'chorus': False,
         'repetition': False
@@ -28,8 +28,8 @@ def translate_to_tex(song):
             _log.append(STRINGS.TRANSLATOR.ERROR_REPETITION_OVERLAPPING.format(_idx))
 
         # finish and close previous block
-        if _context['echo']:
-            _context['echo'] = False
+        if _context['rec']:
+            _context['rec'] = False
             return '}'
 
         if _context['verse']:
@@ -72,11 +72,11 @@ def translate_to_tex(song):
 
                 _context['verse'] = True
 
-            elif tag == TAGS.ECHO:
+            elif tag == TAGS.REC:
                 _result.append(_finish_part())
                 _result.append('\\echo{')
 
-                _context['echo'] = True
+                _context['rec'] = True
 
             elif tag == TAGS.REPETITION_START:
                 if _context['repetition']:
@@ -96,8 +96,8 @@ def translate_to_tex(song):
 
         # handle chords
         elif _is_chord(tag):
-            if _context['echo']:
-                _log.append(STRINGS.TRANSLATOR.ERROR_CHORDS_INSIDE_ECHO.format(_idx))
+            if _context['rec']:
+                _log.append(STRINGS.TRANSLATOR.ERROR_CHORDS_INSIDE_REC.format(_idx))
             _result.append(tag)
 
         else:
@@ -119,7 +119,7 @@ def translate_to_tex(song):
     # check for allowed tags at the beginning of the song
     first_line = content[0].lower()
     if not (first_line.startswith("[chorus]") or first_line.startswith("[verse]") or
-            first_line.startswith("[intro]") or first_line.startswith("[echo]") or
+            first_line.startswith("[intro]") or first_line.startswith("[rec]") or
             first_line.startswith("[solo]")):
         _log.append(STRINGS.TRANSLATOR.ERROR_NO_STARTING_BLOCK)
 

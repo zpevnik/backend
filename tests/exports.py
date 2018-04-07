@@ -72,7 +72,7 @@ class ExportTest(unittest.TestCase):
             "[F#m]I don't know what you're ex[D]pecting of me\n"
             "[A]Put under the pressure\n"
             "of [E]walking in your [D]shoes\n"
-            "[echo]Caught in the undertow, just caught in the undertow\n")
+            "[rec]Caught in the undertow, just caught in the undertow\n")
         assert rv.status_code == 201
         song = json.loads(rv.data)
         song_ids.append(song['link'].split('/')[1])

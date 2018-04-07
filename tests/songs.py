@@ -430,8 +430,8 @@ class SongTest(unittest.TestCase):
         assert rv.status_code == 422
         assert b'"code": "compilation_error"' in rv.data
 
-        # test chords inside echo
-        rv = utils._post_song(self.app, title='Kokos', text='[echo] Kulda [A]')
+        # test chords inside rec
+        rv = utils._post_song(self.app, title='Kokos', text='[rec] Kulda [A]')
         assert rv.status_code == 422
         assert b'"code": "compilation_error"' in rv.data
 

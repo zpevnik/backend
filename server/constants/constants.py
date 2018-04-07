@@ -72,7 +72,7 @@ class Tags(ConstantDict):
     CHORUS = '[chorus]'
     VERSE = '[verse]'
     SOLO = '[solo]'
-    ECHO = '[echo]'
+    REC = '[rec]'
     INTRO = '[intro]'
     OUTRO = '[outro]'
     BRIDGE = '[bridge]'
