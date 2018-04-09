@@ -177,11 +177,7 @@ def songbooks_request(request):
     if ex.errors:
         raise ex
 
-    return {
-        'title': request['title'],
-        'options': request['options'],
-        'songs': request['songs']
-    }
+    return {'title': request['title'], 'options': request['options'], 'songs': request['songs']}
 
 
 def songbooks_title_request(request):
