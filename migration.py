@@ -38,7 +38,23 @@ def reset_variant_cache():
         collection.update_one({'_id': variant['_id']}, {'$set': variant})
 
 
-def migration_2018_011_04_1():
+def migration_2018_12_04_1():
+    logger.info('12.04.2018 - Adding editor key to users.')
+
+    collection = db['users']
+    users = collection.find()
+
+    for user in users:
+        if 'editor' in user:
+            continue
+
+        user['editor'] = True
+
+        collection.update_one({'_id': user['_id']}, {'$set': user})
+
+
+
+def migration_2018_11_04_1():
     logger.info('11.04.2018 - Migrating songs into new variant concept.')
 
     song_collection = db['songs']
@@ -83,12 +99,7 @@ def migration_2018_011_04_1():
 
             song['variant'] = song_map[song['id']]
 
-        songbooks_collection.update_one(
-            {
-                '_id': songbook['_id']
-            }, {
-                '$set': songbook.serialize(update=True)
-            })
+        songbooks_collection.update_one({'_id': songbook['_id']}, {'$set': songbook})
 
 
 def migration_2018_07_04_1():
@@ -482,4 +493,5 @@ def migration_2017_08_18_4():
 #migration_2018_07_04_3()
 #migration_2018_07_04_4()
 
-migration_2018_011_04_1()
+migration_2018_11_04_1()
+migration_2018_12_04_1()

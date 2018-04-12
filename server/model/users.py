@@ -37,6 +37,7 @@ class Users(object):
             'unit': unit,
             'created': datetime.utcnow(),
             'last_login': datetime.utcnow(),
+            'editor': False,
             'token': None
         })
         self._collection.insert_one(user.serialize())
@@ -65,8 +66,9 @@ class User(object):
       _created (int) UTC timestamp
       _last_login (int) UTC timestamp
       _name (str) Name in the skautis
-      _active (bool) True, if is user's account active
+      _active (bool) True if user's account is active
       _token (str): Unique token for current skautis communication
+      _editor (bool): True if user is an editor
       _unit (str): Unique identifier of scout unit
     """
 
@@ -74,6 +76,7 @@ class User(object):
         self._id = user['_id']
         self._created = user['created']
         self._last_login = user['last_login']
+        self._editor = user['editor']
         self._name = user['name']
         self._active = user['active']
         self._token = user['token']
@@ -84,6 +87,7 @@ class User(object):
             'name': self._name,
             'active': self._active,
             'last_login': self._last_login,
+            'editor': self._editor,
             'token': self._token,
             'unit': self._unit
         }
@@ -100,6 +104,7 @@ class User(object):
             'name': self._name,
             'created': self._created.isoformat(),
             'last_login': self._last_login.isoformat(),
+            'editor': self._editor,
             'active': self._active,
             'unit': self._unit
         }
@@ -109,6 +114,9 @@ class User(object):
 
     def is_anonymous(self):
         return False
+
+    def is_editor(self):
+        return self._editor
 
     def is_active(self):
         return self._active
