@@ -2,8 +2,11 @@
 
 from os import getenv
 
-VERSION = '0.2'
+VERSION = '0.3'
 APP_NAME = 'Skautský zpěvník'
+
+# Switches applicataion to maintenance mode (site offline)
+MAINTENANCE_MODE = False
 
 SERVER_PORT = int(getenv('PORT', 5010))
 SERVER_IP = getenv('SERVER_IP', '127.0.0.1')

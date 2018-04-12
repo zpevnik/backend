@@ -55,11 +55,14 @@ def handle_AppException(exception):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def index(path):
+    # check if application is in maintenance mode
+    if app.config['MAINTENANCE_MODE']:
+        return render_template('maintenance.html')
+
     # check whether we have authenticated user
     if not current_user.is_authenticated:
         # render out the login page
-        return render_template(
-            'login.html', login_link=skautis.get_login_url(), app_name=app.config['APP_NAME'])
+        return render_template('login.html', login_link=skautis.get_login_url())
 
     # get base user data
     data = current_user.get_serialized_data()
@@ -127,11 +130,7 @@ def download(filename):
     return send_from_directory(directory=directory, filename=filename)
 
 
-#        as_attachment=True,
-#        attachment_filename="Zpevnik.pdf")
-
-
-@app.route("/cleanup")  # NOT TESTED! TODO
+@app.route("/cleanup")  # NOT TESTED! FIXME
 def cleanup():
     ip = request.remote_addr
     if ip != app.config['SERVER_IP']:
