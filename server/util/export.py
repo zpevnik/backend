@@ -12,12 +12,12 @@ from server.constants import STRINGS
 from server.constants import DEFAULTS
 
 
-def export_song(song):
+def export_variant(variant):
     filename = generate_random_filename()
 
     # get sbd song data and save them into aux sbd file
     with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'wb') as file:
-        data, log = song.generate_sbd_output()
+        data, log, _ = variant.generate_sbd_output()
         file.write(data.encode('utf8'))
 
     # generate tex file for given export
@@ -41,13 +41,13 @@ def export_songbook(songbook):
     log = {}
     filename = generate_random_filename()
 
-    # get sbd song data and save them into aux sbd file
+    # get sbd song variant data and save them into aux sbd file
     with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'ab') as file:
         for song_obj in songbook.get_songs():
-            song = validators.song_existence(song_obj['id'])
-            data, song_log = song.generate_sbd_output()
-            if song_log:
-                log[song.get_title()] = song_log
+            variant = validators.song_variant_existence(song_obj['variant_id'])
+            data, variant_log, title = variant.generate_sbd_output()
+            if variant_log:
+                log[title] = variant_log
 
             file.write(data.encode('utf8'))
 

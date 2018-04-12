@@ -14,12 +14,6 @@ types:
         type: "string"
       title:
         type: "string"
-      owner:
-        type: "string"
-      text:
-        type: "string"
-      description:
-        type: "string"
       authors:
         type: "object"
         properties:
@@ -41,12 +35,35 @@ types:
         description: "Identifiers of Interpreters"
         items:
           type: "string"
-      visibility:
-        type: "number"
       created:
         type: "datetime"
       approved:
         type: "boolean"
+      variants:
+        type: "array"
+        description: "This item is added for better comfort of client application."
+        items:
+          type: "Song variant"
+    (x-restlet):
+      section: "Objects"
+  Song variant:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      song_id:
+        type: "string"
+        required: false
+      owner:
+        type: "string"
+      text:
+        type: "string"
+      description:
+        type: "string"
+      visibility:
+        type: "number"
+      created:
+        type: "datetime"
     (x-restlet):
       section: "Objects"
   Author:
@@ -84,7 +101,7 @@ types:
         type: "array"
         items:
           type: "Songbook_extended_item"
-      songbook_options:
+      options:
         type: "Songbook_options"
       owner:
         type: "string"
@@ -119,9 +136,36 @@ types:
     properties:
       title:
         type: "string"
-      text:
-        type: "string"
-      description:
+      authors:
+        type: "object"
+        properties:
+          music:
+            type: "array"
+            description: "Array of music author ids"
+            items:
+              type: "string"
+          lyrics:
+            type: "array"
+            description: "Array of lyrics author ids"
+            items:
+              type: "string"
+        example:
+          value: "{'music': [], 'lyrics': []}"
+          strict: false
+      interpreters:
+        type: "array"
+        description: "Identifiers of Interpreters"
+        items:
+          type: "string"
+    (x-restlet):
+      section: "Objects"
+  Song_request_extended:
+    type: "object"
+    description: "Extended request for songs also contains one variant. This one is\
+      \ used only for new song creation.\n\nIt should make sence to make just one\
+      \ request for both of these entities."
+    properties:
+      title:
         type: "string"
       authors:
         type: "object"
@@ -144,6 +188,17 @@ types:
         description: "Identifiers of Interpreters"
         items:
           type: "string"
+      variant:
+        type: "Song variant_request"
+    (x-restlet):
+      section: "Objects"
+  Song variant_request:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+      description:
+        type: "string"
       visibility:
         type: "string"
         required: false
@@ -202,8 +257,9 @@ types:
   Songbook_item:
     type: "object"
     properties:
-      id:
+      variant_id:
         type: "string"
+        description: "ObjectId of given variant"
       order:
         type: "number"
         required: false
@@ -212,26 +268,31 @@ types:
   Songbook_extended_item:
     type: "object"
     properties:
-      id:
+      variant_id:
         type: "string"
+        description: "ObjectId of given variant"
       order:
         type: "number"
         required: false
-      title:
-        type: "string"
-        required: false
-      interpreters:
-        type: "array"
-        description: "Identifiers of Interpreters"
-        required: false
-        items:
-          type: "string"
       owner:
         type: "string"
         required: false
       visibility:
         type: "number"
         required: false
+      song:
+        type: "object"
+        required: false
+        properties:
+          song_id:
+            type: "string"
+          title:
+            type: "string"
+            required: false
+          Interpreters:
+            type: "string"
+            description: "Identifiers of Interpreters"
+            required: false
     (x-restlet):
       section: "Objects"
   Songbook_options:
@@ -317,7 +378,9 @@ securitySchemes:
 /songs:
   get:
     displayName: "Get list of songs"
-    description: "Get list of songs with my permissions."
+    description: "This endpoint always returns songs, which have at least one variant\
+      \ accessible by user. This means, that variant dict key will always contain\
+      \ atleast one variant."
     queryParameters:
       query:
         type: "string"
@@ -375,14 +438,14 @@ securitySchemes:
     displayName: "Create new song"
     body:
       application/json:
-        type: "Song_request"
+        type: "Song_request_extended"
     responses:
       201:
         description: "Song was successfully created"
         headers:
           Location:
             type: "string"
-            example: "/songs/1/"
+            example: "/songs/1/variants/3"
         body:
           application/json:
             type: "Redirect"
@@ -404,41 +467,13 @@ securitySchemes:
       type: "string"
   get:
     displayName: "Get song"
-    headers:
-      Accept:
-        type: "string"
-        description: "If Accept header is explicitly set as `application/pdf`, json\
-          \ with endpoint pointing at generated file is returned. In the other case\
-          \ detail of the song in standard `json` is returned."
-        default: "application/json"
-        enum:
-        - "application/json"
-        - "application/pdf"
     responses:
       200:
         body:
           application/json:
             type: "Song"
-          application/pdf:
-            type: "object"
-            description: "Response for generated pdf."
-            example:
-              value: "{\"link\": \"/download/2b573863-71b1-4463-96a7-e7fae9ba3865.pdf\"\
-                }"
-              strict: false
-      403:
-        description: "Insufficient permissions."
-        body:
-          application/json:
-            type: "Error"
       404:
         description: "Song was not found."
-        body:
-          application/json:
-            type: "Error"
-      500:
-        description: "Compilation ended with errors. Error structure contains additional\
-          \ data about the problem."
         body:
           application/json:
             type: "Error"
@@ -458,44 +493,167 @@ securitySchemes:
         body:
           application/json:
             type: "Error"
-      403:
-        description: "Insufficient permissions."
-        body:
-          application/json:
-            type: "Error"
       404:
         description: "Song was not found."
         body:
           application/json:
             type: "Error"
       422:
-        description: "Problem with sent structure or with sing syntax."
+        description: "Problem with sent structure or with song syntax."
         body:
           application/json:
             type: "Error"
-  delete:
-    displayName: "Delete song"
+  (x-restlet):
+    section: "API endpoints"
+/songs/{song_id}/variants:
+  uriParameters:
+    song_id:
+      type: "string"
+  get:
+    displayName: "Get list of variants of song"
+    description: "Get list of visible variants for given song."
     responses:
-      204:
-        description: "Song was successfully deleted."
+      200:
+        description: "Successful server search (0+ variants)."
+        body:
+          application/json:
+            type: "array"
+            items:
+              type: "Song variant"
+      404:
+        description: "Song was not found."
+        body:
+          application/json:
+            type: "Error"
+  post:
+    displayName: "Create new variant of song"
+    body:
+      application/json:
+        type: "Song variant_request"
+    responses:
+      201:
+        description: "Song variant was successfully created"
+        headers:
+          Location:
+            type: "string"
+            example: "/songs/1/variants/3"
+        body:
+          application/json:
+            type: "Redirect"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Song was not found."
+      422:
+        description: "Problem with sent structure."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/songs/{song_id}/variants/{variant_id}:
+  uriParameters:
+    song_id:
+      type: "string"
+    variant_id:
+      type: "string"
+  get:
+    displayName: "Get variant of song"
+    headers:
+      Accept:
+        type: "string"
+        description: "If Accept header is explicitly set as `application/pdf`, json\
+          \ with endpoint pointing at generated file is returned. In the other case\
+          \ detail of the songbook in standard `json` is returned."
+        default: "application/json"
+        enum:
+        - "application/json"
+        - "application/pdf"
+    responses:
+      200:
+        body:
+          application/json:
+            type: "Song variant"
+          application/pdf:
+            type: "object"
+            description: "Response for generated pdf."
+            example:
+              value: "{\"link\": \"/download/2b573863-71b1-4463-96a7-e7fae9ba3865.pdf\"\
+                }"
+              strict: false
       403:
         description: "Insufficient permissions."
         body:
           application/json:
             type: "Error"
       404:
-        description: "Song was not found."
+        description: "Song or variant of song were not found."
+        body:
+          application/json:
+            type: "Error"
+  put:
+    displayName: "Edit variant of song"
+    body:
+      application/json:
+        type: "Song variant_request"
+    responses:
+      200:
+        description: "Song variant was successfully saved."
+        body:
+          application/json:
+            type: "Song"
+      400:
+        description: "Invalid json request."
+        body:
+          application/json:
+            type: "Error"
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Song of variant of song were not found."
+        body:
+          application/json:
+            type: "Error"
+      422:
+        description: "Problem with sent structure or with song syntax."
+        body:
+          application/json:
+            type: "Error"
+  delete:
+    displayName: "Delete variant of song"
+    description: "In case that operation is successfull and given variant was last\
+      \ one of given song, the song is also deleted from the database. This prevents\
+      \ unreachable songs with no variants.\n\nClient should therefore also delete\
+      \ any connection to this song."
+    responses:
+      204:
+        description: "Song variant was successfully deleted."
+      403:
+        description: "Insufficient permissions."
+        body:
+          application/json:
+            type: "Error"
+      404:
+        description: "Song or variant of song were not found."
         body:
           application/json:
             type: "Error"
   (x-restlet):
     section: "API endpoints"
-/songs/{song_id}/duplicate:
+/songs/{song_id}/variant/{variant_id}/duplicate:
   uriParameters:
     song_id:
       type: "string"
+    variant_id:
+      type: "string"
   get:
-    displayName: "Duplicate song"
+    displayName: "Duplicate variant of song"
     responses:
       200:
         body:
@@ -507,7 +665,7 @@ securitySchemes:
           application/json:
             type: "Error"
       404:
-        description: "Song was not found."
+        description: "Song of variant of song were not found."
         body:
           application/json:
             type: "Error"
@@ -777,7 +935,7 @@ securitySchemes:
         headers:
           Location:
             type: "string"
-            example: "/songs/1/"
+            example: "/songbooks/1/"
         body:
           application/json:
             type: "Redirect"
@@ -1003,10 +1161,14 @@ securitySchemes:
   get:
     displayName: "Duplicate songbook"
     responses:
-      200:
+      201:
+        headers:
+          Location:
+            type: "string"
+            example: "/songbooks/2/"
         body:
           application/json:
-            type: "Songbook"
+            type: "Redirect"
       403:
         description: "Insufficient permissions."
         body:

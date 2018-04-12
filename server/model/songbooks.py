@@ -47,7 +47,7 @@ class Songbooks(object):
             'songs': data['songs'] if 'songs' in data else [],
             'cached_file': None,
             'cache_expiration': None,
-        })
+        }) # yapf: disable
         self._collection.insert_one(songbook.serialize())
 
         return songbook
@@ -179,16 +179,13 @@ class Songbook(object):
 
     def get_serialized_data(self):
         # map extended songs representations on songs list
-        songs = g.model.songs.find_multiple(self._songs)
-        extended_data = []
-        for song in songs:
-            extended_data.append(song.get_serialized_data(simple=True))
+        extended_data = g.model.variants.find_extended_songbook_items(self._songs)
 
         return {
             'id': str(self._id),
             'created': self._id.generation_time,
             'title': self._title,
-            'songs': merge_lists(self._songs, extended_data, 'id'),
+            'songs': extended_data,
             'owner': self._owner,
             'options': self._options
         }

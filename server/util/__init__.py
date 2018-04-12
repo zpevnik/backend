@@ -1,4 +1,4 @@
-from server.util.export import export_song
+from server.util.export import export_variant
 from server.util.export import export_songbook
 
 from server.util.misc import generate_random_filename

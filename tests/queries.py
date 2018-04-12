@@ -8,8 +8,6 @@ from pymongo import MongoClient
 from server.app import app
 from server.constants import PERMISSION
 
-#FIXME
-
 
 class QueryTest(unittest.TestCase):
 
@@ -29,25 +27,30 @@ class QueryTest(unittest.TestCase):
         # delete all test database entries
         self.mongo_client.drop_database(self.db_name)
 
-    def _insert_song(self, owner, owner_unit, vPerm, approved=False):
+    def _insert_song(self, owner, visibility, approved=False):
         # insert new song directly into database
         song_id = ObjectId()
         self.mongo_db['songs'].insert_one({
             '_id': song_id,
             'title': 'Nice song',
-            'owner': owner,
-            'owner_unit': owner_unit,
-            'text': '',
-            'description': '',
             'authors': {
                 'lyrics': [],
                 'music': []
             },
             'interpreters': [],
-            'visibility': vPerm,
-            'approved': approved,
+            'approved': approved
+        })
+
+        self.mongo_db['variants'].insert_one({
+            '_id': ObjectId(),
+            'song_id': song_id,
+            'owner': owner,
+            'text': '',
+            'description': '',
+            'visibility': visibility,
             'export_cache': None
         })
+
         return song_id
 
     def test_query_filtering(self):
@@ -56,24 +59,24 @@ class QueryTest(unittest.TestCase):
         invalidIds = []
 
         #insert valid (findable) and invalid test songs into the database
-        validIds.append(self._insert_song(0, 0, PERMISSION.PRIVATE))
-        validIds.append(self._insert_song(0, 0, PERMISSION.PUBLIC))
+        validIds.append(self._insert_song(0, PERMISSION.PRIVATE))
+        validIds.append(self._insert_song(0, PERMISSION.PUBLIC))
 
-        validIds.append(self._insert_song(0, 0, PERMISSION.PRIVATE, True))
-        validIds.append(self._insert_song(0, 0, PERMISSION.PUBLIC, True))
+        validIds.append(self._insert_song(0, PERMISSION.PRIVATE, True))
+        validIds.append(self._insert_song(0, PERMISSION.PUBLIC, True))
 
-        invalidIds.append(self._insert_song(1, 0, PERMISSION.PRIVATE))
-        validIds.append(self._insert_song(1, 0, PERMISSION.PUBLIC))
+        invalidIds.append(self._insert_song(1, PERMISSION.PRIVATE))
+        validIds.append(self._insert_song(1, PERMISSION.PUBLIC))
 
-        invalidIds.append(self._insert_song(1, 0, PERMISSION.PRIVATE, True))
-        validIds.append(self._insert_song(1, 0, PERMISSION.PUBLIC, True))
+        invalidIds.append(self._insert_song(1, PERMISSION.PRIVATE, True))
+        validIds.append(self._insert_song(1, PERMISSION.PUBLIC, True))
 
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.PRIVATE))
+        invalidIds.append(self._insert_song(1, PERMISSION.PRIVATE))
         # this is a temporal change as approved var should affect visibility
-        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC))
+        validIds.append(self._insert_song(1, PERMISSION.PUBLIC))
 
-        invalidIds.append(self._insert_song(1, 1, PERMISSION.PRIVATE, True))
-        validIds.append(self._insert_song(1, 1, PERMISSION.PUBLIC, True))
+        invalidIds.append(self._insert_song(1, PERMISSION.PRIVATE, True))
+        validIds.append(self._insert_song(1, PERMISSION.PUBLIC, True))
 
         #query server for all inserted songs
         rv = self.app.get('/api/v1/songs?per_page=100')

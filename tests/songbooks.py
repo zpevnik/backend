@@ -139,6 +139,73 @@ class SongbookTest(unittest.TestCase):
         # clean the database
         self.mongo_client.drop_database(self.db_name)
 
+    def test_variants_in_songbook(self):
+        # insert test songbook for further testing
+        rv = utils._post_songbook(self.app, title='My songbook')
+        assert rv.status_code == 201
+        songbook = json.loads(rv.data)
+        songbook_id = songbook['link'].split('/')[1]
+
+        # insert test song into the database
+        rv = utils._post_song(self.app, title='Panic Station', description='First variant')
+
+        assert rv.status_code == 201
+        assert b'"link": "songs/' in rv.data
+        assert b'/variants/' in rv.data
+
+        variant_ids = []
+
+        data = json.loads(rv.data)
+        song_id = data['link'].split('/')[1]
+        variant_ids.append(data['link'].split('/')[3])
+
+        # insert one more variant for this song
+        rv = self.app.post(
+            '/api/v1/songs/{}/variants'.format(song_id),
+            content_type='application/json',
+            data=json.dumps(dict(text="[verse]", description="Second variant")))
+        assert rv.status_code == 201
+
+        data = json.loads(rv.data)
+        variant_ids.append(data['link'].split('/')[3])
+
+        # get songbooks with get request
+        rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
+        assert rv.status_code == 200
+
+        songbook = json.loads(rv.data)
+
+        # put one variant into songbook
+        songbook['songs'] = [{'variant_id': variant_ids[1]}]
+        rv = self.app.put(
+            '/api/v1/songbooks/{}'.format(songbook_id),
+            content_type='application/json',
+            data=json.dumps(songbook))
+
+        assert rv.status_code == 200
+        assert variant_ids[0].encode() not in rv.data
+        assert variant_ids[1].encode() in rv.data
+
+        # test both songs
+        songbook['songs'] = [{'variant_id': variant_ids[0]}, {'variant_id': variant_ids[1]}]
+        rv = self.app.put(
+            '/api/v1/songbooks/{}'.format(songbook_id),
+            content_type='application/json',
+            data=json.dumps(songbook))
+
+        assert rv.status_code == 200
+        assert variant_ids[0].encode() in rv.data
+        assert variant_ids[1].encode() in rv.data
+
+        # test songbook duplication
+        rv = self.app.get('/api/v1/songbooks/{}/duplicate'.format(songbook_id))
+        assert rv.status_code == 201
+        assert songbook_id.encode() not in rv.data
+        assert b'"link": "songbooks/' in rv.data
+
+        # clean the database
+        self.mongo_client.drop_database(self.db_name)
+
     def test_simple_requests(self):
         # insert test songbook for further testing
         rv = utils._post_songbook(self.app, title='My songbook')
@@ -180,42 +247,50 @@ class SongbookTest(unittest.TestCase):
         # test songbook songs endpoint (wrong songs)
         rv = utils._put_songbook_songs(
             self.app, songbook_id, songs=[{
-                'id': '000000000000000000000000'
+                'variant_id': '000000000000000000000000'
             }])
         assert rv.status_code == 404
         assert b'"code": "does_not_exist"' in rv.data
 
         # insert songs into the database for further testing
-        song_ids = []
+        variant_ids = []
 
         rv = utils._post_song(self.app)
         data = json.loads(rv.data)
-        song_ids.append(data['link'].split('/')[1])
+        variant_ids.append(data['link'].split('/')[3])
 
         rv = utils._post_song(self.app)
         data = json.loads(rv.data)
-        song_ids.append(data['link'].split('/')[1])
+        variant_ids.append(data['link'].split('/')[3])
 
         # test songbook songs endpoint (correct insertion)
         rv = utils._put_songbook_songs(
-            self.app, songbook_id, songs=[{
-                'id': song_ids[0]
+            self.app,
+            songbook_id,
+            songs=[{
+                'variant_id': variant_ids[0]
             }, {
-                'id': song_ids[1]
+                'variant_id': variant_ids[1]
             }])
         assert rv.status_code == 200
-        assert song_ids[0].encode() in rv.data
-        assert song_ids[1].encode() in rv.data
+        assert variant_ids[0].encode() in rv.data
+        assert variant_ids[1].encode() in rv.data
 
-        rv = utils._put_songbook_songs(self.app, songbook_id, songs=[{'id': song_ids[0]}])
+        rv = utils._put_songbook_songs(
+            self.app, songbook_id, songs=[{
+                'variant_id': variant_ids[0]
+            }])
         assert rv.status_code == 200
-        assert song_ids[0].encode() in rv.data
-        assert song_ids[1].encode() not in rv.data
+        assert variant_ids[0].encode() in rv.data
+        assert variant_ids[1].encode() not in rv.data
 
-        rv = utils._put_songbook_songs(self.app, songbook_id, songs=[{'id': song_ids[1]}])
+        rv = utils._put_songbook_songs(
+            self.app, songbook_id, songs=[{
+                'variant_id': variant_ids[1]
+            }])
         assert rv.status_code == 200
-        assert song_ids[0].encode() not in rv.data
-        assert song_ids[1].encode() in rv.data
+        assert variant_ids[0].encode() not in rv.data
+        assert variant_ids[1].encode() in rv.data
 
         # test songbook options endpoint (missing options)
         rv = self.app.put(

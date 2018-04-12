@@ -43,44 +43,45 @@ def _post_song(app,
         data=json.dumps(
             dict(
                 title=title,
-                text=text,
-                description=description,
                 authors={'lyrics': lauthors,
                          'music': mauthors},
-                interpreters=interpreters)))
-
-
-# put song into the database
-def _put_song(app,
-              song_id,
-              title='title',
-              text='[verse]',
-              description='',
-              lauthors=[],
-              mauthors=[],
-              interpreters=[],
-              visibility=None):
-    data = {
-        'title': title,
-        'text': text,
-        'description': description,
-        'authors': {
-            'lyrics': lauthors,
-            'music': mauthors
-        },
-        'interpreters': interpreters
-    }
-    if visibility is not None:
-        data['visibility'] = visibility
-
-    return app.put(
-        '/api/v1/songs/{}'.format(song_id), content_type='application/json', data=json.dumps(data))
+                interpreters=interpreters,
+                variant={
+                    'text': text,
+                    'description': description
+                })))
 
 
 # post songbook into the database
 def _post_songbook(app, title='title'):
     return app.post(
         '/api/v1/songbooks', content_type='application/json', data=json.dumps(dict(title=title)))
+
+
+# put song into the database
+def _put_song(app, song_id, title='title', lauthors=[], mauthors=[], interpreters=[]):
+    data = {
+        'title': title,
+        'authors': {
+            'lyrics': lauthors,
+            'music': mauthors
+        },
+        'interpreters': interpreters
+    }
+    return app.put(
+        '/api/v1/songs/{}'.format(song_id), content_type='application/json', data=json.dumps(data))
+
+
+# put song variant into the database
+def _put_song_variant(app, song_id, variant_id, text='[verse]', description="", visibility=None):
+    data = {'text': text, 'description': description}
+    if visibility is not None:
+        data['visibility'] = visibility
+
+    return app.put(
+        '/api/v1/songs/{}/variants/{}'.format(song_id, variant_id),
+        content_type='application/json',
+        data=json.dumps(data))
 
 
 # put songbook into the database

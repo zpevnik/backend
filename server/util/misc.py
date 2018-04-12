@@ -13,6 +13,9 @@ def log_event(event, user, data):
 
 
 def merge_lists(l1, l2, key):
+    if not l1 or not l2:
+        return []
+
     merged = {}
     for item in l1 + l2:
         if item[key] in merged:

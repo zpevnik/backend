@@ -19,12 +19,14 @@ class Strings(object):
     REQUEST_SONGBOOK_TITLE_MISSING = 'Songbook title is missing.'
     REQUEST_SONGBOOK_SONGS_MISSING = 'Songbook song list is missing.'
     REQUEST_SONGBOOK_OPTIONS_MISSING = 'Songbook options field is missing.'
+    REQUEST_SONGBOOK_SONGS_VARIANT_MISSING = 'Songbook variant_id in song list is missing.'
 
     REQUEST_SONG_TITLE_MISSING = 'Song title is missing.'
     REQUEST_SONG_TEXT_MISSING = 'Song text is missing.'
     REQUEST_SONG_DESCRIPTION_MISSING = 'Song description is missing.'
     REQUEST_SONG_AUTHORS_MISSING = 'Song authors are missing.'
     REQUEST_SONG_INTERPRETERS_MISSING = 'Song interpreters are missing.'
+    REQUEST_SONG_VARIANT_MISSING = 'Song variant key is missing.'
     REQUEST_INTERPRETER_NAME_MISSING = 'Interpreter name is missing.'
     REQUEST_AUTHOR_NAME_MISSING = 'Author name is missing.'
     REQUEST_PAGE_OOR_ERROR = 'Page number is out of range.'
@@ -38,6 +40,7 @@ class Strings(object):
     INTERPRETER_ALREADY_EXISTS_ERROR = 'Interpreter already exists.'
     INTERPRETER_NOT_FOUND_ERROR = 'Interpreter was not found.'
     SONG_NOT_FOUND_ERROR = 'Song was not found.'
+    SONG_VARIANT_NOT_FOUND_ERROR = 'Song variant was not found.'
     SONGBOOK_NOT_FOUND_ERROR = 'Songbook was not found.'
     USER_NOT_FOUND_ERROR = 'User was not found.'
 

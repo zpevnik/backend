@@ -63,6 +63,19 @@ def song_existence(song_id):
     return song
 
 
+def song_variant_existence(variant_id):
+    try:
+        variant = g.model.variants.find_one(variant_id=variant_id)
+    except ValueError:
+        raise AppException(EVENTS.REQUEST_EXCEPTION, 404,
+                           (EXCODES.DOES_NOT_EXIST, STRINGS.SONG_VARIANT_NOT_FOUND_ERROR))
+
+    if variant is None:
+        raise AppException(EVENTS.BASE_EXCEPTION, 404,
+                           (EXCODES.DOES_NOT_EXIST, STRINGS.SONG_VARIANT_NOT_FOUND_ERROR))
+    return variant
+
+
 def songbook_existence(songbook_id):
     try:
         songbook = g.model.songbooks.find_one(songbook_id=songbook_id)
@@ -138,25 +151,75 @@ def songs_request(request):
 
     if 'title' not in request or not request['title']:
         ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TITLE_MISSING, 'title')
-    if 'text' not in request or not request['text']:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TEXT_MISSING, 'text')
-    if 'description' not in request:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_DESCRIPTION_MISSING, 'description')
     if 'authors' not in request:
         ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_AUTHORS_MISSING, 'authors')
     if 'interpreters' not in request:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_INTERPRETERS_MISSING,
-                     'interpreters')
+        ex.add_error(EXCODES.MISSING_FIELD,
+            STRINGS.REQUEST_SONG_INTERPRETERS_MISSING, 'interpreters') # yapf: disable
 
     if ex.errors:
         raise ex
 
     data = {
         'title': request['title'],
-        'text': request['text'],
         'authors': request['authors'],
-        'description': request['description'],
         'interpreters': request['interpreters']
+    }
+
+    return data
+
+
+def songs_extended_request(request):
+    ex = AppException(EVENTS.REQUEST_EXCEPTION, 422)
+
+    if 'title' not in request or not request['title']:
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TITLE_MISSING, 'title')
+    if 'authors' not in request:
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_AUTHORS_MISSING, 'authors')
+    if 'interpreters' not in request:
+        ex.add_error(EXCODES.MISSING_FIELD,
+            STRINGS.REQUEST_SONG_INTERPRETERS_MISSING, 'interpreters') # yapf: disable
+    if 'variant' not in request:
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_VARIANT_MISSING, 'variant')
+    else:
+        if 'text' not in request['variant'] or not request['variant']['text']:
+            ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TEXT_MISSING, 'variant/text')
+        if 'description' not in request['variant']:
+            ex.add_error(EXCODES.MISSING_FIELD,
+                STRINGS.REQUEST_SONG_DESCRIPTION_MISSING, 'variant/description') # yapf: disable
+
+    if ex.errors:
+        raise ex
+
+    data = {
+        'title': request['title'],
+        'authors': request['authors'],
+        'interpreters': request['interpreters'],
+        'variant': {
+            'text': request['variant']['text'],
+            'description': request['variant']['description']
+        }
+    }
+    if 'visibility' in request['variant']:
+        data['variant']['visibility'] = request['variant']['visibility']
+
+    return data
+
+
+def song_variant_request(request):
+    ex = AppException(EVENTS.REQUEST_EXCEPTION, 422)
+
+    if 'text' not in request or not request['text']:
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TEXT_MISSING, 'text')
+    if 'description' not in request:
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_DESCRIPTION_MISSING, 'description')
+
+    if ex.errors:
+        raise ex
+
+    data = {
+        'text': request['text'],
+        'description': request['description'],
     }
     if 'visibility' in request:
         data['visibility'] = request['visibility']
@@ -202,37 +265,6 @@ def songbooks_options_request(request):
     return {'options': request['options']}
 
 
-def songbook_songs_request(request):
-    data = {'set': [], 'delete': []}
-    if 'set' in request:
-        if not isinstance(request['set'], list):
-            raise AppException(
-                EVENTS.REQUEST_EXCEPTION, 422,
-                (EXCODES.WRONG_VALUE, STRINGS.REQUEST_SONGBOOK_SONGS_INVALID, 'delete'))
-
-        for entry in request['set']:
-            if 'id' not in entry or not entry['id']:
-                raise AppException(
-                    EVENTS.REQUEST_EXCEPTION, 422,
-                    (EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_ADD_SONG_MISSING, 'id'))
-
-            obj = {'id': entry['id']}
-            if 'order' in entry:
-                obj['order'] = entry['order']
-
-            data['set'].append(obj)
-
-    if 'delete' in request:
-        if not isinstance(request['delete'], list):
-            raise AppException(
-                EVENTS.REQUEST_EXCEPTION, 422,
-                (EXCODES.WRONG_VALUE, STRINGS.REQUEST_SONGBOOK_SONGS_INVALID, 'delete'))
-
-        data['delete'] = request['delete']
-
-    return data
-
-
 def songbook_options(data):
     options = {}
     if 'size' in data:
@@ -250,9 +282,9 @@ def songbook_options(data):
     options['front_index'] = bool(
         data['front_index']) if 'front_index' in data else DEFAULTS.SONGBOOK_OPTIONS['front_index']
     options['page_numbering'] = bool(
-        data['page_numbering']) if 'page_numbering' in data else DEFAULTS.SONGBOOK_OPTIONS['page_numbering']
+        data['page_numbering']) if 'page_numbering' in data else DEFAULTS.SONGBOOK_OPTIONS['page_numbering'] # yapf: disable
     options['song_numbering'] = bool(
-        data['song_numbering']) if 'song_numbering' in data else DEFAULTS.SONGBOOK_OPTIONS['song_numbering']
+        data['song_numbering']) if 'song_numbering' in data else DEFAULTS.SONGBOOK_OPTIONS['song_numbering'] # yapf: disable
 
     return options
 
@@ -265,11 +297,16 @@ def songbook_songs(data):
         return max((item['order'] if 'order' in item else 0) for item in songs) + 1
 
     songs = []
-    for song in data:
-        song_existence(song['id'])
-        if 'order' not in song:
-            song['order'] = _get_position()
-        songs.append({'id': song['id'], 'order': song['order']})
+    for variant in data:
+        if 'variant_id' not in variant:
+            raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
+                               (EXCODES.MISSING_FIELD,
+                                STRINGS.REQUEST_SONGBOOK_SONGS_VARIANT_MISSING, 'songs/variant_id'))
+
+        song_variant_existence(variant['variant_id'])
+        if 'order' not in variant:
+            variant['order'] = _get_position()
+        songs.append({'variant_id': variant['variant_id'], 'order': variant['order']})
     return songs
 
 
@@ -281,8 +318,8 @@ def json_request(request):
 
 
 def song_format(request):
-    _, log = translate_to_tex(request['text'])
+    translation, log = translate_to_tex(request['text'])
     if log:
         raise AppException(EVENTS.COMPILATION_EXCEPTION, 422,
                            (EXCODES.COMPILATION_ERROR, STRINGS.COMPILATION_ERROR, log))
-    return True
+    return translation

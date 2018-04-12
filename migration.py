@@ -26,16 +26,69 @@ db = mongo_client[parsed.path[1:]]
 model = Model(db=db)
 
 
-def reset_song_cache():
-    collection = db['songs']
-    songs = collection.find()
+def reset_variant_cache():
+    collection = db['variants']
+    variants = collection.find()
 
-    for song in songs:
-        if not song['export_cache']:
+    for variant in variants:
+        if not variant['export_cache']:
             continue
 
-        song['export_cache'] = None
-        collection.update_one({'_id': song['_id']}, {'$set': song})
+        variant['export_cache'] = None
+        collection.update_one({'_id': variant['_id']}, {'$set': variant})
+
+
+def migration_2018_011_04_1():
+    logger.info('11.04.2018 - Migrating songs into new variant concept.')
+
+    song_collection = db['songs']
+    variant_collection = db['variants']
+    songbooks_collection = db['songbooks']
+
+    song_map = {}
+
+    songs = song_collection.find()
+    for song in songs:
+        if 'text' not in song:
+            continue
+
+        # create new variant for given song
+        variant_id = ObjectId()
+        variant_collection.insert_one({
+            '_id': variant_id,
+            'song_id': str(song['_id']),
+            'owner': song['owner'],
+            'text': song['text'],
+            'description': song['description'],
+            'visibility': song['visibility'],
+            'export_cache': None
+        })
+
+        # map variant to its song
+        song_map[str(song['_id'])] = variant_id
+
+        # remove variant stuff from the song
+        song_collection.update_one({'_id': song['_id']}, {'$unset': {'text': ''}})
+        song_collection.update_one({'_id': song['_id']}, {'$unset': {'owner': ''}})
+        song_collection.update_one({'_id': song['_id']}, {'$unset': {'description': ''}})
+        song_collection.update_one({'_id': song['_id']}, {'$unset': {'visibility': ''}})
+        song_collection.update_one({'_id': song['_id']}, {'$unset': {'export_cache': ''}})
+
+    # update songbooks with variants
+    songbooks = songbooks_collection.find()
+    for songbook in songbooks:
+        for song in songbook['songs']:
+            if 'variant' in song:
+                continue
+
+            song['variant'] = song_map[song['id']]
+
+        songbooks_collection.update_one(
+            {
+                '_id': songbook['_id']
+            }, {
+                '$set': songbook.serialize(update=True)
+            })
 
 
 def migration_2018_07_04_1():
@@ -424,8 +477,9 @@ def migration_2017_08_18_4():
 #migration_2017_12_07_2()
 #migration_2018_12_22_1()
 #migration_2018_03_02_1()
+#migration_2018_07_04_1()
+#migration_2018_07_04_2()
+#migration_2018_07_04_3()
+#migration_2018_07_04_4()
 
-migration_2018_07_04_1()
-migration_2018_07_04_2()
-migration_2018_07_04_3()
-migration_2018_07_04_4()
+migration_2018_011_04_1()

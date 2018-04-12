@@ -27,7 +27,7 @@ class ExportTest(unittest.TestCase):
         # delete all test database entries
         self.mongo_client.drop_database(self.db_name)
 
-    def test_song_export(self):
+    def test_variant_export(self):
         # add test song into the database
         rv = utils._post_song(
             self.app,
@@ -40,9 +40,14 @@ class ExportTest(unittest.TestCase):
         assert rv.status_code == 201
         song = json.loads(rv.data)
         song_id = song['link'].split('/')[1]
+        variant_id = song['link'].split('/')[3]
 
-        # export test song as pdf
-        rv = self.app.get('/api/v1/songs/{}'.format(song_id), headers={'Accept': 'application/pdf'})
+        # export test song variant as pdf
+        rv = self.app.get(
+            '/api/v1/songs/{}/variants/{}'.format(song_id, variant_id),
+            headers={
+                'Accept': 'application/pdf'
+            })
         assert rv.status_code == 200
         assert b'download/' in rv.data
 
@@ -62,7 +67,7 @@ class ExportTest(unittest.TestCase):
         songbook_id = songbook['link'].split('/')[1]
 
         # insert test songs for further testing
-        song_ids = []
+        variant_ids = []
         rv = utils._post_song(
             self.app,
             title="Numb",
@@ -75,7 +80,7 @@ class ExportTest(unittest.TestCase):
             "[rec]Caught in the undertow, just caught in the undertow\n")
         assert rv.status_code == 201
         song = json.loads(rv.data)
-        song_ids.append(song['link'].split('/')[1])
+        variant_ids.append(song['link'].split('/')[3])
 
         rv = utils._post_song(
             self.app,
@@ -89,16 +94,16 @@ class ExportTest(unittest.TestCase):
             "I'm my [Em]own worst [G]ene[C]my\n")
         assert rv.status_code == 201
         song = json.loads(rv.data)
-        song_ids.append(song['link'].split('/')[1])
+        variant_ids.append(song['link'].split('/')[3])
 
         # get current songbook
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
         songbook = json.loads(rv.data)
 
         # insert songs into the songbook
-        songbook['songs'] = [{'id': song_ids[0]}, {'id': song_ids[1]}]
+        songbook['songs'] = [{'variant_id': variant_ids[0]}, {'variant_id': variant_ids[1]}]
         rv = self.app.put(
-            '/api/v1/songbooks/{}'.format(songbook_id),
+            '/api/v1/songbooks/{}/songs'.format(songbook_id),
             content_type='application/json',
             data=json.dumps(songbook))
         assert rv.status_code == 200
