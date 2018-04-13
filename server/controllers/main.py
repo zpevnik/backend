@@ -82,7 +82,6 @@ def index(path):
 def login():
     # get skautIS credentials from POST request
     skautis_token = request.form['skautIS_Token']
-    skautis_idunit = request.form['skautIS_IDUnit']
     skautis_datelogout = request.form['skautIS_DateLogout']
 
     # get additional data about user from the skautIS
@@ -96,8 +95,7 @@ def login():
     user = g.model.users.find(user_info['ID'])
     if user is None:
         # create new user if this is first visit here
-        user = g.model.users.create_user(user_info['ID'], user_info['UserName'],
-                                         user_info['IsActive'], skautis_idunit)
+        user = g.model.users.create_user(user_info['ID'], user_info['UserName'], user_info['IsActive'])
 
     # save user token for possible future usage
     user.set_token(skautis_token)
@@ -168,7 +166,7 @@ def test_login():
 
     user = g.model.users.find(0)
     if user is None:
-        user = g.model.users.create_user(0, 'Test', True, 0)
+        user = g.model.users.create_user(0, 'Test', True)
 
     user.set_token('skautis_token')
     g.model.users.save(user)

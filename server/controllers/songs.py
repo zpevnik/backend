@@ -28,7 +28,7 @@ def songs():
     if request.method == 'GET':
         data = validators.handle_GET_request(request.args)
 
-        # find all results for currect user and his unit
+        # find all results for currect user
         result = g.model.songs.find_filtered(data['query'], data['order'], current_user.get_id())
 
         # prepare response

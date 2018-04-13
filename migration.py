@@ -51,7 +51,7 @@ def migration_2018_12_04_1():
         user['editor'] = True
 
         collection.update_one({'_id': user['_id']}, {'$set': user})
-
+        collection.update_one({'_id': user['_id']}, {'$unset': {'unit': ''}})
 
 
 def migration_2018_11_04_1():

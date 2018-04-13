@@ -117,10 +117,10 @@ types:
         type: "string"
       name:
         type: "string"
+      editor:
+        type: "string"
       active:
         type: "boolean"
-      unit:
-        type: "string"
       created:
         type: "datetime"
         required: false

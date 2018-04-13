@@ -21,11 +21,11 @@ class Users(object):
         self._db = db
         self._collection = db[self.COLLECTION_NAME]
 
-    def create_user(self, userid, name, active, unit):
+    def create_user(self, userid, name, active):
         """Create new user and insert him into database.
 
         Args:
-          data (dict): User data dictionary containing id, name, isActive and unit
+          data (dict): User data dictionary containing id, name and isActive
 
         Returns:
           User: Instance of the new user.
@@ -34,7 +34,6 @@ class Users(object):
             '_id': userid,
             'name': name,
             'active': active,
-            'unit': unit,
             'created': datetime.utcnow(),
             'last_login': datetime.utcnow(),
             'editor': False,
@@ -69,7 +68,6 @@ class User(object):
       _active (bool) True if user's account is active
       _token (str): Unique token for current skautis communication
       _editor (bool): True if user is an editor
-      _unit (str): Unique identifier of scout unit
     """
 
     def __init__(self, user):
@@ -80,7 +78,6 @@ class User(object):
         self._name = user['name']
         self._active = user['active']
         self._token = user['token']
-        self._unit = user['unit']
 
     def serialize(self, update=False):
         user = {
@@ -88,8 +85,7 @@ class User(object):
             'active': self._active,
             'last_login': self._last_login,
             'editor': self._editor,
-            'token': self._token,
-            'unit': self._unit
+            'token': self._token
         }
 
         if not update:
@@ -105,8 +101,7 @@ class User(object):
             'created': self._created.isoformat(),
             'last_login': self._last_login.isoformat(),
             'editor': self._editor,
-            'active': self._active,
-            'unit': self._unit
+            'active': self._active
         }
 
     def is_authenticated(self):
@@ -135,9 +130,6 @@ class User(object):
 
     def get_token(self):
         return self._token
-
-    def get_unit(self):
-        return self._unit
 
     def set_token(self, token):
         self._token = token

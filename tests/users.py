@@ -47,8 +47,7 @@ class UserTest(unittest.TestCase):
             'created': 0,
             'last_login': 0,
             'active_songbook': None,
-            'active': True,
-            'unit': 1001,
+            'active': True
         })
 
         # check test user get request
