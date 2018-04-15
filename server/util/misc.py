@@ -10,16 +10,3 @@ def generate_random_filename():
 def log_event(event, user, data):
     logger = logging.getLogger(__name__)
     logger.info('[{}] user: {}, data: {}'.format(event, user, data))
-
-
-def merge_lists(l1, l2, key):
-    if not l1 or not l2:
-        return []
-
-    merged = {}
-    for item in l1 + l2:
-        if item[key] in merged:
-            merged[item[key]].update(item)
-        else:
-            merged[item[key]] = item
-    return [val for (_, val) in merged.items()]

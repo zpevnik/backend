@@ -4,7 +4,6 @@ from bson import ObjectId
 from flask import g
 
 from server.util import validators
-from server.util import merge_lists
 from server.constants import OPTIONS
 from server.constants import DEFAULTS
 from server.constants import PERMISSION

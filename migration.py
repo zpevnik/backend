@@ -48,7 +48,7 @@ def migration_2018_12_04_1():
         if 'editor' in user:
             continue
 
-        user['editor'] = True
+        user['editor'] = False
 
         collection.update_one({'_id': user['_id']}, {'$set': user})
         collection.update_one({'_id': user['_id']}, {'$unset': {'unit': ''}})
@@ -72,7 +72,7 @@ def migration_2018_11_04_1():
         variant_id = ObjectId()
         variant_collection.insert_one({
             '_id': variant_id,
-            'song_id': str(song['_id']),
+            'song_id': song['_id'],
             'owner': song['owner'],
             'text': song['text'],
             'description': song['description'],
@@ -94,10 +94,11 @@ def migration_2018_11_04_1():
     songbooks = songbooks_collection.find()
     for songbook in songbooks:
         for song in songbook['songs']:
-            if 'variant' in song:
+            if 'variant_id' in song:
                 continue
 
-            song['variant'] = song_map[song['id']]
+            song['variant_id'] = str(song_map[song['id']])
+            del song['id']
 
         songbooks_collection.update_one({'_id': songbook['_id']}, {'$set': songbook})
 
@@ -493,5 +494,5 @@ def migration_2017_08_18_4():
 #migration_2018_07_04_3()
 #migration_2018_07_04_4()
 
-migration_2018_11_04_1()
-migration_2018_12_04_1()
+#migration_2018_11_04_1()
+#migration_2018_12_04_1()

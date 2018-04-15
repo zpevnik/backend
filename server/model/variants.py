@@ -2,7 +2,6 @@ from bson import ObjectId
 from flask import g
 
 from server.util import AppException
-from server.util import merge_lists
 from server.util import translate_to_tex
 
 from server.constants import EVENTS
@@ -193,10 +192,11 @@ class Variants(object):
                     'song_id': str(item['song_id']),
                     'title': item['song'][0]['title'],
                     'interpreters': item['song'][0]['interpreters']
-                }
+                },
+                'order': next((a for a in items if a['variant_id'] == str(item['_id'])), 0)
             })
 
-        return merge_lists(items, extended_items, 'variant_id')
+        return extended_items
 
 
 class Variant(object):
