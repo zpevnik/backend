@@ -1,0 +1,102 @@
+{{=<< >>=}}
+\documentclass[12pt, <<format>>]{article}
+\usepackage[top=2cm,bottom=1cm,left=2.5cm,right=2.5cm]{geometry}
+
+\usepackage[czech]{babel}
+\usepackage[<<chorded>>]{songs}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{fontspec}
+
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{0in}
+\setlength{\topskip}{0in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textheight}{9.1in}
+\settowidth{\versenumwidth}{1.\ }
+
+\setmainfont[
+    Path = fonts/,
+    Extension = .otf,
+    UprightFont = TheMixC5-4_SemiLight,
+    ItalicFont = TheMixC5-4iSemiLightIta.otf,
+    BoldFont = TheMixC5-7_Bold.otf,
+    BoldItalicFont = TheMixC5-7iBoldItalic.otf
+]{TheMixC5}
+
+\newfontfamily\skautfont[
+    Path = fonts/,
+    Extension = .otf,
+    UprightFont = SKAUT-Bold
+]{SkautBold}
+
+\renewcommand{\lyricfont}{\small} % song lyrics font style
+\renewcommand{\stitlefont}{ % song title font style
+  \skautfont\Large\baselineskip=20pt\lineskiplimit=0pt
+}
+\renewcommand{\echofont}{\it\small} % song lyrics font style
+\renewcommand{\printchord}[1]{\rmfamily\bf\normalsize#1} % chords font style
+\versesep=6pt plus 2pt minus 2pt        %mezera mezi slokami a chorusy
+\MultiwordChords    % Akordy nezpusobuji mezery mezi slovy
+
+\renewcommand{\notebgcolor}{white} %barva za refrenem a podobne
+\renewcommand{\snumbgcolor}{white} %barva za cislem pisne
+\renewcommand{\extendprelude}{\showauthors} %nastaveni hlavicky kazde pisne
+\renewcommand{\extendpostlude}{} %nastaveni paticky kazde pisne
+
+\renewcommand{\clineparams}{ %nastaveni mezer mezi akordy a textem
+  \baselineskip=10pt
+  \lineskiplimit=1pt
+  \lineskip=1pt
+}
+
+\setlength{\cbarwidth}{0pt} %zrusi caru vedle refrenu
+\setlength{\sbarheight}{0pt} %zrusi caru mezi pisnickami
+
+<<#disable_page_numbering>>
+\pagenumbering{gobble} %vypne cislovani stranke
+<</disable_page_numbering>>
+
+<<#disable_song_numbering>>
+\nosongnumbers %vypne cislovani pisnicek
+<</disable_song_numbering>>
+
+\songcolumns{<<columns>>} %nastavi pocet sloupcu zpevniku
+
+\newindex{titleidx}{<<filename>>}
+
+\begin{document}
+
+\begin{titlepage}
+	{\centering
+	\includegraphics[width=1\textwidth]{Logo/Logo2-barevne.pdf}\par\vspace{1cm}
+	{\skautfont\scshape\LARGE Skautský zpěvník \par}
+	\vspace{.4cm}
+	{\skautfont\scshape\normalsize Junák - český skaut, z. s.\par}}
+	\vspace{.6cm}
+
+	\vfill
+
+	{\footnotesize vygenerováno pomocí \textit{zpevnik.skauting.cz}}
+
+\end{titlepage}
+
+
+<<#front_index>>
+\showindex{\skautfont Obsah}{titleidx}
+<</front_index>>
+
+\begin{songs}{titleidx}
+\input{<<filename>>.sbd}
+\end{songs}
+
+<<#back_index>>
+\showindex{\skautfont Obsah}{titleidx}
+<</back_index>>
+
+\end{document}
