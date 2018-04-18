@@ -3,7 +3,7 @@ from server.constants import OPTIONS
 
 class Defaults(object):
     SONGBOOK_OPTIONS = {
-        'size': OPTIONS.SIZE.A4,
+        'format': OPTIONS.FORMAT.A4,
         'columns': 2,
         'index': True,
         'chorded': True,

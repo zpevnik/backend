@@ -38,6 +38,25 @@ def reset_variant_cache():
         collection.update_one({'_id': variant['_id']}, {'$set': variant})
 
 
+def migration_2018_18_04_1():
+    logger.info('18.04.2018 - Renaming songbook option size to format.')
+
+    reset_variant_cache()
+
+    collection = db['songbooks']
+    songbooks = collection.find()
+
+    for songbook in songbooks:
+        options = songbook['options']
+        if 'format' in songbook['options']:
+            continue
+
+        songbook['options']['format'] = songbook['options']['size']
+        del songbook['options']['size']
+
+        collection.update_one({'_id': songbook['_id']}, {'$set': songbook})
+
+
 def migration_2018_12_04_1():
     logger.info('12.04.2018 - Adding editor key to users.')
 
@@ -493,6 +512,7 @@ def migration_2017_08_18_4():
 #migration_2018_07_04_2()
 #migration_2018_07_04_3()
 #migration_2018_07_04_4()
-
 #migration_2018_11_04_1()
 #migration_2018_12_04_1()
+
+migration_2018_18_04_1()

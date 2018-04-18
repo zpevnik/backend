@@ -9,7 +9,7 @@ from server.constants import OPTIONS
 from server.constants import STRINGS
 from server.constants import DEFAULTS
 from server.constants import ORDERING
-from server.constants import size_dict
+from server.constants import format_dict
 
 
 def handle_GET_request(request):
@@ -267,12 +267,12 @@ def songbooks_options_request(request):
 
 def songbook_options(data):
     options = {}
-    if 'size' in data:
-        if data['size'] not in size_dict:
+    if 'format' in data:
+        if data['format'] not in format_dict:
             raise AppException(EVENTS.REQUEST_EXCEPTION, 422,
-                               (EXCODES.WRONG_VALUE, STRINGS.JSON_REQUEST_ERROR, 'size'))
+                               (EXCODES.WRONG_VALUE, STRINGS.JSON_REQUEST_ERROR, 'format'))
 
-    options['size'] = data['size'] if 'size' in data else DEFAULTS.SONGBOOK_OPTIONS['size']
+    options['format'] = data['format'] if 'format' in data else DEFAULTS.SONGBOOK_OPTIONS['format']
     options['columns'] = int(
         data['columns']) if 'columns' in data else DEFAULTS.SONGBOOK_OPTIONS['columns']
     options['index'] = bool(

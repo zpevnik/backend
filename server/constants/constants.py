@@ -39,17 +39,17 @@ EVENTS = Events()
 
 class Options(object):
 
-    class Sizes(object):
+    class Formats(object):
         A4 = 'A4'
         A5 = 'A5'
         A4_WIDE = 'A4 WIDE'
         A5_WIDE = 'A5 WIDE'
 
-    SIZE = Sizes()
+    FORMAT = Formats()
 
 
 OPTIONS = Options()
-size_dict = [OPTIONS.SIZE.A4, OPTIONS.SIZE.A5, OPTIONS.SIZE.A4_WIDE, OPTIONS.SIZE.A5_WIDE]
+format_dict = [OPTIONS.FORMAT.A4, OPTIONS.FORMAT.A5, OPTIONS.FORMAT.A4_WIDE, OPTIONS.FORMAT.A5_WIDE]
 
 
 class Ordering(ConstantDict):
