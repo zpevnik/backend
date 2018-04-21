@@ -300,9 +300,9 @@ types:
     description: "This object represents options for each songbook. If some of them\
       \ is not set with request, default values are used (no error is raised!)"
     properties:
-      size:
+      format:
         type: "string"
-        description: "One of predefined page sizes"
+        description: "One of predefined page formats"
         enum:
         - "A4"
         - "A5"
@@ -562,28 +562,11 @@ securitySchemes:
       type: "string"
   get:
     displayName: "Get variant of song"
-    headers:
-      Accept:
-        type: "string"
-        description: "If Accept header is explicitly set as `application/pdf`, json\
-          \ with endpoint pointing at generated file is returned. In the other case\
-          \ detail of the songbook in standard `json` is returned."
-        default: "application/json"
-        enum:
-        - "application/json"
-        - "application/pdf"
     responses:
       200:
         body:
           application/json:
             type: "Song variant"
-          application/pdf:
-            type: "object"
-            description: "Response for generated pdf."
-            example:
-              value: "{\"link\": \"/download/2b573863-71b1-4463-96a7-e7fae9ba3865.pdf\"\
-                }"
-              strict: false
       403:
         description: "Insufficient permissions."
         body:
