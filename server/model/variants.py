@@ -2,7 +2,9 @@ from bson import ObjectId
 from flask import g
 
 from server.util import AppException
+from server.util import SongTemplate
 from server.util import translate_to_tex
+from server.util import validators
 
 from server.constants import EVENTS
 from server.constants import EXCODES
@@ -194,7 +196,7 @@ class Variants(object):
                     'interpreters': item['song'][0]['interpreters']
                 },
                 'order': next((a for a in items if a['variant_id'] == str(item['_id'])), 0)
-            })
+            }) # yapf: disable
 
         return extended_items
 
@@ -297,35 +299,36 @@ class Variant(object):
         # invalidate or reset export cache
         self._export_cache = data['export_cache'] if 'export_cache' in data else None
 
-    def generate_sbd_output(self):
-        """Generate tex output and return it."""
+    def get_output_template(self):
+        """Generate tex output template and return it."""
 
-        # check for cached song translation in export cache
-        if self._export_cache is not None:
-            return self._export_cache, []
+        # generate latex output if export cache is empty
+        if self._export_cache is None:
+            #self._export_cache = song_format(self._text)
 
-        # get parent song of this variant
-        song = g.model.songs.find_one(song_id=str(self._song_id))
+            # get parent song of this variant
+            song = g.model.songs.find_one(song_id=str(self._song_id))
 
-        # translate song lyrics and chords to tex output
-        text, log = translate_to_tex(self._text)
+            # translate song lyrics and chords to tex output (error throws exception)
+            latex_output = validators.song_format({'text': self._text})
 
-        interpreters = []
-        for interpreter_id in song.get_interpreters():
-            interpreter = g.model.interpreters.find_one(interpreter_id=interpreter_id)
-            interpreters.append(interpreter.get_name())
+            # get all interpreters of this song
+            interpreters = []
+            for interpreter_id in song.get_interpreters():
+                interpreter = g.model.interpreters.find_one(interpreter_id=interpreter_id)
+                interpreters.append(interpreter.get_name())
 
-        # create sbd export data
-        filedata = '''\\beginsong{{{}}}[by={{{}}}] {}\endsong'''.format(
-            song.get_title(), ", ".join(interpreters), text)
+            # save variant to export cache
+            self._export_cache = {
+                'title': song.get_title(),
+                'interpreters': interpreters,
+                'song': latex_output
+            }
 
-        # save song to export cache if no log information is present
-        if not log:
-            self._export_cache = filedata
             # save cached song into the database
             g.model.variants.save(self)
 
-        return filedata, log, song.get_title()
+        return SongTemplate(self._export_cache)
 
     def __repr__(self):
         return '<{!r} id={!r} owner={!r} _description={!r}' \

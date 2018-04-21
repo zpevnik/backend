@@ -1,4 +1,5 @@
 import os
+import pystache
 import subprocess
 
 from server.app import app
@@ -12,22 +13,6 @@ from server.constants import STRINGS
 from server.constants import DEFAULTS
 
 
-def export_variant(variant):
-    filename = generate_random_filename()
-
-    # get sbd song data and save them into aux sbd file
-    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'wb') as file:
-        data, log, _ = variant.generate_sbd_output()
-        file.write(data.encode('utf8'))
-
-    # generate tex file for given export
-    generate_tex_file(filename, DEFAULTS.SONGBOOK_OPTIONS)
-
-    # export song to pdf file
-    link = export_to_pdf(filename)
-    return {'link': link, 'log': log}
-
-
 def export_songbook(songbook):
     # check if songbook is cached
     if songbook.is_cached():
@@ -38,39 +23,30 @@ def export_songbook(songbook):
             return {'link': "download/{}.pdf".format(filename), 'log': {}}
 
     # start export process
-    log = {}
     filename = generate_random_filename()
 
-    # get sbd song variant data and save them into aux sbd file
+    # create instance of pystache renderer
+    renderer = pystache.Renderer(string_encoding='utf-8', search_dirs=app.config['SONGBOOK_TEMPLATE_FOLDER'])
+
+    # generate song sbd file
     with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.sbd', 'ab') as file:
         for song_obj in songbook.get_songs():
             variant = validators.song_variant_existence(song_obj['variant_id'])
-            data, variant_log, title = variant.generate_sbd_output()
-            if variant_log:
-                log[title] = variant_log
+            template = variant.get_output_template()
+            file.write(renderer.render(template).encode('utf8'))
 
-            file.write(data.encode('utf8'))
-
-    # generate tex file for given export
-    generate_tex_file(filename, songbook.get_options())
+    # generate songbook tex file
+    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.tex', 'wb') as file:
+        template = songbook.get_output_template()
+        template.set_filename(filename)
+        file.write(renderer.render(template).encode('utf8'))
 
     # export songbook to pdf file
     link = export_to_pdf(filename)
 
     # cache songbook
     songbook.cache_file(filename)
-    return {'link': link, 'log': log}
-
-
-def generate_tex_file(filename, options):
-    # read template file
-    with open('songs/misc/template.tex', 'rb') as sample_file:
-        filedata = sample_file.read().decode('utf8')
-
-    # replace data in template and save it into tex file
-    filedata = filedata.replace('$filename$', filename)
-    with open(app.config['SONGBOOK_TEMP_FOLDER'] + filename + '.tex', 'wb') as temp_file:
-        temp_file.write(filedata.encode('utf8'))
+    return {'link': link}
 
 
 def export_to_pdf(filename):

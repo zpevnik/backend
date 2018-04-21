@@ -4,6 +4,8 @@ from bson import ObjectId
 from flask import g
 
 from server.util import validators
+from server.util import SongbookTemplate
+
 from server.constants import OPTIONS
 from server.constants import DEFAULTS
 from server.constants import PERMISSION
@@ -251,6 +253,9 @@ class Songbook(object):
         self._title = data['title']
         self._options = data['options']
         self._songs = data['songs']
+
+    def get_output_template(self):
+        return SongbookTemplate(self._options)
 
     def __repr__(self):
         return '<{!r} id={!r} title={!r}>' \

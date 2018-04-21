@@ -26,7 +26,7 @@ class SongTemplate(object):
 
 class SongbookTemplate(object):
 
-    def __init__(self, filename, options):
+    def __init__(self, options):
         self.inject_defaults(options)
 
         if options['format'] == OPTIONS.FORMAT.A4:
@@ -47,8 +47,6 @@ class SongbookTemplate(object):
         self._page_numbering = options['page_numbering']
         self._song_numbering = options['song_numbering']
 
-        self._filename = filename
-
     def inject_defaults(self, options):
         # Add missing options to given dict based on songbook defaults.
 
@@ -66,6 +64,9 @@ class SongbookTemplate(object):
             options['page_numbering'] = DEFAULTS.SONGBOOK_OPTIONS['page_numbering']
         if 'song_numbering' not in options:
             options['song_numbering'] = DEFAULTS.SONGBOOK_OPTIONS['song_numbering']
+
+    def set_filename(self, filename):
+        self._filename = filename
 
     def filename(self):
         # Filename of songbook sbd file (without the extension)

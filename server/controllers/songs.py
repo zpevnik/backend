@@ -8,7 +8,6 @@ from flask_login import current_user
 from flask_login import login_required
 
 from server.app import app
-from server.util import export_variant
 from server.util import permissions
 from server.util import validators
 from server.util import log_event
@@ -151,8 +150,6 @@ def song_variant_single(song_id, variant_id):
                            (EXCODES.INSUFFICIENT_PERMISSIONS, STRINGS.INSUFFICIENT_PERMISSIONS))
 
     if request.method == 'GET':
-        if 'Accept' in request.headers and request.headers['Accept'] == 'application/pdf':
-            return jsonify(export_variant(variant)), 200
         return jsonify(variant.get_serialized_data()), 200
 
     elif request.method == 'PUT':

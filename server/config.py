@@ -17,6 +17,7 @@ MONGODB_URI = getenv('MONGODB_UNITTEST_URI',
 
 SONGBOOK_TEMP_FOLDER = 'songs/temp/'
 SONGBOOK_DONE_FOLDER = 'songs/done/'
+SONGBOOK_TEMPLATE_FOLDER = 'songs/templates/'
 
 SKAUTIS = {
     'TEST': getenv('SKAUTIS_TEST', False),

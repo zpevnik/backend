@@ -27,38 +27,6 @@ class ExportTest(unittest.TestCase):
         # delete all test database entries
         self.mongo_client.drop_database(self.db_name)
 
-    def test_variant_export(self):
-        # add test song into the database
-        rv = utils._post_song(
-            self.app,
-            title="Nights In White Satin",
-            text="[verse][Em]Nights in white [D]satin, [Em]never reaching the [D]end,\n"
-            "[C]Letters I've [G]written, [F]never meaning to [Em]send.\n"
-            "[Em]Beauty I've [D]always missed, [Em]with these eyes be[D]fore,\n"
-            "[C]Just what the [G]truth is, [F] I can't say any[Em]more.\n",
-            description="This is a test song")
-        assert rv.status_code == 201
-        song = json.loads(rv.data)
-        song_id = song['link'].split('/')[1]
-        variant_id = song['link'].split('/')[3]
-
-        # export test song variant as pdf
-        rv = self.app.get(
-            '/api/v1/songs/{}/variants/{}'.format(song_id, variant_id),
-            headers={
-                'Accept': 'application/pdf'
-            })
-        assert rv.status_code == 200
-        assert b'download/' in rv.data
-
-        # check correct json structure
-        data = json.loads(rv.data)
-        assert 'link' in data
-        assert 'log' in data
-
-        # clean the database
-        self.mongo_client.drop_database(self.db_name)
-
     def test_songbook_export(self):
         # insert test songbook for further testing
         rv = utils._post_songbook(self.app, title="Linkin Park songbook")
@@ -119,7 +87,11 @@ class ExportTest(unittest.TestCase):
         # check correct json structure
         data = json.loads(rv.data)
         assert 'link' in data
-        assert 'log' in data
+
+        # delete generated file
+        link = json.loads(rv.data)['link']
+        filename = str(link).split('/')[1]
+        os.remove(os.path.join('./songs/done', filename))
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)

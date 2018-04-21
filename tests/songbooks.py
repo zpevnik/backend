@@ -301,21 +301,21 @@ class SongbookTest(unittest.TestCase):
         assert b'"code": "missing_field"' in rv.data
         assert b'"data": "options"' in rv.data
 
-        # test songbook options endpoint (wrong size option)
-        rv = utils._put_songbook_options(self.app, songbook_id, options={'size': "B4"})
+        # test songbook options endpoint (wrong format option)
+        rv = utils._put_songbook_options(self.app, songbook_id, options={'format': "B4"})
         assert rv.status_code == 422
         assert b'"code": "wrong_value"' in rv.data
-        assert b'"data": "size"' in rv.data
+        assert b'"data": "format"' in rv.data
 
         # test songbook options endpoint (correct change)
         rv = utils._put_songbook_options(
             self.app, songbook_id, options={
-                'size': OPTIONS.SIZE.A5,
+                'format': OPTIONS.FORMAT.A5,
                 'chorded': False
             })
         res = json.loads(rv.data)
         assert rv.status_code == 200
-        assert res['options']['size'] == OPTIONS.SIZE.A5
+        assert res['options']['format'] == OPTIONS.FORMAT.A5
         assert res['options']['chorded'] == False
 
         # clean the database
