@@ -41,6 +41,46 @@ types:
         type: "boolean"
       variants:
         type: "array"
+        description: "array of variant ids"
+        required: false
+        items:
+          type: "string"
+    (x-restlet):
+      section: "Objects"
+  Song ext:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      title:
+        type: "string"
+      authors:
+        type: "object"
+        properties:
+          music:
+            type: "array"
+            description: "Identifiers of Authors"
+            items:
+              type: "string"
+          lyrics:
+            type: "array"
+            description: "Identifiers of Authors"
+            items:
+              type: "string"
+        example:
+          value: "{'music': [], 'lyrics': []}"
+          strict: false
+      interpreters:
+        type: "array"
+        description: "Identifiers of Interpreters"
+        items:
+          type: "string"
+      created:
+        type: "datetime"
+      approved:
+        type: "boolean"
+      variants:
+        type: "array"
         description: "This item is added for better comfort of client application."
         items:
           type: "Song variant"
@@ -64,6 +104,55 @@ types:
         type: "number"
       created:
         type: "datetime"
+    (x-restlet):
+      section: "Objects"
+  Song variant ext:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      song_id:
+        type: "string"
+        required: false
+      owner:
+        type: "string"
+      text:
+        type: "string"
+      description:
+        type: "string"
+      visibility:
+        type: "number"
+      created:
+        type: "datetime"
+      song:
+        type: "object"
+        required: false
+        properties:
+          id:
+            type: "string"
+          title:
+            type: "string"
+          authors:
+            type: "object"
+            properties:
+              music:
+                type: "array"
+                description: "Idenatifiers of Authors"
+                items:
+                  type: "string"
+              lyrics:
+                type: "array"
+                description: "Identifiers of Authors"
+                items:
+                  type: "string"
+            example:
+              value: "{'music': [], 'lyrics': []}"
+              strict: false
+          interpreters:
+            type: "string"
+            description: "Identifiers of Interpreters"
+          created:
+            type: "datetime"
     (x-restlet):
       section: "Objects"
   Author:
@@ -378,9 +467,8 @@ securitySchemes:
 /songs:
   get:
     displayName: "Get list of songs"
-    description: "This endpoint always returns songs, which have at least one variant\
-      \ accessible by user. This means, that variant dict key will always contain\
-      \ atleast one variant."
+    description: "This endpoint always returns every song including those, which doesn't\
+      \ have any variant visible to the user."
     queryParameters:
       query:
         type: "string"
@@ -471,7 +559,7 @@ securitySchemes:
       200:
         body:
           application/json:
-            type: "Song"
+            type: "Song ext"
       404:
         description: "Song was not found."
         body:
@@ -487,7 +575,7 @@ securitySchemes:
         description: "Song was successfully saved."
         body:
           application/json:
-            type: "Song"
+            type: "Song ext"
       400:
         description: "Invalid json request."
         body:
@@ -587,7 +675,7 @@ securitySchemes:
         description: "Song variant was successfully saved."
         body:
           application/json:
-            type: "Song"
+            type: "Song ext"
       400:
         description: "Invalid json request."
         body:
@@ -641,7 +729,7 @@ securitySchemes:
       200:
         body:
           application/json:
-            type: "Song"
+            type: "Song ext"
       403:
         description: "Insufficient permissions."
         body:
@@ -1191,6 +1279,71 @@ securitySchemes:
               strict: false
       404:
         description: "User was not found."
+        body:
+          application/json:
+            type: "Error"
+  (x-restlet):
+    section: "API endpoints"
+/variants:
+  get:
+    displayName: "Get list of extended variants"
+    description: "page and per_page arguments are tied to songs and not their variants\
+      \ meaning that if each song in your database has two variants and you call this\
+      \ with per_page set to 10, you will receive 20 results (10 songs, each 2 variants).\
+      \ In the same way count and pages keys in response are tied to songs and not\
+      \ variants.\n\nAlso it is always guaranteed that if one variant of the song\
+      \ is returned, all others are returned as well and will be directly near each\
+      \ other."
+    queryParameters:
+      query:
+        type: "string"
+        description: "Query string (song name)."
+        required: false
+      page:
+        type: "integer"
+        format: "int32"
+        description: "Page of paged result."
+        default: 0
+        minimum: 0
+        required: false
+      per_page:
+        type: "integer"
+        format: "int32"
+        description: "Number of songs on one page."
+        default: 30
+        minimum: 1
+        maximum: 200
+        required: false
+      order:
+        type: "string"
+        description: "Result sorting."
+        enum:
+        - "title"
+        - "title_desc"
+        required: false
+    responses:
+      200:
+        description: "Successful server search (0+ variants)."
+        body:
+          application/json:
+            type: "object"
+            properties:
+              count:
+                type: "integer"
+                description: "Number of found songs."
+              pages:
+                type: "string"
+                description: "Number of pages for current *per_page* value."
+              data:
+                type: "array"
+                description: "Array of variants itself."
+                items:
+                  type: "Song variant ext"
+            example:
+              value: "{\n  \"count\": 103,\n  \"data\": [...],\n  \"pages\": 52\n}"
+              strict: false
+      400:
+        description: "Request contains invalid parameters."
         body:
           application/json:
             type: "Error"
