@@ -1,24 +1,15 @@
 {{=<< >>=}}
 \documentclass[12pt, <<format>>]{article}
-\usepackage[top=2cm,bottom=1cm,left=2.5cm,right=2.5cm]{geometry}
+\usepackage[top=1.5cm,bottom=2cm,left=1.75cm,right=1.5cm]{geometry}
 
 \usepackage[czech]{babel}
 \usepackage[<<chorded>>]{../songs}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
 
+\usepackage{microtype}
 \usepackage{graphicx}
 \usepackage{fontspec}
-
-\setlength{\oddsidemargin}{0in}
-\setlength{\evensidemargin}{0in}
-\setlength{\textwidth}{6.5in}
-\setlength{\topmargin}{0in}
-\setlength{\topskip}{0in}
-\setlength{\headheight}{0in}
-\setlength{\headsep}{0in}
-\setlength{\textheight}{9.1in}
-\settowidth{\versenumwidth}{1.\ }
+\usepackage[hidelinks]{hyperref}
+\usepackage{bm}
 
 \setmainfont[
     Path = ../misc/fonts/,
@@ -35,13 +26,25 @@
     UprightFont = SKAUT-Bold
 ]{SkautBold}
 
-\renewcommand{\lyricfont}{\small} % song lyrics font style
+\renewcommand{\lyricfont}{\large} % song lyrics font style
+\newcommand{\authfont}{\it\large} % song lyrics author style
+\makeatletter % Changing author styles
+\renewcommand{\showauthors}{%
+  \vspace{0.25cm}%
+  \setlength{\parindent}{0.8cm}%
+  \setbox\SB@box\hbox{\sfcode'22\@m\authfont\songauthors}%
+  \ifdim\wd\SB@box>\z@\unhbox\SB@box\par\fi%
+  \vspace{0.25cm}%
+}
+\makeatother
 \renewcommand{\stitlefont}{ % song title font style
-  \skautfont\Large\baselineskip=20pt\lineskiplimit=0pt
+  \vspace{1cm}\skautfont\Large\baselineskip=20pt\lineskiplimit=0pt%
+  \setlength{\parindent}{0.8cm}%
 }
 \renewcommand{\echofont}{\it\small} % song lyrics font style
 \renewcommand{\printchord}[1]{\rmfamily\bf\normalsize#1} % chords font style
-\versesep=6pt plus 2pt minus 2pt        %mezera mezi slokami a chorusy
+\versesep=15pt plus 2pt minus 2pt        %mezera mezi slokami a chorusy
+\baselineadj=5pt plus 1pt minus 1pt  % Line to chords spacing
 \MultiwordChords    % Akordy nezpusobuji mezery mezi slovy
 
 \renewcommand{\notebgcolor}{white} %barva za refrenem a podobne
@@ -55,8 +58,15 @@
   \lineskip=1pt
 }
 
+\renewcommand{\everychorus}{\setlength{\parindent}{0.2cm}} % Chorus indent to match verse indent
+\renewcommand{\chorusmark}{\llap{\raisebox{-1.15cm}[0cm][0cm]{\makebox[-0.35cm]{\raggedright\bf R:}}}} % Chorus mark (R:)
+\renewcommand{\printversenum}[1]{\bf#1.} % Bold Verse number
+
 \setlength{\cbarwidth}{0pt} %zrusi caru vedle refrenu
 \setlength{\sbarheight}{0pt} %zrusi caru mezi pisnickami
+
+\renewcommand{\sharpsymbol}{\raisebox{0.1cm}{\#}} % ♯ styling - raised
+\renewcommand{\flatsymbol}{\raisebox{0.05cm}{\ensuremath{\bm{\flat}}}} % ♭ styling - raised, bolder
 
 <<#disable_page_numbering>>
 \pagenumbering{gobble} %vypne cislovani stranke
@@ -69,26 +79,27 @@
 \songcolumns{<<columns>>} %nastavi pocet sloupcu zpevniku
 
 \newindex{titleidx}{<<filename>>}
+\indexsongsas{titleidx}{\thepage} % Index for pages, not song numbers
 
 \begin{document}
 
 \begin{titlepage}
-	{\centering
-	\includegraphics[width=1\textwidth]{../misc/img/Logo2-barevne.pdf}\par\vspace{1cm}
-	{\skautfont\scshape\LARGE Skautský zpěvník \par}
-	\vspace{.4cm}
-	{\skautfont\scshape\normalsize Junák - český skaut, z. s.\par}}
-	\vspace{.6cm}
+  {\centering
+  \includegraphics[width=1\textwidth]{../misc/img/Logo2-barevne.pdf}\par\vspace{1cm}
+  {\skautfont\Huge Skautský zpěvník \par}
+  \vspace{.4cm}
+  {\skautfont\normalsize Junák - český skaut, z. s.\par}}
+  \vspace{.6cm}
 
-	\vfill
+  \vfill
 
-	{\footnotesize vygenerováno pomocí \textit{zpevnik.skauting.cz}}
+  {\footnotesize Vytvořeno pomocí \textit{\href{https://zpevnik.skauting.cz}{zpevnik.skauting.cz}}}
 
 \end{titlepage}
 
 
 <<#front_index>>
-\showindex{\skautfont Obsah}{titleidx}
+\showindex[0]{\skautfont Obsah}{titleidx} % Optional column count
 <</front_index>>
 
 \begin{songs}{titleidx}
@@ -96,7 +107,7 @@
 \end{songs}
 
 <<#back_index>>
-\showindex{\skautfont Obsah}{titleidx}
+\showindex[0]{\skautfont Obsah}{titleidx} % Optional column count
 <</back_index>>
 
 \end{document}
