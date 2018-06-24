@@ -75,8 +75,10 @@ def songs():
         variant = g.model.variants.create_variant(data['variant'])
         log_event(EVENTS.VARIANT_NEW, current_user.get_id(), data['variant'])
 
-        return jsonify(link='songs/{}/variants/{}'.format(song.get_id(), variant.get_id())), 201, \
-              {'location': '/songs/{}/variants/{}'.format(song.get_id(), variant.get_id())}
+        return jsonify(song.get_serialized_data(current_user.get_id())), 201
+
+        # return jsonify(link='songs/{}/variants/{}'.format(song.get_id(), variant.get_id())), 201, \
+        #       {'location': '/songs/{}/variants/{}'.format(song.get_id(), variant.get_id())}
 
 
 @api.route('/songs/<song_id>', methods=['GET', 'PUT'])
