@@ -137,9 +137,7 @@ def song_variants(song_id):
         variant = g.model.variants.create_variant(data)
         log_event(EVENTS.VARIANT_NEW, current_user.get_id(), data)
 
-        return jsonify(link='songs/{}/variants/{}'.format(song_id, variant.get_id())), 201, \
-              {'location': '/songs/{}/variants/{}'.format(song_id, variant.get_id())}
-
+        return jsonify(variant.get_serialized_data()), 201
 
 @api.route('/songs/<song_id>/variants/<variant_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
