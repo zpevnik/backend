@@ -195,7 +195,7 @@ class Variants(object):
                     'title': item['song'][0]['title'],
                     'interpreters': item['song'][0]['interpreters']
                 },
-                'order': next((a for a in items if a['variant_id'] == str(item['_id'])), 0)
+                'order': next((a['order'] for a in items if a['variant_id'] == str(item['_id'])), 0)
             }) # yapf: disable
 
         return extended_items
