@@ -31,12 +31,12 @@ class SongVariantTest(unittest.TestCase):
         # add test song into the database
         rv = utils._post_song(self.app, title='Back in Black', description='Variant test song')
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
-        assert b'/variants/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         data = json.loads(rv.data)
-        song_id = data['link'].split('/')[1]
-        variant_id = data['link'].split('/')[3]
+        song_id = data['id']
+        variant_id = data['variants'][0]['id']
 
         # get song variant with get request
         rv = self.app.get('/api/v1/songs/{}/variants'.format(song_id))
@@ -60,12 +60,12 @@ class SongVariantTest(unittest.TestCase):
         # insert test song into the database
         rv = utils._post_song(self.app, title='Back in Black', description='Variant test song')
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
-        assert b'/variants/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         data = json.loads(rv.data)
-        song_id = data['link'].split('/')[1]
-        variant_id = data['link'].split('/')[3]
+        song_id = data['id']
+        variant_id = data['variants'][0]['id']
 
         # test json request error
         rv = self.app.post('/api/v1/songs/{}/variants'.format(song_id))
@@ -131,12 +131,12 @@ class SongVariantTest(unittest.TestCase):
         # insert test song into the database
         rv = utils._post_song(self.app, title='Panic Station', description='Variant test song')
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
-        assert b'/variants/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         data = json.loads(rv.data)
-        song_id = data['link'].split('/')[1]
-        variant_id = data['link'].split('/')[3]
+        song_id = data['id']
+        variant_id = data['variants'][0]['id']
 
         # test wrong song variant id
         rv = utils._put_song_variant(self.app, song_id, '000000000000000000000000')
@@ -187,14 +187,14 @@ class SongVariantTest(unittest.TestCase):
         rv = utils._post_song(self.app, title='Panic Station', description='First variant')
 
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
-        assert b'/variants/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         variant_ids = []
 
         data = json.loads(rv.data)
-        song_id = data['link'].split('/')[1]
-        variant_ids.append(data['link'].split('/')[3])
+        song_id = data['id']
+        variant_ids.append(data['variants'][0]['id'])
 
         # insert one more variant for this song
         rv = self.app.post(
@@ -241,12 +241,12 @@ class SongVariantTest(unittest.TestCase):
         # insert test song into the database
         rv = utils._post_song(self.app, title='Invincible', description='Variant test song')
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
-        assert b'/variants/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         data = json.loads(rv.data)
-        song_id = data['link'].split('/')[1]
-        variant_id = data['link'].split('/')[3]
+        song_id = data['id']
+        variant_id = data['variants'][0]['id']
 
         # duplicate variant
         rv = self.app.get('/api/v1/songs/{}/variants/{}/duplicate'.format(song_id, variant_id))
@@ -265,12 +265,12 @@ class SongVariantTest(unittest.TestCase):
         # insert test song for further testing
         rv = utils._post_song(self.app, title='Bubák')
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
-        assert b'/variants/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         data = json.loads(rv.data)
-        song_id = data['link'].split('/')[1]
-        variant_id = data['link'].split('/')[3]
+        song_id = data['id']
+        variant_id = data['variants'][0]['id']
 
         # test wrong view permission values
         rv = utils._put_song_variant(self.app, song_id, variant_id, visibility=2)

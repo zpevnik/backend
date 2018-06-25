@@ -536,7 +536,7 @@ securitySchemes:
             example: "/songs/1/variants/3"
         body:
           application/json:
-            type: "Redirect"
+            type: "Song ext"
       400:
         description: "Invalid json request."
         body:
@@ -1009,7 +1009,7 @@ securitySchemes:
             example: "/songbooks/1/"
         body:
           application/json:
-            type: "Redirect"
+            type: "Songbook"
       400:
         description: "Invalid json request."
         body:

@@ -35,7 +35,8 @@ class SongTest(unittest.TestCase):
         # add song into the database
         rv = utils._post_song(self.app, title='Back in Black')
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         # get songs with get request
         rv = self.app.get('/api/v1/songs')
@@ -173,7 +174,7 @@ class SongTest(unittest.TestCase):
         rv = utils._post_song(self.app, title='Panic Station')
         assert rv.status_code == 201
         song = json.loads(rv.data)
-        song_id = song['link'].split('/')[1]
+        song_id = song['id']
 
         # test wrong song id
         rv = utils._put_song(self.app, '000000000000000000000000', title='Panic Station')
@@ -238,24 +239,27 @@ class SongTest(unittest.TestCase):
 
         rv = utils._post_song(self.app, title='Live and Let Die')
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         data = json.loads(rv.data)
-        song_ids.append(data['link'].split('/')[1])
+        song_ids.append(data['id'])
 
         rv = utils._post_song(self.app, title='Kashmir')
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         data = json.loads(rv.data)
-        song_ids.append(data['link'].split('/')[1])
+        song_ids.append(data['id'])
 
         rv = utils._post_song(self.app, title='Pažitka')
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         data = json.loads(rv.data)
-        song_ids.append(data['link'].split('/')[1])
+        song_ids.append(data['id'])
 
         # get sorted songs with get request
         rv = self.app.get('/api/v1/songs?order=title')
@@ -319,10 +323,11 @@ class SongTest(unittest.TestCase):
             interpreters=[interpreter_id])
 
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         data = json.loads(rv.data)
-        song_id = data['link'].split('/')[1]
+        song_id = data['id']
 
         # text correct song edit request
         rv = self.app.get('/api/v1/songs/{}'.format(song_id))

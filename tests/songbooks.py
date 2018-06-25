@@ -37,7 +37,8 @@ class SongbookTest(unittest.TestCase):
         # add songbook into the database
         rv = utils._post_songbook(self.app, title='My songbook')
         assert rv.status_code == 201
-        assert b'"link": "songbooks/' in rv.data
+        assert b'"created": "' in rv.data
+        assert b'"id": "' in rv.data
 
         # get songbooks with get request
         rv = self.app.get('/api/v1/songbooks')
@@ -119,7 +120,7 @@ class SongbookTest(unittest.TestCase):
         rv = utils._post_songbook(self.app, title='My songbook')
         assert rv.status_code == 201
         songbook = json.loads(rv.data)
-        songbook_id = songbook['link'].split('/')[1]
+        songbook_id = songbook['id']
 
         # test wrong songbook id
         rv = utils._put_songbook(self.app, '000000000000000000000000', title='Other songbook')
@@ -144,20 +145,18 @@ class SongbookTest(unittest.TestCase):
         rv = utils._post_songbook(self.app, title='My songbook')
         assert rv.status_code == 201
         songbook = json.loads(rv.data)
-        songbook_id = songbook['link'].split('/')[1]
+        songbook_id = songbook['id']
 
         # insert test song into the database
         rv = utils._post_song(self.app, title='Panic Station', description='First variant')
 
         assert rv.status_code == 201
-        assert b'"link": "songs/' in rv.data
-        assert b'/variants/' in rv.data
 
         variant_ids = []
 
         data = json.loads(rv.data)
-        song_id = data['link'].split('/')[1]
-        variant_ids.append(data['link'].split('/')[3])
+        song_id = data['id']
+        variant_ids.append(data['variants'][0]['id'])
 
         # insert one more variant for this song
         rv = self.app.post(
@@ -211,7 +210,7 @@ class SongbookTest(unittest.TestCase):
         rv = utils._post_songbook(self.app, title='My songbook')
         assert rv.status_code == 201
         songbook = json.loads(rv.data)
-        songbook_id = songbook['link'].split('/')[1]
+        songbook_id = songbook['id']
 
         # test songbook title endpoint (missing title)
         rv = self.app.put(
@@ -257,11 +256,11 @@ class SongbookTest(unittest.TestCase):
 
         rv = utils._post_song(self.app)
         data = json.loads(rv.data)
-        variant_ids.append(data['link'].split('/')[3])
+        variant_ids.append(data['variants'][0]['id'])
 
         rv = utils._post_song(self.app)
         data = json.loads(rv.data)
-        variant_ids.append(data['link'].split('/')[3])
+        variant_ids.append(data['variants'][0]['id'])
 
         # test songbook songs endpoint (correct insertion)
         rv = utils._put_songbook_songs(

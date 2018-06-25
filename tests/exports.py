@@ -32,7 +32,7 @@ class ExportTest(unittest.TestCase):
         rv = utils._post_songbook(self.app, title="Linkin Park songbook")
         assert rv.status_code == 201
         songbook = json.loads(rv.data)
-        songbook_id = songbook['link'].split('/')[1]
+        songbook_id = songbook['id']
 
         # insert test songs for further testing
         variant_ids = []
@@ -48,7 +48,7 @@ class ExportTest(unittest.TestCase):
             "[rec]Caught in the undertow, just caught in the undertow\n")
         assert rv.status_code == 201
         song = json.loads(rv.data)
-        variant_ids.append(song['link'].split('/')[3])
+        variant_ids.append(song['variants'][0]['id'])
 
         rv = utils._post_song(
             self.app,
@@ -62,7 +62,7 @@ class ExportTest(unittest.TestCase):
             "I'm my [Em]own worst [G]ene[C]my\n")
         assert rv.status_code == 201
         song = json.loads(rv.data)
-        variant_ids.append(song['link'].split('/')[3])
+        variant_ids.append(song['variants'][0]['id'])
 
         # get current songbook
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
@@ -101,7 +101,7 @@ class ExportTest(unittest.TestCase):
         rv = utils._post_songbook(self.app, title="Cache songbook")
         assert rv.status_code == 201
         songbook = json.loads(rv.data)
-        songbook_id = songbook['link'].split('/')[1]
+        songbook_id = songbook['id']
 
         # export test songbook as pdf
         rv = self.app.get(
