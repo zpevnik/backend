@@ -56,8 +56,7 @@ def songbooks():
         songbook = g.model.songbooks.create_songbook(data)
         log_event(EVENTS.SONGBOOK_NEW, current_user.get_id(), data)
 
-        return jsonify(link='songbooks/{}'.format(songbook.get_id())), 201, \
-              {'location': '/songbooks/{}'.format(songbook.get_id())}
+        return jsonify(songbook.get_serialized_data()), 201
 
 
 @api.route('/songbooks/<songbook_id>', methods=['GET', 'PUT', 'DELETE'])
