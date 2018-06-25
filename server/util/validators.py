@@ -233,9 +233,9 @@ def songbooks_request(request):
     if 'title' not in request or not request['title']:
         ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_TITLE_MISSING, 'title')
     if 'options' not in request:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_TITLE_MISSING, 'options')
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_OPTIONS_MISSING, 'options')
     if 'songs' not in request:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_TITLE_MISSING, 'songs')
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONGBOOK_SONGS_MISSING, 'songs')
 
     if ex.errors:
         raise ex
