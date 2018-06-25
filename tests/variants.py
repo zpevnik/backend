@@ -113,7 +113,7 @@ class SongVariantTest(unittest.TestCase):
         assert rv.status_code == 201
 
         data = json.loads(rv.data)
-        variant_id = data['link'].split('/')[3]
+        variant_id = data['id']
 
         # check get request on inserted song variant
         rv = self.app.get('/api/v1/songs/{}/variants/{}'.format(song_id, variant_id))
@@ -204,7 +204,7 @@ class SongVariantTest(unittest.TestCase):
         assert rv.status_code == 201
 
         data = json.loads(rv.data)
-        variant_ids.append(data['link'].split('/')[3])
+        variant_ids.append(data['id'])
 
         # try to delete nonexistent song variant from the database
         rv = self.app.delete('/api/v1/songs/{}/variants/{}'.format(song_id,

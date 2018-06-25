@@ -627,7 +627,7 @@ securitySchemes:
             example: "/songs/1/variants/3"
         body:
           application/json:
-            type: "Redirect"
+            type: "Song variant"
       400:
         description: "Invalid json request."
         body:

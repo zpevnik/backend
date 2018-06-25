@@ -166,7 +166,7 @@ class SongbookTest(unittest.TestCase):
         assert rv.status_code == 201
 
         data = json.loads(rv.data)
-        variant_ids.append(data['link'].split('/')[3])
+        variant_ids.append(data['id'])
 
         # get songbooks with get request
         rv = self.app.get('/api/v1/songbooks/{}'.format(songbook_id))
