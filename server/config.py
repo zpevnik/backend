@@ -15,6 +15,8 @@ SECRET_KEY = getenv('SECRET_KEY', 'test_secret')
 MONGODB_URI = getenv('MONGODB_UNITTEST_URI',
                      getenv('MONGODB_URI', 'mongodb://localhost:27017/zpevnik'))
 
+XELATEX_PATH = getenv('XELATEX_PATH', '/usr/bin/xelatex')
+
 SONGBOOK_TEMP_FOLDER = 'songs/temp/'
 SONGBOOK_DONE_FOLDER = 'songs/done/'
 SONGBOOK_TEMPLATE_FOLDER = 'songs/templates/'

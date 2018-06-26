@@ -61,7 +61,7 @@ def export_to_pdf(filename):
                            (EXCODES.COMPILATION_ERROR, STRINGS.COMPILATION_ERROR, error))
 
     process = subprocess.Popen(
-        ["xelatex", "-halt-on-error", filename + ".tex"],
+        [app.config['XELATEX_PATH'], "-halt-on-error", filename + ".tex"],
         stdout=subprocess.PIPE,
         cwd=app.config['SONGBOOK_TEMP_FOLDER'])
     output = process.communicate()[0]
@@ -81,7 +81,7 @@ def export_to_pdf(filename):
         error("index generation", output)
 
     process = subprocess.Popen(
-        ["xelatex", "-halt-on-error", filename + ".tex"],
+        [app.config['XELATEX_PATH'], "-halt-on-error", filename + ".tex"],
         stdout=subprocess.PIPE,
         cwd=app.config['SONGBOOK_TEMP_FOLDER'])
     output = process.communicate()[0]
