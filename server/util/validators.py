@@ -182,11 +182,13 @@ def songs_extended_request(request):
     if 'variant' not in request:
         ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_VARIANT_MISSING, 'variant')
     else:
+        if 'title' not in request['variant'] or not request['variant']['title']:
+            ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_VARIANT_TITLE_MISSING, 'variant/title')
         if 'text' not in request['variant'] or not request['variant']['text']:
-            ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TEXT_MISSING, 'variant/text')
+            ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_VARIANT_TEXT_MISSING, 'variant/text')
         if 'description' not in request['variant']:
             ex.add_error(EXCODES.MISSING_FIELD,
-                STRINGS.REQUEST_SONG_DESCRIPTION_MISSING, 'variant/description') # yapf: disable
+                STRINGS.REQUEST_VARIANT_DESCRIPTION_MISSING, 'variant/description') # yapf: disable
 
     if ex.errors:
         raise ex
@@ -196,6 +198,7 @@ def songs_extended_request(request):
         'authors': request['authors'],
         'interpreters': request['interpreters'],
         'variant': {
+            'title': request['variant']['title'],
             'text': request['variant']['text'],
             'description': request['variant']['description']
         }
@@ -209,17 +212,20 @@ def songs_extended_request(request):
 def song_variant_request(request):
     ex = AppException(EVENTS.REQUEST_EXCEPTION, 422)
 
+    if 'title' not in request or not request['title']:
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_VARIANT_TITLE_MISSING, 'title')
     if 'text' not in request or not request['text']:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_TEXT_MISSING, 'text')
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_VARIANT_TEXT_MISSING, 'text')
     if 'description' not in request:
-        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_SONG_DESCRIPTION_MISSING, 'description')
+        ex.add_error(EXCODES.MISSING_FIELD, STRINGS.REQUEST_VARIANT_DESCRIPTION_MISSING, 'description')
 
     if ex.errors:
         raise ex
 
     data = {
+        'title': request['title'],
         'text': request['text'],
-        'description': request['description'],
+        'description': request['description']
     }
     if 'visibility' in request:
         data['visibility'] = request['visibility']

@@ -77,9 +77,6 @@ def songs():
 
         return jsonify(song.get_serialized_data(current_user.get_id())), 201
 
-        # return jsonify(link='songs/{}/variants/{}'.format(song.get_id(), variant.get_id())), 201, \
-        #       {'location': '/songs/{}/variants/{}'.format(song.get_id(), variant.get_id())}
-
 
 @api.route('/songs/<song_id>', methods=['GET', 'PUT'])
 @login_required
@@ -200,6 +197,7 @@ def song_variant_duplicate(song_id, variant_id):
     data = variant.get_serialized_data()
     data['owner'] = current_user.get_id()
     data['visibility'] = PERMISSION.PRIVATE
+    data['title'] = '{} duplicate'.format(data['title'])
 
     g.model.variants.create_variant(data)
     log_event(EVENTS.VARIANT_NEW, current_user.get_id(), data)

@@ -22,11 +22,14 @@ class Strings(object):
     REQUEST_SONGBOOK_SONGS_VARIANT_MISSING = 'Songbook variant_id in song list is missing.'
 
     REQUEST_SONG_TITLE_MISSING = 'Song title is missing.'
-    REQUEST_SONG_TEXT_MISSING = 'Song text is missing.'
-    REQUEST_SONG_DESCRIPTION_MISSING = 'Song description is missing.'
     REQUEST_SONG_AUTHORS_MISSING = 'Song authors are missing.'
     REQUEST_SONG_INTERPRETERS_MISSING = 'Song interpreters are missing.'
     REQUEST_SONG_VARIANT_MISSING = 'Song variant key is missing.'
+
+    REQUEST_VARIANT_TITLE_MISSING = 'Song variant title is missing.'
+    REQUEST_VARIANT_TEXT_MISSING = 'Song variant text is missing.'
+    REQUEST_VARIANT_DESCRIPTION_MISSING = 'Song variant description is missing.'
+
     REQUEST_INTERPRETER_NAME_MISSING = 'Interpreter name is missing.'
     REQUEST_AUTHOR_NAME_MISSING = 'Author name is missing.'
     REQUEST_PAGE_OOR_ERROR = 'Page number is out of range.'

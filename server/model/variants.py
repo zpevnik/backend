@@ -37,7 +37,7 @@ class Variants(object):
 
         Args:
           data (dict): Song variant data dictionary containing 'owner', 'text',
-            'description' and 'visibility' dictionary key.
+            'description', 'title' and 'visibility' dictionary key.
 
         Returns:
           Variant: Instance of the new variant.
@@ -46,6 +46,7 @@ class Variants(object):
             '_id': ObjectId(),
             'song_id': ObjectId(data['song_id']),
             'owner': data['owner'],
+            'title': data['title'],
             'text': data['text'] if 'text' in data else '',
             'description': data['description'] if 'description' in data else '',
             'visibility': data['visibility'],
@@ -189,6 +190,7 @@ class Variants(object):
             extended_items.append({
                 'variant_id': str(item['_id']),
                 'owner': item['owner'],
+                'title': item['title'],
                 'visibility': item['visibility'],
                 'song': {
                     'song_id': str(item['song_id']),
@@ -220,6 +222,7 @@ class Variant(object):
         self._id = variant['_id']
         self._song_id = variant['song_id']
         self._owner = variant['owner']
+        self._title = variant['title']
         self._text = variant['text']
         self._description = variant['description']
         self._visibility = variant['visibility']
@@ -235,6 +238,7 @@ class Variant(object):
 
         variant = {
             'text': self._text,
+            'title': self._title,
             'description': self._description,
             'visibility': self._visibility,
             'export_cache': self._export_cache
@@ -253,6 +257,7 @@ class Variant(object):
             'created': self._id.generation_time,
             'song_id': str(self._song_id),
             'owner': self._owner,
+            'title': self._title,
             'text': self._text,
             'description': self._description,
             'visibility': self._visibility
@@ -269,6 +274,9 @@ class Variant(object):
 
     def get_song_id(self):
         return str(self._song_id)
+
+    def get_title(self):
+        return self._title
 
     def get_description(self):
         return self._description
@@ -292,6 +300,7 @@ class Variant(object):
         self._visibility = visibility
 
     def set_data(self, data):
+        self._text = data['title'] if 'title' in data else self._title
         self._text = data['text'] if 'text' in data else self._text
         self._description = data['description'] if 'description' in data else self._description
         self._handle_permissions(data['visibility'] if 'visibility' in data else self._visibility)
