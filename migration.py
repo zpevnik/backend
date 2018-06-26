@@ -38,6 +38,29 @@ def reset_variant_cache():
         collection.update_one({'_id': variant['_id']}, {'$set': variant})
 
 
+def migration_2018_26_08_1():
+    logger.info('26.08.2018 - Adding variant titles.')
+
+    reset_variant_cache()
+
+    collection = db['variants']
+    variants = collection.find()
+
+    counters = {}
+
+    for variant in variants:
+        if 'title' in variant:
+            continue
+
+        if variant['_id'] in counters:
+            counters[variant['_id']] += 1
+        else:
+            counters[variant['_id']] = 1
+        variant['title'] = 'Varianta {}'.format(counters[variant['_id']])
+
+        collection.update_one({'_id': variant['_id']}, {'$set': variant})
+
+
 def migration_2018_18_04_1():
     logger.info('18.04.2018 - Renaming songbook option size to format.')
 
@@ -514,5 +537,6 @@ def migration_2017_08_18_4():
 #migration_2018_07_04_4()
 #migration_2018_11_04_1()
 #migration_2018_12_04_1()
+#migration_2018_18_04_1()
 
-migration_2018_18_04_1()
+migration_2018_26_08_1()
