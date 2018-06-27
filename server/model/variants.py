@@ -300,7 +300,7 @@ class Variant(object):
         self._visibility = visibility
 
     def set_data(self, data):
-        self._text = data['title'] if 'title' in data else self._title
+        self._title = data['title'] if 'title' in data else self._title
         self._text = data['text'] if 'text' in data else self._text
         self._description = data['description'] if 'description' in data else self._description
         self._handle_permissions(data['visibility'] if 'visibility' in data else self._visibility)
