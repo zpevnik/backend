@@ -7,7 +7,7 @@ class TranslatorStrings(object):
     ERROR_NOT_IMPLEMENTED = '[{}] ERROR: Not yet implemented.'
     ERROR_CHORDS_INSIDE_REC = '[{}] ERROR: Chord tag found inside rec block.'
     ERROR_NO_STARTING_BLOCK = '[0] ERROR: Song must start with some block tag.'
-    ERROR_STRING_CONTAINS_FORBIDDEN_CHARACTERS = '[0] ERROR: String contaions forbidden characters.'
+    ERROR_STRING_CONTAINS_FORBIDDEN_CHARACTERS = '[0] ERROR: String contains forbidden characters.'
 
 
 class Strings(object):
