@@ -12,7 +12,10 @@ from bson import ObjectId
 
 from server.model import Model
 from server.constants import OPTIONS
+from server.constants import STRINGS
 from server.constants import PERMISSION
+
+from server.util.translator import translate_to_tex
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +29,50 @@ db = mongo_client[parsed.path[1:]]
 model = Model(db=db)
 
 
+def remove_corrupted_variants():
+    logger.info('Fixing/Removing corrupted song variants.')
+    collection = db['variants']
+    variants = collection.find()
+
+    counter = 0
+    fix_counter = 0
+    delete_counter = 0
+
+    for variant in variants:
+        counter += 1
+        _, log = translate_to_tex(variant['text'])
+
+        # end if there is no problem
+        if not log:
+            continue
+
+        text = variant['text']
+
+        # check if there is no starting block and try to fix it
+        if STRINGS.TRANSLATOR.ERROR_NO_STARTING_BLOCK in log:
+            text = "[verse]\n{}".format(text)
+            _, log = translate_to_tex(text)
+
+        # there is no longer any problem
+        if not log:
+            fix_counter += 1
+            variant['text'] = text
+            collection.update_one({'_id': variant['_id']}, {'$set': variant})
+        else:  # this text has bigger problems
+            delete_counter += 1
+            collection.delete_one({'_id': variant['_id']})
+
+            # delete song if there is no more variants for it
+            song_variants = collection.count({'song_id': ObjectId(variant['song_id'])})
+            if song_variants == 0:
+                db['songs'].delete_one({'_id': ObjectId(variant['song_id'])})
+
+    logger.info('Number of songs before fix/removal: {}'.format(counter))
+    logger.info('Fixed songs: {}'.format(fix_counter))
+    logger.info('Removed songs: {}'.format(delete_counter))
+
 def reset_variant_cache():
+    logger.info('Resetting variant cache.')
     collection = db['variants']
     variants = collection.find()
 
@@ -538,5 +584,4 @@ def migration_2017_08_18_4():
 #migration_2018_11_04_1()
 #migration_2018_12_04_1()
 #migration_2018_18_04_1()
-
-migration_2018_26_08_1()
+#migration_2018_26_08_1()
