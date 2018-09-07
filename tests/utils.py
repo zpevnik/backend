@@ -32,6 +32,7 @@ def _put_author(app, author_id, name='name'):
 # post song into the database
 def _post_song(app,
                title='title',
+               variant_title='Variant title',
                text='[verse]',
                description='',
                lauthors=[],
@@ -47,6 +48,7 @@ def _post_song(app,
                          'music': mauthors},
                 interpreters=interpreters,
                 variant={
+                    'title': variant_title,
                     'text': text,
                     'description': description
                 })))
@@ -73,8 +75,8 @@ def _put_song(app, song_id, title='title', lauthors=[], mauthors=[], interpreter
 
 
 # put song variant into the database
-def _put_song_variant(app, song_id, variant_id, text='[verse]', description="", visibility=None):
-    data = {'text': text, 'description': description}
+def _put_song_variant(app, song_id, variant_id, variant_title='Variant title', text='[verse]', description='', visibility=None):
+    data = {'text': text, 'description': description, 'title': variant_title}
     if visibility is not None:
         data['visibility'] = visibility
 

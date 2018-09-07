@@ -162,7 +162,7 @@ class SongbookTest(unittest.TestCase):
         rv = self.app.post(
             '/api/v1/songs/{}/variants'.format(song_id),
             content_type='application/json',
-            data=json.dumps(dict(text="[verse]", description="Second variant")))
+            data=json.dumps(dict(title="Variant title", text="[verse]", description="Second variant")))
         assert rv.status_code == 201
 
         data = json.loads(rv.data)

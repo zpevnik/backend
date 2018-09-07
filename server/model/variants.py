@@ -299,21 +299,23 @@ class Variant(object):
 
         self._visibility = visibility
 
+    def invalidate_cache(self):
+        self._export_cache = None
+
     def set_data(self, data):
         self._title = data['title'] if 'title' in data else self._title
         self._text = data['text'] if 'text' in data else self._text
         self._description = data['description'] if 'description' in data else self._description
         self._handle_permissions(data['visibility'] if 'visibility' in data else self._visibility)
 
-        # invalidate or reset export cache
-        self._export_cache = data['export_cache'] if 'export_cache' in data else None
+        # invalidate and reset export cache
+        self._export_cache = None
 
     def get_output_template(self):
         """Generate tex output template and return it."""
 
         # generate latex output if export cache is empty
         if self._export_cache is None:
-            #self._export_cache = song_format(self._text)
 
             # get parent song of this variant
             song = g.model.songs.find_one(song_id=str(self._song_id))

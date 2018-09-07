@@ -255,6 +255,12 @@ class Song(object):
         self._authors = data['authors'] if 'authors' in data else self._authors
         self._interpreters = data['interpreters'] if 'interpreters' in data else self._interpreters
 
+        # clear export cache for songs variants
+        variants = g.model.variants.find(song_id=self.get_id())
+        for variant in variants:
+            variant.invalidate_cache()
+            g.model.variants.save(variant)
+
     def __repr__(self):
         return '<{!r} id={!r} title={!r} interpreters={!r}' \
             .format(self.__class__.__name__, self._id, self._title, self._interpreters)

@@ -158,8 +158,9 @@ def song_variant_single(song_id, variant_id):
         validators.json_request(data)
         data = validators.song_variant_request(data)
 
-        # immediately save test translation into export_cache
-        data['export_cache'] = validators.song_format(data)
+        # Currently, translated and validated song is not saved.
+        # This can be changed in the future.
+        validators.song_format(data)
         variant.set_data(data)
 
         data['variant_id'] = variant_id
@@ -177,7 +178,7 @@ def song_variant_single(song_id, variant_id):
         log_event(EVENTS.VARIANT_DELETE, current_user.get_id(), variant_id)
 
         # there is no remaining variant for this song
-        if not len(g.model.variants.find(song_id)):
+        if not len(g.model.variants.find(song_id=song_id)):
             g.model.songs.delete(song)
             log_event(EVENTS.SONG_DELETE, current_user.get_id(), song_id)
 

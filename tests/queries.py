@@ -45,6 +45,7 @@ class QueryTest(unittest.TestCase):
             '_id': ObjectId(),
             'song_id': song_id,
             'owner': owner,
+            'title': 'Variant title',
             'text': '',
             'description': '',
             'visibility': visibility,
