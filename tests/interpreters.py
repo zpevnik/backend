@@ -35,7 +35,7 @@ class InterpreterTest(unittest.TestCase):
         # add interpreter into the database
         rv = utils._post_interpreter(self.app, name='Jimmy Page')
         assert rv.status_code == 201
-        assert b'"link": "interpreters/' in rv.data
+        assert b'"link":"interpreters/' in rv.data
 
         # get interpreters with get request
         rv = self.app.get('/api/v1/interpreters')
@@ -100,15 +100,15 @@ class InterpreterTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "name"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"name"' in rv.data
 
         # test duplicate interpreters
         rv = utils._post_interpreter(self.app, name='Slash')
         assert rv.status_code == 201
         rv = utils._post_interpreter(self.app, name='Slash')
         assert rv.status_code == 422
-        assert b'"code": "already_exists"' in rv.data
+        assert b'"code":"already_exists"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -130,8 +130,8 @@ class InterpreterTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "name"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"name"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)

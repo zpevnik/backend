@@ -31,8 +31,8 @@ class SongVariantTest(unittest.TestCase):
         # add test song into the database
         rv = utils._post_song(self.app, title='Back in Black', description='Variant test song')
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         data = json.loads(rv.data)
         song_id = data['id']
@@ -60,8 +60,8 @@ class SongVariantTest(unittest.TestCase):
         # insert test song into the database
         rv = utils._post_song(self.app, title='Back in Black', description='Variant test song')
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         data = json.loads(rv.data)
         song_id = data['id']
@@ -77,7 +77,7 @@ class SongVariantTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
 
         # test missing text field
         rv = self.app.post(
@@ -85,8 +85,8 @@ class SongVariantTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(description="Missing text variant")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "text"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"text"' in rv.data
 
         # test missing description field
         rv = self.app.post(
@@ -94,8 +94,8 @@ class SongVariantTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(text="Missing description variant")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "description"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"description"' in rv.data
 
         # test non-existent song variant insertion
         rv = self.app.post(
@@ -103,7 +103,7 @@ class SongVariantTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(text="[verse] Test song", description="Test song")))
         assert rv.status_code == 404
-        assert b'"code": "does_not_exist"' in rv.data
+        assert b'"code":"does_not_exist"' in rv.data
 
         # test correct song variant insertion
         rv = self.app.post(
@@ -131,8 +131,8 @@ class SongVariantTest(unittest.TestCase):
         # insert test song into the database
         rv = utils._post_song(self.app, title='Panic Station', description='Variant test song')
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         data = json.loads(rv.data)
         song_id = data['id']
@@ -148,7 +148,7 @@ class SongVariantTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
 
         # test missing text field
         rv = self.app.put(
@@ -156,8 +156,8 @@ class SongVariantTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(description="")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "text"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"text"' in rv.data
 
         # test missing description field
         rv = self.app.put(
@@ -165,8 +165,8 @@ class SongVariantTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(text="[verse]")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "description"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"description"' in rv.data
 
         # test correct song variant edit request
         rv = self.app.put(
@@ -187,8 +187,8 @@ class SongVariantTest(unittest.TestCase):
         rv = utils._post_song(self.app, title='Panic Station', description='First variant')
 
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         variant_ids = []
 
@@ -232,7 +232,7 @@ class SongVariantTest(unittest.TestCase):
         # check correct deletion of entire song
         rv = self.app.get('/api/v1/songs/{}'.format(song_id))
         assert rv.status_code == 404
-        assert b'"code": "does_not_exist"' in rv.data
+        assert b'"code":"does_not_exist"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -241,8 +241,8 @@ class SongVariantTest(unittest.TestCase):
         # insert test song into the database
         rv = utils._post_song(self.app, title='Invincible', description='Variant test song')
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         data = json.loads(rv.data)
         song_id = data['id']
@@ -256,7 +256,7 @@ class SongVariantTest(unittest.TestCase):
         rv = self.app.get('/api/v1/songs/{}/variants/{}/duplicate'.format(
             song_id, '000000000000000000000000'))
         assert rv.status_code == 404
-        assert b'"code": "does_not_exist"' in rv.data
+        assert b'"code":"does_not_exist"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -265,8 +265,8 @@ class SongVariantTest(unittest.TestCase):
         # insert test song for further testing
         rv = utils._post_song(self.app, title='Bubák')
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         data = json.loads(rv.data)
         song_id = data['id']
@@ -275,13 +275,13 @@ class SongVariantTest(unittest.TestCase):
         # test wrong view permission values
         rv = utils._put_song_variant(self.app, song_id, variant_id, visibility=2)
         assert rv.status_code == 422
-        assert b'"code": "wrong_value"' in rv.data
-        assert b'"data": "visibility"' in rv.data
+        assert b'"code":"wrong_value"' in rv.data
+        assert b'"data":"visibility"' in rv.data
 
         rv = utils._put_song_variant(self.app, song_id, variant_id, visibility='abc')
         assert rv.status_code == 422
-        assert b'"code": "wrong_value"' in rv.data
-        assert b'"data": "visibility"' in rv.data
+        assert b'"code":"wrong_value"' in rv.data
+        assert b'"data":"visibility"' in rv.data
 
         # test correct permission change
         rv = utils._put_song_variant(self.app, song_id, variant_id, visibility=PERMISSION.PUBLIC)
@@ -294,8 +294,8 @@ class SongVariantTest(unittest.TestCase):
         # test wrong permission change
         rv = utils._put_song_variant(self.app, song_id, variant_id, visibility=PERMISSION.PRIVATE)
         assert rv.status_code == 422
-        assert b'"code": "wrong_value"' in rv.data
-        assert b'"data": "visibility"' in rv.data
+        assert b'"code":"wrong_value"' in rv.data
+        assert b'"data":"visibility"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)

@@ -37,8 +37,8 @@ class SongbookTest(unittest.TestCase):
         # add songbook into the database
         rv = utils._post_songbook(self.app, title='My songbook')
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         # get songbooks with get request
         rv = self.app.get('/api/v1/songbooks')
@@ -109,8 +109,8 @@ class SongbookTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "title"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"title"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -132,10 +132,10 @@ class SongbookTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "title"' in rv.data
-        assert b'"data": "songs"' in rv.data
-        assert b'"data": "options"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"title"' in rv.data
+        assert b'"data":"songs"' in rv.data
+        assert b'"data":"options"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -200,7 +200,7 @@ class SongbookTest(unittest.TestCase):
         rv = self.app.get('/api/v1/songbooks/{}/duplicate'.format(songbook_id))
         assert rv.status_code == 201
         assert songbook_id.encode() not in rv.data
-        assert b'"link": "songbooks/' in rv.data
+        assert b'"link":"songbooks/' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -218,14 +218,14 @@ class SongbookTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "title"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"title"' in rv.data
 
         # test songbook title endpoint (no title)
         rv = utils._put_songbook_title(self.app, songbook_id, title='')
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "title"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"title"' in rv.data
 
         # test songbook title endpoint (correct title)
         rv = utils._put_songbook_title(self.app, songbook_id, title='Other songbook')
@@ -240,8 +240,8 @@ class SongbookTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "songs"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"songs"' in rv.data
 
         # test songbook songs endpoint (wrong songs)
         rv = utils._put_songbook_songs(
@@ -249,7 +249,7 @@ class SongbookTest(unittest.TestCase):
                 'variant_id': '000000000000000000000000'
             }])
         assert rv.status_code == 404
-        assert b'"code": "does_not_exist"' in rv.data
+        assert b'"code":"does_not_exist"' in rv.data
 
         # insert songs into the database for further testing
         variant_ids = []
@@ -297,14 +297,14 @@ class SongbookTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "options"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"options"' in rv.data
 
         # test songbook options endpoint (wrong format option)
         rv = utils._put_songbook_options(self.app, songbook_id, options={'format': "B4"})
         assert rv.status_code == 422
-        assert b'"code": "wrong_value"' in rv.data
-        assert b'"data": "format"' in rv.data
+        assert b'"code":"wrong_value"' in rv.data
+        assert b'"data":"format"' in rv.data
 
         # test songbook options endpoint (correct change)
         rv = utils._put_songbook_options(

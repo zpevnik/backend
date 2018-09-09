@@ -29,9 +29,9 @@ class UserTest(unittest.TestCase):
         # check user info
         rv = self.app.get('/api/v1/user')
         assert rv.status_code == 200
-        assert b'"active_songbook": ' in rv.data
-        assert b'"logout_link": ' in rv.data
-        assert b'"name": ' in rv.data
+        assert b'"active_songbook":' in rv.data
+        assert b'"logout_link":' in rv.data
+        assert b'"name":' in rv.data
 
     def test_login_page(self):
         # check login page accessibility

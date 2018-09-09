@@ -35,8 +35,8 @@ class SongTest(unittest.TestCase):
         # add song into the database
         rv = utils._post_song(self.app, title='Back in Black')
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         # get songs with get request
         rv = self.app.get('/api/v1/songs')
@@ -72,7 +72,7 @@ class SongTest(unittest.TestCase):
         rv = self.app.post(
             '/api/v1/songs', content_type='application/json', data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
 
         # test missing title field
         rv = self.app.post(
@@ -88,8 +88,8 @@ class SongTest(unittest.TestCase):
                         'description': ""
                     })))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "title"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"title"' in rv.data
 
         # test missing authors field
         rv = self.app.post(
@@ -101,8 +101,8 @@ class SongTest(unittest.TestCase):
                     'description': ""
                 })))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "authors"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"authors"' in rv.data
 
         # test missing interpreters field
         rv = self.app.post(
@@ -118,8 +118,8 @@ class SongTest(unittest.TestCase):
                         'description': ""
                     })))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "interpreters"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"interpreters"' in rv.data
 
         # test missing variant field
         rv = self.app.post(
@@ -129,8 +129,8 @@ class SongTest(unittest.TestCase):
                 dict(title="Madness", authors={'lyrics': [],
                                                'music': []}, interpreters=[])))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "variant"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"variant"' in rv.data
 
         # test missing variant/text field
         rv = self.app.post(
@@ -146,8 +146,8 @@ class SongTest(unittest.TestCase):
                         'description': ""
                     })))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "variant/text"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"variant/text"' in rv.data
 
         # test missing variant/description field
         rv = self.app.post(
@@ -163,8 +163,8 @@ class SongTest(unittest.TestCase):
                         'text': "song"
                     })))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "variant/description"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"variant/description"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -186,7 +186,7 @@ class SongTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
 
         # test missing title field
         rv = self.app.put(
@@ -195,8 +195,8 @@ class SongTest(unittest.TestCase):
             data=json.dumps(dict(authors={'lyrics': [],
                                           'music': []}, interpreters=[])))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "title"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"title"' in rv.data
 
         # test missing authors field
         rv = self.app.put(
@@ -204,8 +204,8 @@ class SongTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(title="Madness", interpreters=[])))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "authors"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"authors"' in rv.data
 
         # test missing interpreters field
         rv = self.app.put(
@@ -216,8 +216,8 @@ class SongTest(unittest.TestCase):
                 'music': []
             })))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "interpreters"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"interpreters"' in rv.data
 
         # test correct song edit request
         rv = self.app.put(
@@ -239,24 +239,24 @@ class SongTest(unittest.TestCase):
 
         rv = utils._post_song(self.app, title='Live and Let Die')
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         data = json.loads(rv.data)
         song_ids.append(data['id'])
 
         rv = utils._post_song(self.app, title='Kashmir')
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         data = json.loads(rv.data)
         song_ids.append(data['id'])
 
         rv = utils._post_song(self.app, title='Pažitka')
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         data = json.loads(rv.data)
         song_ids.append(data['id'])
@@ -301,18 +301,18 @@ class SongTest(unittest.TestCase):
         rv = utils._post_song(
             self.app, title='Welcome to the Jungle', lauthors=['000000000000000000000000'])
         assert rv.status_code == 404
-        assert b'"code": "does_not_exist"' in rv.data
+        assert b'"code":"does_not_exist"' in rv.data
 
         rv = utils._post_song(
             self.app, title='Welcome to the Jungle', mauthors=['000000000000000000000000'])
         assert rv.status_code == 404
-        assert b'"code": "does_not_exist"' in rv.data
+        assert b'"code":"does_not_exist"' in rv.data
 
         # test wrong interpreter insert
         rv = utils._post_song(
             self.app, title='Welcome to the Jungle', interpreters=['000000000000000000000000'])
         assert rv.status_code == 404
-        assert b'"code": "does_not_exist"' in rv.data
+        assert b'"code":"does_not_exist"' in rv.data
 
         # test correct insert
         rv = utils._post_song(
@@ -323,8 +323,8 @@ class SongTest(unittest.TestCase):
             interpreters=[interpreter_id])
 
         assert rv.status_code == 201
-        assert b'"created": "' in rv.data
-        assert b'"id": "' in rv.data
+        assert b'"created":"' in rv.data
+        assert b'"id":"' in rv.data
 
         data = json.loads(rv.data)
         song_id = data['id']
@@ -345,19 +345,19 @@ class SongTest(unittest.TestCase):
         # test nested repetition
         rv = utils._post_song(self.app, title='Kokos', text='[verse] |: |: Kulda :| :|')
         assert rv.status_code == 422
-        assert b'"code": "compilation_error"' in rv.data
+        assert b'"code":"compilation_error"' in rv.data
 
         # test nested repetition end before start
         rv = utils._post_song(self.app, title='Kokos', text='[verse] |: Kulda :| :|')
         assert rv.status_code == 422
-        assert b'"code": "compilation_error"' in rv.data
+        assert b'"code":"compilation_error"' in rv.data
 
         # test chords inside rec
         rv = utils._post_song(self.app, title='Kokos', text='[rec] Kulda [A]')
         assert rv.status_code == 422
-        assert b'"code": "compilation_error"' in rv.data
+        assert b'"code":"compilation_error"' in rv.data
 
         # test unknown tag
         rv = utils._post_song(self.app, title='Kokos', text='[versex]')
         assert rv.status_code == 422
-        assert b'"code": "compilation_error"' in rv.data
+        assert b'"code":"compilation_error"' in rv.data

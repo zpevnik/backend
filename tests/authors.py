@@ -35,7 +35,7 @@ class AuthorTest(unittest.TestCase):
         # add author into the database
         rv = utils._post_author(self.app, name='Jimmy Page')
         assert rv.status_code == 201
-        assert b'"link": "authors/' in rv.data
+        assert b'"link":"authors/' in rv.data
 
         # get authors with get request
         rv = self.app.get('/api/v1/authors')
@@ -100,15 +100,15 @@ class AuthorTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "name"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"name"' in rv.data
 
         # test duplicate authors
         rv = utils._post_author(self.app, name='Slash')
         assert rv.status_code == 201
         rv = utils._post_author(self.app, name='Slash')
         assert rv.status_code == 422
-        assert b'"code": "already_exists"' in rv.data
+        assert b'"code":"already_exists"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
@@ -130,8 +130,8 @@ class AuthorTest(unittest.TestCase):
             content_type='application/json',
             data=json.dumps(dict(field="field")))
         assert rv.status_code == 422
-        assert b'"code": "missing_field"' in rv.data
-        assert b'"data": "name"' in rv.data
+        assert b'"code":"missing_field"' in rv.data
+        assert b'"data":"name"' in rv.data
 
         # clean the database
         self.mongo_client.drop_database(self.db_name)
